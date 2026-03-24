@@ -1,1 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+/* En tu styles.css global */
+@layer base {
+  :root {
+    --sena-green: #39a900;
+  }
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-sena: #39a900;
+}
+
+@layer base {
+  html {
+    /* Esto hace que la fuente se vea más nítida en pantallas modernas */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3 {
+    /* Reducir un poco el espacio entre letras en títulos grandes 
+       le da un look mucho más pro y de "Diseñador" */
+    letter-spacing: -0.02em;
+  }
+}
