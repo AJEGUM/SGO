@@ -20,14 +20,14 @@ export class Admin {
 
   constructor(private http: HttpClient) { }
 
+  // Servicio para subir el archivo excel al sistema (backend)
   uploadCurriculo(archivo: File): Observable<any> {
     const formData = new FormData();
-    // 'archivo' debe ser igual al nombre en upload.single('archivo') del backend
     formData.append('archivo', archivo); 
-
     return this.http.post(`${this.apiUrl}/upload-curriculo`, formData);
   }
 
+  // Servicio para obtener las competencias
   getCompetencias(): Observable<Competencia[]> {
     return this.http.get<Competencia[]>(`${this.apiUrl}/competencias`);
   }
@@ -37,6 +37,7 @@ export class Admin {
     return this.http.get<any>(`${this.apiUrl}/competencias/${id}`);
   }
 
+  // Servicio para actualizar la data de las competencias
   patchCurriculo(tipo: string, id: number, nuevoTexto: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/patch/${tipo}/${id}`, { valor: nuevoTexto });
   }

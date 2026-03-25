@@ -13,24 +13,29 @@ import { ModalDetalleCompetencia } from '../../../components/admin/modal-detalle
   styleUrl: './importar.css',
 })
 export class Importar {
+  // Variables
 archivoSeleccionado: File | null = null;
 loading: boolean = false;
 listaCompetencias: Competencia[] = [];
 detalleSeleccionado: any = null;
 loadingDetalle: boolean = false;
 
+// Importadores
   constructor(private adminService: Admin) {}
 
+  // Onit permite ejecutar una funcion sin tener que recargar la pagina
   ngOnInit() {
     this.cargarCompetencias();
   }
 
+  // Funcion que recibe el archivo excel subido por el usuario
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.archivoSeleccionado = event.target.files[0];
     }
   }
 
+  // Funcion que se ejecuta cuando se intenta subir el archivo al backend
   subir() {
     if (!this.archivoSeleccionado) return;
 
@@ -66,7 +71,6 @@ loadingDetalle: boolean = false;
       next: (data) => {
         this.detalleSeleccionado = data;
         this.loadingDetalle = false;
-        // Tip: Podrías hacer scroll automático hacia el detalle aquí
       },
       error: (err) => {
         alert('No se pudo cargar el detalle');
@@ -87,7 +91,6 @@ loadingDetalle: boolean = false;
 
     this.adminService.patchCurriculo(tipo, id, nuevoValor).subscribe({
       next: () => {
-        // Un toast minimalista para la tabla
         Swal.mixin({
           toast: true,
           position: 'top-end',

@@ -17,7 +17,7 @@ export class ModalDetalleCompetencia {
 
   constructor(private adminService: Admin) {}
 
-  // Movemos la función actualizar aquí para que el modal sea autosuficiente
+  // FuFuncion que permite actualizar data desde el modal
   actualizar(tipo: string, id: number, event: any) {
     const elemento = event.target as HTMLInputElement | HTMLTextAreaElement;
     const nuevoValor = elemento.value;

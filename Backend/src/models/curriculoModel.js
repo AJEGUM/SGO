@@ -51,6 +51,7 @@ export const curriculoModel = {
         }
     },
 
+// Funcion validadora para ver si existe datos duplicados antes de guardar en la DB
 async buscarPorCodigo(codigo) {
     const [rows] = await db.query('SELECT id FROM competencias WHERE codigo_norma = ?', [codigo]);
     return rows.length > 0 ? rows[0] : null;
@@ -74,14 +75,14 @@ async obtenerDetalleCompleto(id) {
 
     // 3. Mapear cada RAP con sus tablas de detalles (Trayendo ID y Descripcion)
     const resultadosConDetalles = await Promise.all(raps.map(async (rap) => {
-        // Traemos explícitamente el id para poder hacer el PATCH luego
+        // Traemos el id para poder hacer el PATCH luego
         const [procesos] = await db.query('SELECT id, descripcion FROM conocimientos_proceso WHERE rap_id = ?', [rap.id]);
         const [saberes] = await db.query('SELECT id, descripcion FROM conocimientos_saber WHERE rap_id = ?', [rap.id]);
         const [criterios] = await db.query('SELECT id, descripcion FROM criterios_evaluacion WHERE rap_id = ?', [rap.id]);
 
         return {
             ...rap,
-            procesos: procesos, // Ahora devuelve [{id: 1, descripcion: '...'}, ...]
+            procesos: procesos,
             saberes: saberes,
             criterios: criterios
         };

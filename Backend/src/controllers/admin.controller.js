@@ -1,6 +1,6 @@
 import { curriculoService } from '../services/curriculo.js';
 
-// admin.controller.js
+// Funcion que permite extraer la informacion del excel cargado por el administrador
 export const importarDiseno = async (req, res) => {
     try {
         // Validación de seguridad DevOps
@@ -22,6 +22,7 @@ export const importarDiseno = async (req, res) => {
     }
 };
 
+// Funcion que permite obtener las competencias registradas
 export const getCompetencias = async (req, res) => {
     try {
         const data = await curriculoService.obtenerCompetencias();
@@ -31,6 +32,7 @@ export const getCompetencias = async (req, res) => {
     }
 };
 
+// Funcion que permite obtener toda la informacion de una competencia
 export const getDetalleCurriculo = async (req, res) => {
     try {
         const { id } = req.params;
@@ -42,6 +44,7 @@ export const getDetalleCurriculo = async (req, res) => {
     }
 };
 
+// Funcion que permite actualizar los datos de una competencia
 export const patchCurriculo = async (req, res) => {
     try {
         const { tipo, id } = req.params;
