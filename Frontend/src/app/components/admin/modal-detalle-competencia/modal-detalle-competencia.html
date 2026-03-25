@@ -1,0 +1,102 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+  
+  <div class="bg-gray-900 w-full max-w-6xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-y-auto border border-white/10 relative scrollbar-thin scrollbar-thumb-sena scrollbar-track-transparent">
+    
+    <button (click)="cerrarModal()" class="absolute top-6 right-6 z-10 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="p-8 md:p-12 text-white">
+      
+      <div class="max-w-4xl mb-12 bg-white/5 border border-white/10 p-8 rounded-[2rem]">
+        <span class="text-sena font-bold text-xs uppercase tracking-[0.2em] mb-4 block">Identificación de Competencia</span>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label class="text-[10px] text-white/40 uppercase font-bold mb-1 block">Código de Norma</label>
+            <input [(ngModel)]="detalle.codigo_norma" (blur)="actualizar('competencia', detalle.id, $event)"
+                   class="bg-transparent border-b border-white/10 hover:border-sena focus:border-sena outline-none w-full py-1 text-xl font-mono font-bold text-sena transition-all">
+          </div>
+          <div>
+            <label class="text-[10px] text-white/40 uppercase font-bold mb-1 block">Duración (Horas)</label>
+            <input [(ngModel)]="detalle.duracion_horas" (blur)="actualizar('competencia', detalle.id, $event)"
+                   class="bg-transparent border-b border-white/10 hover:border-sena focus:border-sena outline-none w-full py-1 text-xl font-bold text-white transition-all">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-white/40 uppercase font-bold mb-1 block">Denominación de la Competencia</label>
+          <textarea [(ngModel)]="detalle.nombre" (blur)="actualizar('competencia', detalle.id, $event)"
+                    class="bg-transparent border-b border-white/10 hover:border-sena focus:border-sena outline-none w-full py-2 text-2xl font-extrabold text-white transition-all resize-none"
+                    rows="2"></textarea>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+        <span class="w-8 h-[1px] bg-sena"></span>
+        Estructura de RAPs
+      </h3>
+
+      <div class="space-y-6">
+        @for (rap of detalle.resultados; track rap.id) {
+          <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 hover:bg-white/[0.07] transition-all">
+            
+            <div class="mb-8">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="bg-sena text-white px-3 py-1 rounded-lg text-xs font-bold font-mono">
+                  {{ rap.codigo_rap }}
+                </span>
+                <span class="text-white/40 text-xs font-bold uppercase tracking-widest">Resultado de Aprendizaje</span>
+              </div>
+              
+              <textarea [(ngModel)]="rap.denominacion" 
+                        (blur)="actualizar('rap', rap.id, $event)"
+                        class="bg-transparent border-b border-white/10 hover:border-sena/50 focus:border-sena focus:bg-white/5 outline-none w-full py-2 text-lg font-bold text-white transition-all resize-none overflow-hidden"
+                        rows="2"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              <div class="space-y-4">
+                <h5 class="text-sena text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                  <div class="w-2 h-2 bg-sena rounded-full animate-pulse"></div> 1. Proceso
+                </h5>
+                <div class="space-y-3">
+                  @for (p of rap.procesos; track p.id) {
+                    <input [(ngModel)]="p.descripcion" (blur)="actualizar('proceso', p.id, $event)"
+                           class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-sena outline-none w-full text-xs text-white/70 py-1 transition-all">
+                  }
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <h5 class="text-blue-400 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                  <div class="w-2 h-2 bg-blue-400 rounded-full"></div> 2. Saber
+                </h5>
+                <div class="space-y-3">
+                  @for (s of rap.saberes; track s.id) {
+                    <input [(ngModel)]="s.descripcion" (blur)="actualizar('saber', s.id, $event)"
+                           class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-blue-400 outline-none w-full text-xs text-white/70 py-1 transition-all">
+                  }
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <h5 class="text-purple-400 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                  <div class="w-2 h-2 bg-purple-400 rounded-full"></div> 3. Evaluación
+                </h5>
+                <div class="space-y-3">
+                  @for (c of rap.criterios; track c.id) {
+                    <input [(ngModel)]="c.descripcion" (blur)="actualizar('criterio', c.id, $event)"
+                           class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-purple-400 outline-none w-full text-xs text-white/70 py-1 transition-all">
+                  }
+                </div>
+              </div>
+
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

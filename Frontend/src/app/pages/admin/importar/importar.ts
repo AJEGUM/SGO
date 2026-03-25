@@ -3,11 +3,12 @@ import { Admin, Competencia } from '../../../services/admin/admin';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { ModalDetalleCompetencia } from '../../../components/admin/modal-detalle-competencia/modal-detalle-competencia';
 
 @Component({
   selector: 'app-importar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalDetalleCompetencia],
   templateUrl: './importar.html',
   styleUrl: './importar.css',
 })
@@ -78,41 +79,25 @@ loadingDetalle: boolean = false;
     this.detalleSeleccionado = null;
   }
 
-actualizar(tipo: string, id: number, event: any) {
-    const elemento = event.target as HTMLInputElement | HTMLTextAreaElement;
+  actualizar(tipo: string, id: number, event: any) {
+    const elemento = event.target as HTMLInputElement;
     const nuevoValor = elemento.value;
 
     if (!nuevoValor.trim()) return;
 
     this.adminService.patchCurriculo(tipo, id, nuevoValor).subscribe({
-        next: () => {
-            // Toast de éxito: elegante y no bloquea la pantalla
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-
-            Toast.fire({
-                icon: 'success',
-                title: `${tipo.toUpperCase()} actualizado correctamente`
-            });
-        },
-        error: (err) => {
-            console.error('Error en PATCH:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al guardar',
-                text: 'Revisa la conexión con el servidor local.',
-                confirmButtonColor: '#39A900' // Verde SENA
-            });
-        }
+      next: () => {
+        // Un toast minimalista para la tabla
+        Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 1000
+        }).fire({
+          icon: 'success',
+          title: 'Nombre actualizado'
+        });
+      }
     });
-}
+  }
 }
