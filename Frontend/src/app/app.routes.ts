@@ -11,4 +11,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/publico/como-funciona/como-funciona').then(m => m.ComoFunciona),
     title: 'Como Funciona - Sistema de Gestion de OVAs'
   },
+{
+    path: 'beneficios',
+    loadComponent: () => import('./pages/publico/beneficios/beneficios').then(m => m.Beneficios),
+    title: 'Beneficios - Sistema de Gestion de OVAs'
+  },
 ];

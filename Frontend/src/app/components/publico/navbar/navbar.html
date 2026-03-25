@@ -12,7 +12,7 @@
       <div class="hidden md:flex items-center gap-8 text-gray-600 font-medium">
         <a routerLink="/" routerLinkActive="text-sena" [routerLinkActiveOptions]="{exact: true}" class="hover:text-sena transition-colors relative group">Inicio</a>
         <a routerLink="/como-funciona" routerLinkActive="text-sena" class="hover:text-sena transition-colors relative group">¿Cómo funciona?</a>
-        <a href="#" class="hover:text-sena transition-colors relative group">Beneficios</a>
+        <a routerLink="/beneficios" class="hover:text-sena transition-colors relative group">Beneficios</a>
       </div>
 
       <div class="flex items-center gap-4">
@@ -53,12 +53,12 @@
       <div class="p-8 flex flex-col gap-6">
         <a routerLink="/" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">Inicio</a>
         <a routerLink="/como-funciona" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">¿Cómo funciona?</a>
-        <a href="#" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">Beneficios</a>
+        <a routerLink="/beneficios" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">Beneficios</a>
         
         <hr class="border-gray-100 my-2">
 
         <button class="w-full bg-sena text-white py-4 rounded-2xl shadow-xl shadow-sena/30 font-bold active:scale-95 transition-transform cursor-pointer">
-          Acceder al OVA
+          Iniciar sesion
         </button>
       </div>
     </div>
