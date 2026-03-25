@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { Admin, Competencia } from '../../../services/admin/admin';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-importar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './importar.html',
   styleUrl: './importar.css',
 })
@@ -75,4 +77,42 @@ loadingDetalle: boolean = false;
   cerrarDetalle() {
     this.detalleSeleccionado = null;
   }
+
+actualizar(tipo: string, id: number, event: any) {
+    const elemento = event.target as HTMLInputElement | HTMLTextAreaElement;
+    const nuevoValor = elemento.value;
+
+    if (!nuevoValor.trim()) return;
+
+    this.adminService.patchCurriculo(tipo, id, nuevoValor).subscribe({
+        next: () => {
+            // Toast de éxito: elegante y no bloquea la pantalla
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: `${tipo.toUpperCase()} actualizado correctamente`
+            });
+        },
+        error: (err) => {
+            console.error('Error en PATCH:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar',
+                text: 'Revisa la conexión con el servidor local.',
+                confirmButtonColor: '#39A900' // Verde SENA
+            });
+        }
+    });
+}
 }

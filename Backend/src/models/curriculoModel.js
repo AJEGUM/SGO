@@ -72,17 +72,18 @@ async obtenerDetalleCompleto(id) {
     // 2. Obtener los RAPs vinculados
     const [raps] = await db.query('SELECT * FROM resultados_aprendizaje WHERE competencia_id = ?', [id]);
 
-    // 3. Mapear cada RAP con sus tablas de detalles
+    // 3. Mapear cada RAP con sus tablas de detalles (Trayendo ID y Descripcion)
     const resultadosConDetalles = await Promise.all(raps.map(async (rap) => {
-        const [procesos] = await db.query('SELECT descripcion FROM conocimientos_proceso WHERE rap_id = ?', [rap.id]);
-        const [saberes] = await db.query('SELECT descripcion FROM conocimientos_saber WHERE rap_id = ?', [rap.id]);
-        const [criterios] = await db.query('SELECT descripcion FROM criterios_evaluacion WHERE rap_id = ?', [rap.id]);
+        // Traemos explícitamente el id para poder hacer el PATCH luego
+        const [procesos] = await db.query('SELECT id, descripcion FROM conocimientos_proceso WHERE rap_id = ?', [rap.id]);
+        const [saberes] = await db.query('SELECT id, descripcion FROM conocimientos_saber WHERE rap_id = ?', [rap.id]);
+        const [criterios] = await db.query('SELECT id, descripcion FROM criterios_evaluacion WHERE rap_id = ?', [rap.id]);
 
         return {
             ...rap,
-            procesos: procesos.map(p => p.descripcion),
-            saberes: saberes.map(s => s.descripcion),
-            criterios: criterios.map(c => c.descripcion)
+            procesos: procesos, // Ahora devuelve [{id: 1, descripcion: '...'}, ...]
+            saberes: saberes,
+            criterios: criterios
         };
     }));
 
@@ -90,5 +91,11 @@ async obtenerDetalleCompleto(id) {
         ...competencias[0],
         resultados: resultadosConDetalles
     };
+},
+
+async actualizarEntidad(tabla, id, columna, valor) {
+    const query = `UPDATE ${tabla} SET ${columna} = ? WHERE id = ?`;
+    const [result] = await db.query(query, [valor, id]);
+    return result.affectedRows > 0;
 }
 };

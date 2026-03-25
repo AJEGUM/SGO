@@ -36,4 +36,8 @@ export class Admin {
   getDetalleCompetencia(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/competencias/${id}`);
   }
+
+  patchCurriculo(tipo: string, id: number, nuevoTexto: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/patch/${tipo}/${id}`, { valor: nuevoTexto });
+  }
 }

@@ -41,3 +41,20 @@ export const getDetalleCurriculo = async (req, res) => {
         res.status(status).json({ ok: false, msg: error.message });
     }
 };
+
+export const patchCurriculo = async (req, res) => {
+    try {
+        const { tipo, id } = req.params;
+        const { valor } = req.body;
+
+        const actualizado = await curriculoService.patchElemento(tipo, id, valor);
+        
+        if (actualizado) {
+            res.json({ ok: true, msg: "Actualizado correctamente" });
+        } else {
+            res.status(404).json({ ok: false, msg: "No se encontró el registro" });
+        }
+    } catch (error) {
+        res.status(500).json({ ok: false, msg: error.message });
+    }
+};

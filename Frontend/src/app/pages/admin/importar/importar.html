@@ -1,120 +1,150 @@
-<div class="max-w-4xl mx-auto mt-10 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-  <h2 class="text-xl font-bold text-gray-800 mb-4">Gestión de Diseños Curriculares (SENA)</h2>
-  
-  <div class="flex flex-col md:flex-row gap-4 items-end border-b pb-6 mb-6">
-    <div class="flex-1">
-      <label class="block mb-2 text-sm font-medium text-gray-700">Importar Nueva Competencia (.xlsx)</label>
-      <input type="file" (change)="onFileChange($event)" accept=".xlsx"
-        class="block w-full text-sm text-gray-500
-        file:mr-4 file:py-2 file:px-4
-        file:rounded-full file:border-0
-        file:text-sm file:font-semibold
-        file:bg-blue-50 file:text-blue-700
-        hover:file:bg-blue-100 cursor-pointer border rounded-lg"
-      />
-    </div>
-
-    <button 
-      (click)="subir()"
-      [disabled]="!archivoSeleccionado || loading"
-      class="h-10 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center"
-    >
-      <span *ngIf="loading" class="mr-2 animate-spin">🌀</span>
-      {{ loading ? 'Procesando...' : 'Cargar Excel' }}
-    </button>
-  </div>
-
-  <div class="mt-4">
-    <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-      <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
-      Competencias en Base de Datos
-    </h3>
     
-    <div class="overflow-x-auto border rounded-lg">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-50 text-gray-600 uppercase text-xs font-bold">
-            <th class="px-4 py-3 border-b">Código</th>
-            <th class="px-4 py-3 border-b">Denominación de la Competencia</th>
-            <th class="px-4 py-3 border-b text-center">Duración</th>
-            <th class="px-4 py-3 border-b text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-700 text-sm">
-          <tr *ngFor="let comp of listaCompetencias" class="hover:bg-blue-50 transition-colors border-b last:border-0">
-            <td class="px-4 py-4 font-mono text-blue-700">{{ comp.codigo_norma }}</td>
-            <td class="px-4 py-4 font-medium">{{ comp.nombre }}</td>
-            <td class="px-4 py-4 text-center">{{ comp.duracion_horas }}h</td>
-            <td class="px-4 py-4 text-right">
-              <button (click)="verDetalle(comp.id)" 
-                class="bg-white border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-600 hover:text-white transition-all">
-                Ver Estructura
+<div class="min-h-screen bg-gray-50 pt-32 pb-20">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <div class="mb-12">
+      <span class="text-sena font-bold text-sm uppercase tracking-widest mb-2 block">Panel de Administración</span>
+      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Gestión de Diseños Curriculares</h1>
+      <p class="text-gray-600 mt-2">Carga archivos Excel o edita las competencias existentes directamente en la base de datos.</p>
+    </div>
+
+    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm mb-12 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-sena/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+      
+      <div class="flex flex-col md:flex-row gap-6 items-end relative z-10">
+        <div class="flex-1 w-full">
+          <label class="block mb-3 text-sm font-bold text-gray-700 uppercase tracking-tight">Importar Nueva Competencia (.xlsx)</label>
+          <input type="file" (change)="onFileChange($event)" accept=".xlsx"
+            class="block w-full text-sm text-gray-500
+            file:mr-4 file:py-2.5 file:px-6
+            file:rounded-full file:border-0
+            file:text-sm file:font-bold
+            file:bg-emerald-50 file:text-sena
+            hover:file:bg-emerald-100 cursor-pointer border border-gray-100 rounded-2xl p-2 bg-gray-50/50"
+          />
+        </div>
+
+        <button 
+          (click)="subir()"
+          [disabled]="!archivoSeleccionado || loading"
+          class="bg-sena text-white px-8 py-3.5 rounded-full font-bold text-md hover:scale-105 transition-transform shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:scale-100 cursor-pointer flex items-center justify-center min-w-[200px]"
+        >
+          @if (loading) { <span class="mr-2 animate-spin">🌀</span> }
+          {{ loading ? 'Procesando...' : 'Subir Competencia' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-12">
+      <div class="p-6 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
+        <h3 class="font-bold text-gray-900 flex items-center gap-2">
+          <div class="w-1.5 h-5 bg-sena rounded-full"></div>
+          Competencias Registradas
+        </h3>
+        <span class="text-xs font-medium text-gray-500">{{ listaCompetencias.length }} registros encontrados</span>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-gray-400 uppercase text-[11px] font-bold tracking-widest border-b border-gray-50">
+              <th class="px-8 py-4">Código Norma</th>
+              <th class="px-8 py-4">Denominación</th>
+              <th class="px-8 py-4 text-center">Duración</th>
+              <th class="px-8 py-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-700">
+            @for (comp of listaCompetencias; track comp.id) {
+              <tr class="hover:bg-emerald-50/30 transition-colors border-b border-gray-50 last:border-0 group">
+                <td class="px-8 py-5 font-mono text-sena text-xs font-bold">{{ comp.codigo_norma }}</td>
+                <td class="px-8 py-5">
+                   <input [(ngModel)]="comp.nombre" 
+                          (blur)="actualizar('competencia', comp.id, $event)"
+                          class="bg-transparent border-b border-transparent hover:border-gray-200 focus:border-sena focus:bg-white outline-none w-full py-1 transition-all font-medium text-gray-900">
+                </td>
+                <td class="px-8 py-5 text-center">
+                  <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">{{ comp.duracion_horas }}h</span>
+                </td>
+                <td class="px-8 py-5 text-right">
+                  <button (click)="verDetalle(comp.id)" 
+                    class="text-sena font-bold text-sm hover:underline p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Editar Estructura →
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (detalleSeleccionado) {
+      <div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div class="bg-gray-900 rounded-[2.5rem] p-1 shadow-2xl overflow-hidden mb-20">
+          <div class="p-8 md:p-12 text-white">
+            <div class="flex justify-between items-start mb-10">
+              <div class="max-w-3xl">
+                <span class="text-sena font-bold text-xs uppercase tracking-[0.2em] mb-3 block">Editor de Resultados (RAP)</span>
+                <h2 class="text-3xl font-extrabold leading-tight">{{ detalleSeleccionado.nombre }}</h2>
+              </div>
+              <button (click)="cerrarDetalle()" class="bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
-            </td>
-          </tr>
-          <tr *ngIf="listaCompetencias.length === 0">
-            <td colspan="4" class="text-center py-10 text-gray-400">No hay competencias cargadas aún.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+            </div>
 
-<div *ngIf="detalleSeleccionado" class="max-w-6xl mx-auto mt-8 mb-20 animate-fade-in">
-  <div class="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-    <div class="bg-gray-800 p-6 flex justify-between items-center text-white">
-      <div>
-        <span class="text-blue-400 text-xs font-bold uppercase tracking-widest">Detalle Curricular</span>
-        <h4 class="text-2xl font-bold">{{ detalleSeleccionado.nombre }}</h4>
-      </div>
-      <button (click)="cerrarDetalle()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-    </div>
+            <div class="space-y-6">
+              @for (rap of detalleSeleccionado.resultados; track rap.id) {
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 hover:bg-white/[0.07] transition-all">
+                  <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                      <span class="bg-sena text-white px-3 py-1 rounded-lg text-xs font-bold font-mono">{{ rap.codigo_rap }}</span>
+                      <span class="text-white/40 text-xs font-bold uppercase tracking-widest">Resultado de Aprendizaje</span>
+                    </div>
+                    <textarea [(ngModel)]="rap.denominacion" 
+                              (blur)="actualizar('rap', rap.id, $event)"
+                              class="bg-transparent border-b border-white/10 hover:border-sena/50 focus:border-sena focus:bg-white/5 outline-none w-full py-2 text-lg font-bold text-white transition-all resize-none overflow-hidden"
+                              rows="2"></textarea>
+                  </div>
 
-    <div class="p-6 space-y-8">
-      <div *ngFor="let rap of detalleSeleccionado.resultados" class="border rounded-lg overflow-hidden">
-        <div class="bg-gray-50 px-4 py-3 border-b">
-          <p class="text-sm font-bold text-gray-800">
-            <span class="bg-blue-600 text-white px-2 py-0.5 rounded mr-2">{{ rap.codigo_rap }}</span>
-            {{ rap.denominacion }}
-          </p>
-        </div>
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="space-y-4">
+                      <h5 class="text-sena text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                        <div class="w-2 h-2 bg-sena rounded-full animate-pulse"></div> 1. Proceso
+                      </h5>
+                      @for (p of rap.procesos; track p.id) {
+                        <input [(ngModel)]="p.descripcion" (blur)="actualizar('proceso', p.id, $event)"
+                               class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-sena outline-none w-full text-xs text-white/70 py-1 transition-all">
+                      }
+                    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x bg-white">
-          <div class="p-4">
-            <h5 class="text-xs font-bold text-blue-600 uppercase mb-3 flex items-center gap-1">
-              ⚙️ Conocimientos de Proceso
-            </h5>
-            <ul class="space-y-2">
-              <li *ngFor="let item of rap.procesos" class="text-xs text-gray-600 flex gap-2">
-                <span class="text-blue-400">•</span> {{ item }}
-              </li>
-            </ul>
-          </div>
+                    <div class="space-y-4">
+                      <h5 class="text-blue-400 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div> 2. Saber
+                      </h5>
+                      @for (s of rap.saberes; track s.id) {
+                        <input [(ngModel)]="s.descripcion" (blur)="actualizar('saber', s.id, $event)"
+                               class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-sena outline-none w-full text-xs text-white/70 py-1 transition-all">
+                      }
+                    </div>
 
-          <div class="p-4 bg-gray-50/50">
-            <h5 class="text-xs font-bold text-green-600 uppercase mb-3 flex items-center gap-1">
-              📚 Conocimientos del Saber
-            </h5>
-            <ul class="space-y-2">
-              <li *ngFor="let item of rap.saberes" class="text-xs text-gray-600 flex gap-2">
-                <span class="text-green-400">•</span> {{ item }}
-              </li>
-            </ul>
-          </div>
-
-          <div class="p-4">
-            <h5 class="text-xs font-bold text-purple-600 uppercase mb-3 flex items-center gap-1">
-              ✅ Criterios de Evaluación
-            </h5>
-            <ul class="space-y-2">
-              <li *ngFor="let item of rap.criterios" class="text-xs text-gray-600 flex gap-2">
-                <span class="text-purple-400">•</span> {{ item }}
-              </li>
-            </ul>
+                    <div class="space-y-4">
+                      <h5 class="text-purple-400 text-[10px] font-black uppercase tracking-[0.15em] flex items-center gap-2">
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div> 3. Evaluación
+                      </h5>
+                      @for (c of rap.criterios; track c.id) {
+                        <input [(ngModel)]="c.descripcion" (blur)="actualizar('criterio', c.id, $event)"
+                               class="bg-transparent border-b border-white/5 hover:border-white/20 focus:border-sena outline-none w-full text-xs text-white/70 py-1 transition-all">
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
+
   </div>
 </div>

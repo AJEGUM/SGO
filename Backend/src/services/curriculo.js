@@ -65,5 +65,21 @@ export const curriculoService = {
         const data = await curriculoModel.obtenerDetalleCompleto(id);
         if (!data) throw new Error("La competencia no existe");
         return data;
+    },
+
+    async patchElemento(tipo, id, nuevoTexto) {
+        const tablas = {
+            competencia: { nombre: 'competencias', col: 'nombre' },
+            rap: { nombre: 'resultados_aprendizaje', col: 'denominacion' },
+            proceso: { nombre: 'conocimientos_proceso', col: 'descripcion' },
+            saber: { nombre: 'conocimientos_saber', col: 'descripcion' },
+            criterio: { nombre: 'criterios_evaluacion', col: 'descripcion' }
+        };
+
+        const config = tablas[tipo];
+        if (!config) throw new Error("Tipo de entidad no válido");
+
+        return await curriculoModel.actualizarEntidad(config.nombre, id, config.col, nuevoTexto);
     }
+    
 };
