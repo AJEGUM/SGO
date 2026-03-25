@@ -21,4 +21,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/publico/beneficios/beneficios').then(m => m.Beneficios),
     title: 'Beneficios - Sistema de Gestion de OVAs'
   },
+{
+    path: 'importar',
+    loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
+    title: 'Importar - Sistema de Gestion de OVAs'
+  },
 ];

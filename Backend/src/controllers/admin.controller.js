@@ -1,0 +1,43 @@
+import { curriculoService } from '../services/curriculo.js';
+
+// admin.controller.js
+export const importarDiseno = async (req, res) => {
+    try {
+        // Validación de seguridad DevOps
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ msg: 'No se recibió ningún archivo válido.' });
+        }
+
+        // IMPORTANTE: Pasar req.file.buffer
+        const competenciaId = await curriculoService.procesarExcel(req.file.buffer);
+
+        res.status(201).json({ ok: true, id: competenciaId });
+    } catch (error) {
+        // Si es un error de "ya existe", mandamos 400 o 409
+        const statusCode = error.message.includes('ya existe') ? 400 : 500;
+        res.status(statusCode).json({ 
+            ok: false, 
+            msg: error.message 
+        });
+    }
+};
+
+export const getCompetencias = async (req, res) => {
+    try {
+        const data = await curriculoService.obtenerCompetencias();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ ok: false, msg: error.message });
+    }
+};
+
+export const getDetalleCurriculo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = await curriculoService.obtenerCurriculo(id);
+        res.status(200).json(data);
+    } catch (error) {
+        const status = error.message === "La competencia no existe" ? 404 : 500;
+        res.status(status).json({ ok: false, msg: error.message });
+    }
+};
