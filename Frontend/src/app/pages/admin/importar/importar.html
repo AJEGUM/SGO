@@ -3,78 +3,122 @@
     
     <div class="mb-12">
       <span class="text-sena font-bold text-sm uppercase tracking-widest mb-2 block">Panel de Administración</span>
-      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Gestión de Diseños Curriculares</h1>
-      <p class="text-gray-600 mt-2">Carga archivos Excel o edita las competencias existentes directamente en la base de datos.</p>
+      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Diseños Curriculares</h1>
+      <p class="text-gray-600 mt-2">Gestiona los programas de formación y sus detalles técnicos mediante automatización.</p>
     </div>
 
-    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm mb-12 relative overflow-hidden">
-      <div class="absolute top-0 right-0 w-32 h-32 bg-sena/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
       
-      <div class="flex flex-col md:flex-row gap-6 items-end relative z-10">
-        <div class="flex-1 w-full">
-          <label class="block mb-3 text-sm font-bold text-gray-700 uppercase tracking-tight">Importar Nueva Competencia (.xlsx)</label>
-          <input type="file" (change)="onFileChange($event)" accept=".xlsx"
-            class="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2.5 file:px-6
-            file:rounded-full file:border-0
-            file:text-sm file:font-bold
-            file:bg-emerald-50 file:text-sena
-            hover:file:bg-emerald-100 cursor-pointer border border-gray-100 rounded-2xl p-2 bg-gray-50/50"
-          />
+      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 blur-xl"></div>
+        <div class="relative z-10">
+          <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase px-3 py-1 rounded-full mb-4 inline-block">Primera Fase</span>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Estructura del Programa</h3>
+          <p class="text-gray-500 text-sm mb-6">Sube el reporte de juicios (.xlsx) para crear la ficha y las competencias base.</p>
+          
+          <div class="space-y-4">
+            <input type="file" (change)="onFileChange($event)" accept=".xlsx"
+              class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-sena hover:file:bg-emerald-100 cursor-pointer border border-dashed border-gray-200 rounded-2xl p-4 bg-gray-50/50" />
+            
+            <button (click)="subir()" [disabled]="!archivoSeleccionado || loading"
+              class="w-full bg-sena text-white py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-emerald-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              @if (loading) { <span class="animate-spin text-lg">🌀</span> }
+              {{ loading ? 'Sincronizando...' : 'Cargar Estructura Excel' }}
+            </button>
+          </div>
         </div>
-
-        <button 
-          (click)="subir()"
-          [disabled]="!archivoSeleccionado || loading"
-          class="bg-sena text-white px-8 py-3.5 rounded-full font-bold text-md hover:scale-105 transition-transform shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:scale-100 cursor-pointer flex items-center justify-center min-w-[200px]"
-        >
-          @if (loading) { <span class="mr-2 animate-spin">🌀</span> }
-          {{ loading ? 'Procesando...' : 'Subir Competencia' }}
-        </button>
       </div>
+
+      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12 blur-xl"></div>
+        <div class="relative z-10">
+          <span class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-3 py-1 rounded-full mb-4 inline-block">Segunda Fase</span>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Detalles Técnicos (IA)</h3>
+          <p class="text-gray-500 text-sm mb-6">Vincula Saberes y Criterios de Evaluación procesando el PDF del diseño curricular.</p>
+          
+          <div class="space-y-4">
+            <select [(ngModel)]="programaSeleccionadoId" 
+              class="w-full border border-gray-200 rounded-2xl p-3 text-sm bg-gray-50/50 focus:ring-2 focus:ring-purple-200 outline-none transition-all">
+              <option [ngValue]="null">-- Selecciona un programa cargado --</option>
+              @for (p of listaProgramas; track p.id) {
+                <option [value]="p.id">{{ p.numero_ficha }} - {{ p.nombre_programa }}</option>
+              }
+            </select>
+
+            <input type="file" (change)="onPdfChange($event)" accept=".pdf"
+              class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-purple-50 file:text-purple-600 hover:file:bg-purple-100 cursor-pointer border border-dashed border-gray-200 rounded-2xl p-4 bg-gray-50/50" />
+            
+            <button (click)="subirPdf()" [disabled]="!archivoPdf || !programaSeleccionadoId || loadingPdf"
+              class="w-full bg-purple-600 text-white py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-purple-100 transition-all disabled:opacity-40 flex items-center justify-center gap-2">
+              @if (loadingPdf) { <span class="animate-spin text-lg">✨</span> }
+              {{ loadingPdf ? 'IA Analizando Pulpa...' : 'Vincular Detalles PDF' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-12">
       <div class="p-6 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
         <h3 class="font-bold text-gray-900 flex items-center gap-2">
           <div class="w-1.5 h-5 bg-sena rounded-full"></div>
-          Competencias Registradas
+          Programas Registrados
         </h3>
-        <span class="text-xs font-medium text-gray-500">{{ listaCompetencias.length }} registros encontrados</span>
+        <span class="text-xs font-medium text-gray-500">{{ listaProgramas.length }} registros</span>
       </div>
       
       <div class="overflow-x-auto">
         <table class="w-full text-left">
           <thead>
             <tr class="text-gray-400 uppercase text-[11px] font-bold tracking-widest border-b border-gray-50">
-              <th class="px-8 py-4">Código Norma</th>
-              <th class="px-8 py-4">Denominación</th>
-              <th class="px-8 py-4 text-center">Duración</th>
+              <th class="px-8 py-4">Ficha / Código</th>
+              <th class="px-8 py-4">Denominación del Programa</th>
+              <th class="px-8 py-4 text-center">Versión</th>
+              <th class="px-8 py-4 text-center">Periodo</th>
               <th class="px-8 py-4 text-right">Acción</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
-            @for (comp of listaCompetencias; track comp.id) {
+            @for (prog of listaProgramas; track prog.id) {
               <tr class="hover:bg-emerald-50/30 transition-colors border-b border-gray-50 last:border-0 group">
-                <td class="px-8 py-5 font-mono text-sena text-xs font-bold">{{ comp.codigo_norma }}</td>
                 <td class="px-8 py-5">
-                   <input [(ngModel)]="comp.nombre" 
-                          (blur)="actualizar('competencia', comp.id, $event)"
-                          class="bg-transparent border-b border-transparent hover:border-gray-200 focus:border-sena focus:bg-white outline-none w-full py-1 transition-all font-medium text-gray-900">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-sena text-sm">{{ prog.numero_ficha }}</span>
+                    <span class="text-[10px] text-gray-400 font-mono">{{ prog.codigo_programa }}</span>
+                  </div>
+                </td>
+                <td class="px-8 py-5">
+                   <div class="font-medium text-gray-900 uppercase text-xs tracking-tight">
+                     {{ prog.nombre_programa }}
+                   </div>
                 </td>
                 <td class="px-8 py-5 text-center">
-                  <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">{{ comp.duracion_horas }}h</span>
+                  <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-[10px] font-bold">V. {{ prog.version_programa }}</span>
+                </td>
+                <td class="px-8 py-5 text-center">
+                  <div class="flex flex-col text-[10px] text-gray-500">
+                    <span>{{ prog.fecha_inicio | date:'dd/MM/yyyy' }}</span>
+                    <span class="font-bold text-gray-300">|</span>
+                    <span>{{ prog.fecha_fin | date:'dd/MM/yyyy' }}</span>
+                  </div>
                 </td>
                 <td class="px-8 py-5 text-right">
-                    <button (click)="verDetalle(comp.id)" 
-                    [disabled]="loadingDetalle"
-                    class="text-sena font-bold text-sm hover:underline p-2 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50">
-                    @if (loadingDetalle && detalleSeleccionado?.id === comp.id) {
-                        <span class="animate-pulse">Cargando...</span>
-                    } @else {
-                        Editar Estructura →
-                    }
+                    <button (click)="verDetalle(prog.id)" 
+                    class="bg-gray-50 text-gray-400 group-hover:bg-sena group-hover:text-white p-2.5 rounded-xl transition-all shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-8 py-20 text-center text-gray-400">
+                  <div class="flex flex-col items-center">
+                    <span class="text-4xl mb-2">📄</span>
+                    <p>No hay programas registrados todavía.</p>
+                  </div>
                 </td>
               </tr>
             }

@@ -3,17 +3,20 @@ import { curriculoService } from '../services/curriculo.js';
 // Funcion que permite extraer la informacion del excel cargado por el administrador
 export const importarDiseno = async (req, res) => {
     try {
-        // Validación de seguridad DevOps
-        if (!req.file || !req.file.buffer) {
+        console.log("--- INICIO DE CARGA ---");
+        if (!req.file) {
+            console.error("Error: No se recibió archivo en req.file");
             return res.status(400).json({ msg: 'No se recibió ningún archivo válido.' });
         }
 
-        // IMPORTANTE: Pasar req.file.buffer
-        const competenciaId = await curriculoService.procesarExcel(req.file.buffer);
+        console.log("Archivo recibido:", req.file.originalname, "Tamaño:", req.file.size);
 
-        res.status(201).json({ ok: true, id: competenciaId });
+        const resultado = await curriculoService.procesarExcel(req.file.buffer);
+
+        console.log("Proceso completado con éxito para ficha:", resultado.ficha);
+        res.status(201).json({ ok: true, ...resultado });
     } catch (error) {
-        // Si es un error de "ya existe", mandamos 400 o 409
+        console.error("LOG SERVIDOR (Error Completo):", error);
         const statusCode = error.message.includes('ya existe') ? 400 : 500;
         res.status(statusCode).json({ 
             ok: false, 
@@ -22,10 +25,38 @@ export const importarDiseno = async (req, res) => {
     }
 };
 
+export const procesarDisenoPdf = async (req, res) => {
+    try {
+        const { programaId } = req.params;
+        if (!req.file) throw new Error("No se subió ningún archivo PDF.");
+
+        // Pasamos el buffer al service
+        const resultado = await curriculoService.procesarPdfDiseno(req.file.buffer, programaId);
+        
+        res.status(200).json({ 
+            ok: true, 
+            msg: "Diseño curricular procesado y vinculado exitosamente", 
+            resultado 
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, msg: error.message });
+    }
+};
+
 // Funcion que permite obtener las competencias registradas
 export const getCompetencias = async (req, res) => {
     try {
         const data = await curriculoService.obtenerCompetencias();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ ok: false, msg: error.message });
+    }
+};
+
+// En admin.controller.js
+export const getProgramas = async (req, res) => {
+    try {
+        const data = await curriculoService.obtenerProgramas();
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ ok: false, msg: error.message });

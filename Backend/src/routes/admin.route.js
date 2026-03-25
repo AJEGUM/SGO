@@ -1,6 +1,6 @@
 // admin.routes.js o similar
 import { Router } from 'express';
-import { getCompetencias, getDetalleCurriculo, importarDiseno, patchCurriculo } from '../controllers/admin.controller.js'; // Asegúrate que el nombre coincida
+import { getCompetencias, getDetalleCurriculo, getProgramas, importarDiseno, patchCurriculo, procesarDisenoPdf } from '../controllers/admin.controller.js'; // Asegúrate que el nombre coincida
 import multer from 'multer';
 
 const storage = multer.memoryStorage(); 
@@ -16,5 +16,6 @@ router.get('/competencias', getCompetencias);
 router.get('/competencias/:id', getDetalleCurriculo);
 // Ruta para actualizar la informacion de una competencia
 router.patch('/patch/:tipo/:id', patchCurriculo);
-
+router.get('/programas', getProgramas);
+router.post('/programas/procesar-pdf/:programaId', upload.single('pdf'), procesarDisenoPdf);
 export default router;

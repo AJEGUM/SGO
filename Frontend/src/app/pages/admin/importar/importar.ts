@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Admin, Competencia } from '../../../services/admin/admin';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,26 +12,36 @@ import { ModalDetalleCompetencia } from '../../../components/admin/modal-detalle
   templateUrl: './importar.html',
   styleUrl: './importar.css',
 })
-export class Importar {
+export class Importar implements OnInit{
   // Variables
 archivoSeleccionado: File | null = null;
 loading: boolean = false;
 listaCompetencias: Competencia[] = [];
 detalleSeleccionado: any = null;
 loadingDetalle: boolean = false;
+listaProgramas: any[] = [];
+archivoPdf: File | null = null;
+  programaSeleccionadoId: number | null = null;
+  loadingPdf: boolean = false;
 
 // Importadores
   constructor(private adminService: Admin) {}
 
   // Onit permite ejecutar una funcion sin tener que recargar la pagina
   ngOnInit() {
-    this.cargarCompetencias();
+    this.cargarProgramas();
   }
 
   // Funcion que recibe el archivo excel subido por el usuario
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.archivoSeleccionado = event.target.files[0];
+    }
+  }
+
+  onPdfChange(event: any) {
+    if (event.target.files.length > 0) {
+      this.archivoPdf = event.target.files[0];
     }
   }
 
@@ -43,7 +53,7 @@ loadingDetalle: boolean = false;
     this.adminService.uploadCurriculo(this.archivoSeleccionado).subscribe({
       next: (resp) => {
         console.log('Carga exitosa', resp);
-        this.cargarCompetencias();
+        this.cargarProgramas();
         alert('Diseño curricular cargado correctamente en la base de datos.');
         this.loading = false;
         this.archivoSeleccionado = null;
@@ -53,6 +63,36 @@ loadingDetalle: boolean = false;
         alert('Error al procesar el Excel. Revisa la consola.');
         this.loading = false;
       }
+    });
+  }
+
+  subirPdf() {
+    if (!this.archivoPdf || !this.programaSeleccionadoId) {
+      Swal.fire('Atención', 'Selecciona un programa y un archivo PDF', 'warning');
+      return;
+    }
+
+    this.loadingPdf = true;
+    this.adminService.uploadDisenoPdf(this.archivoPdf, this.programaSeleccionadoId).subscribe({
+      next: (resp) => {
+        this.loadingPdf = false;
+        this.archivoPdf = null;
+        Swal.fire('¡IA Finalizada!', 'Saberes y Criterios vinculados correctamente', 'success');
+      },
+      error: (err) => {
+        this.loadingPdf = false;
+        console.error(err);
+        Swal.fire('Error', 'La IA no pudo procesar el PDF: ' + err.error?.msg, 'error');
+      }
+    });
+  }
+
+  cargarProgramas() {
+    this.adminService.getProgramas().subscribe({
+      next: (data) => {
+        this.listaProgramas = data;
+      },
+      error: (err) => console.error('Error al cargar programas', err)
     });
   }
 

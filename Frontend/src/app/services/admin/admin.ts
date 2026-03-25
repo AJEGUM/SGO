@@ -27,6 +27,12 @@ export class Admin {
     return this.http.post(`${this.apiUrl}/upload-curriculo`, formData);
   }
 
+  uploadDisenoPdf(archivo: File, programaId: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('pdf', archivo); // 'pdf' debe coincidir con upload.single('pdf') en el backend
+    return this.http.post(`${this.apiUrl}/programas/procesar-pdf/${programaId}`, formData);
+  }
+
   // Servicio para obtener las competencias
   getCompetencias(): Observable<Competencia[]> {
     return this.http.get<Competencia[]>(`${this.apiUrl}/competencias`);
@@ -35,6 +41,11 @@ export class Admin {
   // Obtener detalle completo (RAPs, Saberes, etc.)
   getDetalleCompetencia(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/competencias/${id}`);
+  }
+
+  // En admin.service.ts
+  getProgramas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/programas`);
   }
 
   // Servicio para actualizar la data de las competencias

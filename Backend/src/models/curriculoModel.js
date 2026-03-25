@@ -1,55 +1,118 @@
 import db from '../config/db.js'; // Tu pool con mysql2/promise
 
 export const curriculoModel = {
-    async insertarTodo(comp, resultados) {
-        const connection = await db.getConnection();
-        try {
-            await connection.beginTransaction();
+async insertarDesdeReporte(info, competencias) {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
 
-            // 1. Insertar Competencia
-            const [resComp] = await connection.query(
-                'INSERT INTO competencias (codigo_norma, prefijo_id, nombre, duracion_horas) VALUES (?, ?, ?, ?)',
-                [comp.codigo_norma, comp.prefijo_id, comp.nombre, comp.duracion]
+        // 1. Asegurar el Programa
+        let [prog] = await connection.query("SELECT id FROM programas WHERE nombre_programa = ?", [info.nombrePrograma]);
+        let programaId = prog.length > 0 ? prog[0].id : null;
+        
+        if (!programaId) {
+            const [newProg] = await connection.query("INSERT INTO programas (nombre_programa) VALUES (?)", [info.nombrePrograma]);
+            programaId = newProg.insertId;
+        }
+
+        // 2. Asegurar Ficha con toda la info de cabecera
+        await connection.query(`
+            INSERT INTO fichas (numero_ficha, programa_id, codigo_programa, version_programa, fecha_inicio, fecha_fin) 
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                codigo_programa = VALUES(codigo_programa),
+                version_programa = VALUES(version_programa),
+                fecha_inicio = VALUES(fecha_inicio),
+                fecha_fin = VALUES(fecha_fin)
+        `, [info.numeroFicha, programaId, info.codigoPrograma, info.versionPrograma, info.fechaInicio, info.fechaFin]);
+
+        // 3. Insertar Competencias y RAPs
+        for (const comp of competencias) {
+            let [compExist] = await connection.query(
+                "SELECT id FROM competencias WHERE codigo_norma = ? AND programa_id = ?", 
+                [comp.codigo_norma, programaId]
             );
-            const competenciaId = resComp.insertId;
 
-            // 2. Insertar RAPs y sus detalles
-            for (const rap of resultados) {
-                const [resRap] = await connection.query(
-                    'INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) VALUES (?, ?, ?)',
-                    [competenciaId, rap.codigo_rap, rap.denominacion]
+            let competenciaId;
+            if (compExist.length > 0) {
+                competenciaId = compExist[0].id;
+            } else {
+                const [resComp] = await connection.query(
+                    "INSERT INTO competencias (programa_id, codigo_norma, prefijo_id, nombre, duracion_horas) VALUES (?, ?, ?, ?, ?)",
+                    [programaId, comp.codigo_norma, comp.prefijo_id, comp.nombre, comp.duracion]
                 );
-                const rapId = resRap.insertId;
-
-                // 3. Insertar Conocimientos de Proceso
-                if (rap.procesos.length > 0) {
-                    const valuesProcesos = rap.procesos.map(p => [rapId, p.trim()]);
-                    await connection.query('INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES ?', [valuesProcesos]);
-                }
-
-                // 4. Insertar Conocimientos del Saber
-                if (rap.saberes.length > 0) {
-                    const valuesSaberes = rap.saberes.map(s => [rapId, s.trim()]);
-                    await connection.query('INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES ?', [valuesSaberes]);
-                }
-
-                // 5. Insertar Criterios
-                if (rap.criterios.length > 0) {
-                    const valuesCriterios = rap.criterios.map(c => [rapId, c.trim()]);
-                    await connection.query('INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES ?', [valuesCriterios]);
-                }
+                competenciaId = resComp.insertId;
             }
 
-            await connection.commit();
-            return competenciaId;
-
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
+            for (const rap of comp.resultados) {
+                await connection.query(
+                    `INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) 
+                     VALUES (?, ?, ?) 
+                     ON DUPLICATE KEY UPDATE denominacion = VALUES(denominacion)`,
+                    [competenciaId, rap.codigo_rap, rap.denominacion]
+                );
+            }
         }
-    },
+
+        await connection.commit();
+        return { success: true, ficha: info.numeroFicha };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+},
+
+async guardarDetallesCurriculo(programaId, datosExtraidos) {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        for (const competencia of datosExtraidos) {
+            // Buscamos el ID de la competencia en este programa
+            const [compRows] = await connection.query(
+                "SELECT id FROM competencias WHERE codigo_norma = ? AND programa_id = ?",
+                [competencia.codigo_norma, programaId]
+            );
+
+            if (compRows.length === 0) continue; 
+            const competenciaId = compRows[0].id;
+
+            for (const rap of competencia.resultados) {
+                // Buscamos el ID del RAP vinculado a esa competencia
+                const [rapRows] = await connection.query(
+                    "SELECT id FROM resultados_aprendizaje WHERE codigo_rap = ? AND competencia_id = ?",
+                    [rap.codigo_rap, competenciaId]
+                );
+
+                if (rapRows.length === 0) continue;
+                const rapId = rapRows[0].id;
+
+                // Insertar Procesos
+                for (const desc of rap.procesos) {
+                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+                }
+                // Insertar Saberes
+                for (const desc of rap.saberes) {
+                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+                }
+                // Insertar Criterios
+                for (const desc of rap.criterios) {
+                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+                }
+            }
+        }
+
+        await connection.commit();
+        return { status: "Completado" };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+},
 
 // Funcion validadora para ver si existe datos duplicados antes de guardar en la DB
 async buscarPorCodigo(codigo) {
@@ -61,6 +124,26 @@ async listarTodas() {
     const [rows] = await db.query(
         'SELECT id, codigo_norma, prefijo_id, nombre, duracion_horas, created_at FROM competencias ORDER BY created_at DESC'
     );
+    return rows;
+},
+
+// En curriculoModel.js
+async listarProgramas() {
+    const query = `
+        SELECT 
+            p.id, 
+            p.nombre_programa, 
+            f.codigo_programa, 
+            f.version_programa, 
+            f.fecha_inicio, 
+            f.fecha_fin,
+            f.numero_ficha,
+            p.created_at
+        FROM programas p
+        LEFT JOIN fichas f ON p.id = f.programa_id
+        ORDER BY p.created_at DESC
+    `;
+    const [rows] = await db.query(query);
     return rows;
 },
 
