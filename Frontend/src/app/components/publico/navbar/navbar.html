@@ -1,29 +1,66 @@
-<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="w-10 h-10 bg-[#39a900] rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-100">
-        S
+<nav class="fixed top-0 w-full z-[100] font-sans">
+  <div class="relative z-[110] bg-white/80 backdrop-blur-md border-b border-gray-100 h-20 flex items-center shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
+      
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 bg-sena rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sena/20">
+          S
+        </div>
+        <span class="text-xl font-bold text-gray-900 tracking-tight">SGO <span class="text-sena">+ IA</span></span>
       </div>
-      <span class="text-xl font-bold text-gray-900 tracking-tight">SGO <span class="text-[#39a900]">+ IA</span></span>
-    </div>
-    
-    <div class="hidden md:flex items-center gap-8 text-gray-600 font-medium">
-      <a href="#" class="hover:text-[#39a900] transition-colors relative group">
-        Inicio
-        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#39a900] transition-all group-hover:w-full"></span>
-      </a>
-      <a href="#" class="hover:text-[#39a900] transition-colors relative group">
-        ¿Cómo funciona?
-        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#39a900] transition-all group-hover:w-full"></span>
-      </a>
-      <a href="#" class="hover:text-[#39a900] transition-colors relative group">
-        Beneficios
-        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#39a900] transition-all group-hover:w-full"></span>
-      </a>
-    </div>
+      
+      <div class="hidden md:flex items-center gap-8 text-gray-600 font-medium">
+        <a routerLink="/" routerLinkActive="text-sena" [routerLinkActiveOptions]="{exact: true}" class="hover:text-sena transition-colors relative group">Inicio</a>
+        <a routerLink="/como-funciona" routerLinkActive="text-sena" class="hover:text-sena transition-colors relative group">¿Cómo funciona?</a>
+        <a href="#" class="hover:text-sena transition-colors relative group">Beneficios</a>
+      </div>
 
-    <button class="bg-gray-900 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-[#39a900] transition-all shadow-lg shadow-gray-200 cursor-pointer active:scale-95">
-      Acceder al OVA
-    </button>
+      <div class="flex items-center gap-4">
+        <button class="hidden md:block bg-gray-900 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-sena transition-all cursor-pointer">
+          Acceder al OVA
+        </button>
+
+        <button (click)="alternarMenu()" class="md:hidden p-2 text-gray-600 hover:text-sena transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div 
+    *ngIf="menuAbierto"
+    (click)="cerrarMenu()"
+    class="fixed inset-0 bg-black/60 backdrop-blur-md z-[120] transition-opacity duration-300">
+  </div>
+
+  <div 
+    class="fixed top-0 right-0 h-screen w-[300px] bg-white z-[130] shadow-[0_0_50px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-out transform border-l border-gray-100"
+    [class.translate-x-0]="menuAbierto"
+    [class.translate-x-full]="!menuAbierto">
+    
+    <div class="flex flex-col h-full">
+      <div class="p-6 flex justify-between items-center border-b border-gray-50">
+        <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Navegación</span>
+        <button (click)="cerrarMenu()" class="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-8 flex flex-col gap-6">
+        <a routerLink="/" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">Inicio</a>
+        <a routerLink="/como-funciona" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">¿Cómo funciona?</a>
+        <a href="#" (click)="cerrarMenu()" class="text-xl font-bold text-gray-800 hover:text-sena transition-colors">Beneficios</a>
+        
+        <hr class="border-gray-100 my-2">
+
+        <button class="w-full bg-sena text-white py-4 rounded-2xl shadow-xl shadow-sena/30 font-bold active:scale-95 transition-transform cursor-pointer">
+          Acceder al OVA
+        </button>
+      </div>
+    </div>
   </div>
 </nav>
