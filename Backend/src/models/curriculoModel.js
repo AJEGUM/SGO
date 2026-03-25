@@ -120,9 +120,13 @@ async buscarPorCodigo(codigo) {
     return rows.length > 0 ? rows[0] : null;
 },
 
-async listarTodas() {
+async listarCompetencias(programaId) {
     const [rows] = await db.query(
-        'SELECT id, codigo_norma, prefijo_id, nombre, duracion_horas, created_at FROM competencias ORDER BY created_at DESC'
+        `SELECT id, codigo_norma, prefijo_id, nombre, duracion_horas, created_at 
+         FROM competencias 
+         WHERE programa_id = ? 
+         ORDER BY created_at DESC`,
+        [programaId]
     );
     return rows;
 },

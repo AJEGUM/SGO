@@ -1,0 +1,20 @@
+.scale-in-center {
+    animation: scale-in-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@keyframes scale-in-center {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Custom scrollbar para que no sea tosca */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 10px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #39a900;
+}

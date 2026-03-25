@@ -33,9 +33,9 @@ export class Admin {
     return this.http.post(`${this.apiUrl}/programas/procesar-pdf/${programaId}`, formData);
   }
 
-  // Servicio para obtener las competencias
-  getCompetencias(): Observable<Competencia[]> {
-    return this.http.get<Competencia[]>(`${this.apiUrl}/competencias`);
+  // Ahora recibe el ID como parámetro
+  getCompetencias(programaId: number): Observable<Competencia[]> {
+    return this.http.get<Competencia[]>(`${this.apiUrl}/competencias/${programaId}`);
   }
 
   // Obtener detalle completo (RAPs, Saberes, etc.)

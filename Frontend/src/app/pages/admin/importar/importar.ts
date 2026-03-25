@@ -96,26 +96,31 @@ archivoPdf: File | null = null;
     });
   }
 
-  cargarCompetencias() {
-    this.adminService.getCompetencias().subscribe({
-      next: (data) => {
-        this.listaCompetencias = data;
-      },
-      error: (err) => console.error('Error al cargar lista', err)
-    });
-  }
-
-  verDetalle(id: number) {
+  // Función que se dispara al dar click en la lupa/botón de la tabla de programas
+  verDetalle(programaId: number) {
     this.loadingDetalle = true;
-    this.adminService.getDetalleCompetencia(id).subscribe({
+    
+    // Llamamos al servicio pasando el ID de la ficha/programa seleccionado
+    this.adminService.getCompetencias(programaId).subscribe({
       next: (data) => {
-        this.detalleSeleccionado = data;
+        // Guardamos el array de competencias en detalleSeleccionado para que el modal lo reciba
+        this.detalleSeleccionado = data; 
         this.loadingDetalle = false;
       },
       error: (err) => {
-        alert('No se pudo cargar el detalle');
+        console.error('Error al cargar competencias:', err);
+        Swal.fire('Error', 'No se pudieron obtener las competencias de este programa', 'error');
         this.loadingDetalle = false;
       }
+    });
+  }
+
+  // Esta función la puedes dejar para refrescar si es necesario, 
+  // pero ahora requiere un ID.
+  cargarCompetencias(id: number) {
+    this.adminService.getCompetencias(id).subscribe({
+      next: (data) => this.listaCompetencias = data,
+      error: (err) => console.error('Error al cargar lista', err)
     });
   }
 

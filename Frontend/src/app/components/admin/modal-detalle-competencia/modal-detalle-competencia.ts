@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Admin } from '../../../services/admin/admin';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
@@ -12,14 +12,17 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './modal-detalle-competencia.css',
 })
 export class ModalDetalleCompetencia {
-  @Input() detalle: any; // Aquí recibimos la competencia completa con sus RAPs
-  @Output() cerrar = new EventEmitter<void>(); // Para avisarle al padre que lo cierre
+  @Input() detalle: any[] = []; // Recibe el array de competencias filtrado
+  @Output() cerrar = new EventEmitter<void>();
 
   constructor(private adminService: Admin) {}
 
-  // FuFuncion que permite actualizar data desde el modal
+  cerrarModal() {
+    this.cerrar.emit();
+  }
+
   actualizar(tipo: string, id: number, event: any) {
-    const elemento = event.target as HTMLInputElement | HTMLTextAreaElement;
+    const elemento = event.target as HTMLInputElement;
     const nuevoValor = elemento.value;
 
     if (!nuevoValor.trim()) return;
@@ -35,14 +38,9 @@ export class ModalDetalleCompetencia {
         });
         Toast.fire({
           icon: 'success',
-          title: `Guardado automáticamente`
+          title: `Nombre actualizado`
         });
-      },
-      error: (err) => console.error('Error:', err)
+      }
     });
-  }
-
-  cerrarModal() {
-    this.cerrar.emit();
   }
 }

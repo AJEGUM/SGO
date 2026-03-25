@@ -46,7 +46,8 @@ export const procesarDisenoPdf = async (req, res) => {
 // Funcion que permite obtener las competencias registradas
 export const getCompetencias = async (req, res) => {
     try {
-        const data = await curriculoService.obtenerCompetencias();
+        const { programaId } = req.params; // Extraemos el ID
+        const data = await curriculoService.obtenerCompetencias(programaId);
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ ok: false, msg: error.message });

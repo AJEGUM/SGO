@@ -184,8 +184,8 @@ async procesarPdfDiseno(pdfBuffer, programaId) {
   }
 },
 
-    async obtenerCompetencias() {
-        return await curriculoModel.listarTodas();
+    async obtenerCompetencias(programaId) {
+        return await curriculoModel.listarCompetencias(programaId);
     },
 
     async obtenerProgramas() {
