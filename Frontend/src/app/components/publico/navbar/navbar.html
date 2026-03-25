@@ -16,8 +16,8 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <button class="hidden md:block bg-gray-900 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-sena transition-all cursor-pointer">
-          Acceder al OVA
+        <button routerLink="/login" class="hidden md:block bg-gray-900 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-sena transition-all cursor-pointer">
+          Iniciar sesion
         </button>
 
         <button (click)="alternarMenu()" class="md:hidden p-2 text-gray-600 hover:text-sena transition-colors cursor-pointer">
@@ -57,7 +57,7 @@
         
         <hr class="border-gray-100 my-2">
 
-        <button class="w-full bg-sena text-white py-4 rounded-2xl shadow-xl shadow-sena/30 font-bold active:scale-95 transition-transform cursor-pointer">
+        <button routerLink="/login" class="w-full bg-sena text-white py-4 rounded-2xl shadow-xl shadow-sena/30 font-bold active:scale-95 transition-transform cursor-pointer">
           Iniciar sesion
         </button>
       </div>

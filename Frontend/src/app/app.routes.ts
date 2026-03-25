@@ -7,6 +7,11 @@ export const routes: Routes = [
     title: 'SGO - Sistema de Gestion de OVAs'
   },
 {
+    path: 'login',
+    loadComponent: () => import('./pages/publico/login/login').then(m => m.Login),
+    title: 'Login - Sistema de Gestion de OVAs'
+  },
+{
     path: 'como-funciona',
     loadComponent: () => import('./pages/publico/como-funciona/como-funciona').then(m => m.ComoFunciona),
     title: 'Como Funciona - Sistema de Gestion de OVAs'
