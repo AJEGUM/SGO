@@ -68,39 +68,62 @@ async guardarDetallesCurriculo(programaId, datosExtraidos) {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
+        console.log("--- INICIANDO PERSISTENCIA DE DETALLES ---");
 
         for (const competencia of datosExtraidos) {
-            // Buscamos el ID de la competencia en este programa
-            const [compRows] = await connection.query(
-                "SELECT id FROM competencias WHERE codigo_norma = ? AND programa_id = ?",
-                [competencia.codigo_norma, programaId]
+            const codPdf = competencia.codigo_norma?.trim();
+            const nomPdf = competencia.nombre_competencia?.trim();
+
+            // 1. Búsqueda híbrida (Código o Nombre)
+            let [compRows] = await connection.query(
+                "SELECT id, nombre FROM competencias WHERE (codigo_norma = ? OR nombre LIKE ?) AND programa_id = ?",
+                [codPdf, `%${nomPdf?.split(' ').slice(0, 3).join(' ')}%`, programaId]
             );
 
-            if (compRows.length === 0) continue; 
+            if (compRows.length === 0) {
+                console.warn(`⚠️ Competencia no hallada: ${nomPdf}`);
+                continue; 
+            }
+
             const competenciaId = compRows[0].id;
 
             for (const rap of competencia.resultados) {
-                // Buscamos el ID del RAP vinculado a esa competencia
+                // Normalizamos el código del RAP (ej: de "03" a "3" y viceversa para el match)
+                const rapNum = rap.codigo_rap.trim().replace(/^0+/, '');
+                
                 const [rapRows] = await connection.query(
-                    "SELECT id FROM resultados_aprendizaje WHERE codigo_rap = ? AND competencia_id = ?",
-                    [rap.codigo_rap, competenciaId]
+                    "SELECT id FROM resultados_aprendizaje WHERE (codigo_rap = ? OR codigo_rap = ? OR codigo_rap LIKE ?) AND competencia_id = ?",
+                    [rap.codigo_rap.trim(), rapNum, `%${rapNum}`, competenciaId]
                 );
 
                 if (rapRows.length === 0) continue;
                 const rapId = rapRows[0].id;
 
-                // Insertar Procesos
-                for (const desc of rap.procesos) {
-                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+                // Limpieza de datos previos del RAP
+                await connection.query("DELETE FROM conocimientos_proceso WHERE rap_id = ?", [rapId]);
+                await connection.query("DELETE FROM conocimientos_saber WHERE rap_id = ?", [rapId]);
+                await connection.query("DELETE FROM criterios_evaluacion WHERE rap_id = ?", [rapId]);
+
+                // 2. INSERCIONES MASIVAS (Bulk Inserts)
+                // Procesos
+                if (rap.procesos?.length > 0) {
+                    const values = rap.procesos.map(desc => [rapId, desc]);
+                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES ?", [values]);
                 }
-                // Insertar Saberes
-                for (const desc of rap.saberes) {
-                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+
+                // Saberes
+                if (rap.saberes?.length > 0) {
+                    const values = rap.saberes.map(desc => [rapId, desc]);
+                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES ?", [values]);
                 }
-                // Insertar Criterios
-                for (const desc of rap.criterios) {
-                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)", [rapId, desc]);
+
+                // Criterios
+                if (rap.criterios?.length > 0) {
+                    const values = rap.criterios.map(desc => [rapId, desc]);
+                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES ?", [values]);
                 }
+                
+                console.log(`✅ Detalle guardado para RAP: ${rap.codigo_rap}`);
             }
         }
 
@@ -108,6 +131,7 @@ async guardarDetallesCurriculo(programaId, datosExtraidos) {
         return { status: "Completado" };
     } catch (error) {
         await connection.rollback();
+        console.error("❌ Error en guardarDetallesCurriculo:", error);
         throw error;
     } finally {
         connection.release();

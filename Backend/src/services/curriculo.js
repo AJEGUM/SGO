@@ -1,10 +1,8 @@
 import XLSX from 'xlsx';
 import { curriculoModel } from '../models/curriculoModel.js'; 
-import geminiModel from '../config/gemini.js';
+import groqModel from '../config/groq.js';
 import { promptExtraerDetallesSena } from '../prompts/disenoCurricular.js';
 import pdf from 'pdf-parse-fork';
-
-const delay = (ms) => new Promise(res => setTimeout(res, ms))
 
 export const curriculoService = {
 
@@ -19,28 +17,25 @@ async procesarExcel(fileBuffer) {
         throw new Error("El archivo no tiene el formato esperado del reporte de juicios.");
     }
 
-    // Función interna para convertir fechas seriales de Excel a formato YYYY-MM-DD
     const excelDateToJS = (serial) => {
         if (!serial || isNaN(serial)) return null;
         const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
         return date.toISOString().split('T')[0];
     };
 
-    // 2. Extracción de información de cabecera extendida
     const infoCabecera = {
-        numeroFicha: rows[2][2]?.toString().split('.')[0].trim(),   // C3
-        codigoPrograma: rows[3][2]?.toString().trim(),            // C4
-        versionPrograma: rows[4][2]?.toString().trim(),           // C5
-        nombrePrograma: rows[5][2]?.toString().trim(),            // C6
-        fechaInicio: excelDateToJS(rows[7][2]),                    // C8
-        fechaFin: excelDateToJS(rows[8][2])                        // C9
+        numeroFicha: rows[2][2]?.toString().split('.')[0].trim(),
+        codigoPrograma: rows[3][2]?.toString().trim(),
+        versionPrograma: rows[4][2]?.toString().trim(),
+        nombrePrograma: rows[5][2]?.toString().trim(),
+        fechaInicio: excelDateToJS(rows[7][2]),
+        fechaFin: excelDateToJS(rows[8][2])
     };
 
     if (!infoCabecera.numeroFicha || !infoCabecera.nombrePrograma) {
-        throw new Error("No se pudo encontrar la Ficha o el Programa en las celdas correspondientes.");
+        throw new Error("No se pudo encontrar la Ficha o el Programa.");
     }
 
-    // 3. Mapeo de Competencias y RAPs
     const mapaCompetencias = new Map();
 
     for (let i = 13; i < rows.length; i++) {
@@ -52,7 +47,8 @@ async procesarExcel(fileBuffer) {
 
         if (textoComp && textoRap && textoComp.includes(' - ')) {
             const partsComp = textoComp.split(' - ');
-            const codComp = partsComp[0].trim();
+            // CODIGO VIRGEN: Limpiamos cualquier espacio o carácter raro
+            const codComp = partsComp[0].trim(); 
             const nomComp = partsComp.slice(1).join(' - ').trim();
 
             const partsRap = textoRap.split(' - ');
@@ -61,9 +57,9 @@ async procesarExcel(fileBuffer) {
 
             if (!mapaCompetencias.has(codComp)) {
                 mapaCompetencias.set(codComp, {
-                    codigo_norma: codComp,
+                    codigo_norma: codComp, // Guardado puro
                     nombre: nomComp,
-                    prefijo_id: `C${codComp.slice(-4)}`,
+                    prefijo_id: codComp,   // Quitamos la "C", dejamos el código virgen
                     duracion: 0,
                     resultados: new Map()
                 });
@@ -95,92 +91,72 @@ async procesarExcel(fileBuffer) {
 
 async procesarPdfDiseno(pdfBuffer, programaId) {
   try {
-    console.log("--- INICIANDO PROCESAMIENTO POR LOTES (ESTRATEGIA CHUNKING OPTIMIZADA) ---");
-
-    // 1. Extraer el texto completo
+    console.log("--- INICIANDO EXTRACCIÓN (MODO ROBUSTO) ---");
     const data = await pdf(pdfBuffer);
-    let textoOriginal = data.text;
-    console.log("Caracteres totales extraídos:", textoOriginal.length);
-
-    // 2. Recortar la introducción administrativa
-    const marcadorInicio = "4.  CONTENIDOS CURRICULARES DE LA COMPETENCIA";
-    const indiceInicio = textoOriginal.indexOf(marcadorInicio);
-    let textoLimpio = (indiceInicio !== -1) ? textoOriginal.substring(indiceInicio) : textoOriginal;
-
-    // 3. Configuración de fragmentación (Chunks más pequeños para evitar JSON incompleto)
-    const tamañoChunk = 15000; 
-    const chunks = [];
-    for (let i = 0; i < textoLimpio.length; i += tamañoChunk) {
-      chunks.push(textoLimpio.substring(i, i + tamañoChunk));
-    }
-
-    console.log(`El texto se dividió en ${chunks.length} partes. Procesando con pausas de seguridad...`);
+    const textoCompleto = data.text;
+    
+    // Marcador para dividir el PDF por competencias
+    const regexMarcador = /4\.\s*CONTENIDOS\s+CURRICULARES/gi;
+    let secciones = textoCompleto.split(regexMarcador);
+    secciones.shift(); // Quitamos el encabezado inicial del PDF
 
     let todasLasCompetencias = [];
 
-    // 4. Bucle de procesamiento con manejo de Rate Limit
-    for (let i = 0; i < chunks.length; i++) {
-      console.log(`>> Procesando bloque ${i + 1} de ${chunks.length}...`);
-      
-      // Pausa obligatoria a partir del segundo bloque para evitar el error 503
-      if (i > 0) {
-        console.log("   ⏳ Esperando 3.5 segundos para liberar cuota de API...");
-        await delay(3500);
-      }
+    for (let i = 0; i < secciones.length; i++) {
+      const bloqueTexto = secciones[i];
+      if (bloqueTexto.length < 300) continue;
 
-      const prompt = `
-        ${promptExtraerDetallesSena(chunks[i])}
-        
-        CONTEXTO: Parte ${i + 1} de ${chunks.length}.
-        INSTRUCCIÓN DE SEGURIDAD: 
-        - Extrae únicamente la información presente en este fragmento.
-        - Asegúrate de cerrar correctamente todas las llaves y corchetes del JSON.
-        - Si no hay competencias completas en este fragmento, devuelve [].
-      `;
+      console.log(`>> Procesando bloque ${i + 1}/${secciones.length}...`);
+      
+      // Delay de 3 segundos para respetar el RPM de Groq
+      await new Promise(r => setTimeout(r, 3000)); 
 
       try {
-        const result = await geminiModel.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-
-        // Limpieza y parseo
-        const jsonString = text.replace(/```json|```/g, "").trim();
+        const promptFinal = promptExtraerDetallesSena(bloqueTexto);
+        const result = await groqModel.generateContent(promptFinal);
+        const responseText = result.response.text();
         
-        // Validación básica antes de intentar parsear
-        if (!jsonString.startsWith('[') && !jsonString.startsWith('{')) {
-             console.log(`   ℹ️ Bloque ${i + 1}: La IA no detectó formato JSON (posiblemente no hay datos).`);
-             continue;
+        // --- LIMPIEZA DE JSON SEGURA ---
+        // Buscamos los límites del array para ignorar cualquier texto extra de la IA
+        const inicioJson = responseText.indexOf('[');
+        const finJson = responseText.lastIndexOf(']') + 1;
+
+        if (inicioJson === -1 || finJson === 0) {
+          console.warn(`⚠️ El bloque ${i + 1} no devolvió un JSON válido. Reintentando o saltando...`);
+          continue;
         }
 
-        const datosFragmento = JSON.parse(jsonString);
+        const jsonLimpio = responseText.substring(inicioJson, finJson);
+        const datosParsed = JSON.parse(jsonLimpio);
+        // -------------------------------
 
-        if (Array.isArray(datosFragmento) && datosFragmento.length > 0) {
-          console.log(`   ✅ Bloque ${i + 1}: Se encontraron ${datosFragmento.length} competencias.`);
-          todasLasCompetencias = [...todasLasCompetencias, ...datosFragmento];
-        } else {
-          console.log(`   ℹ️ Bloque ${i + 1}: Sin competencias en este fragmento.`);
-        }
+        const array = Array.isArray(datosParsed) ? datosParsed : [datosParsed];
+        todasLasCompetencias.push(...array);
+        console.log(`  ✅ Bloque ${i + 1} extraído con éxito.`);
+
       } catch (err) {
-        console.error(`   ❌ Error en bloque ${i + 1}:`, err.message);
-        // En DevOps, si un bloque falla, seguimos con el resto para rescatar lo que se pueda
+        if (err.message.includes("429")) {
+            console.log("⏳ Límite de tokens excedido. Esperando 30 segundos...");
+            await new Promise(r => setTimeout(r, 30000));
+            i--; // Retrocedemos el índice para reintentar este mismo bloque
+        } else {
+            console.error(`❌ Error parseando bloque ${i + 1}:`, err.message);
+        }
       }
     }
 
-    // 5. Consolidación y Guardado
     if (todasLasCompetencias.length === 0) {
-      throw new Error("No se logró extraer ninguna información válida tras procesar todos los bloques.");
+      throw new Error("No se pudo extraer información válida del PDF.");
     }
 
-    console.log(`--- PROCESO FINALIZADO --- Total acumulado: ${todasLasCompetencias.length} competencias.`);
+    console.log(`--- EXTRACCIÓN FINALIZADA --- Total: ${todasLasCompetencias.length} competencias.`);
     
-    // Eliminar duplicados si una competencia quedó partida entre dos chunks (opcional)
-    const competenciasUnicas = Array.from(new Set(todasLasCompetencias.map(c => JSON.stringify(c)))).map(s => JSON.parse(s));
-
-    return await curriculoModel.guardarDetallesCurriculo(programaId, competenciasUnicas);
+    // Llamada al model con la nueva lógica de Bulk Inserts
+    return await curriculoModel.guardarDetallesCurriculo(programaId, todasLasCompetencias);
 
   } catch (error) {
     console.error("Error crítico en procesarPdfDiseno:", error);
-    throw new Error("Error en la arquitectura de extracción: " + error.message);
+    throw error;
   }
 },
 
