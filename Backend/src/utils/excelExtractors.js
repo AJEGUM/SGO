@@ -1,32 +1,27 @@
-import * as XLSX from 'xlsx';
+// YA NO necesitas importar XLSX aquí, Python ya hizo ese trabajo.
 
-/**
- * Convierte el buffer a filas y procesa toda la estructura.
- */
-export const extraerTodoElContenido = (fileBuffer) => {
-    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
+export const extraerTodoElContenido = (rows) => {
     let todasLasCompetencias = [];
     let contexto = { 
         currentCompetencia: null, 
         currentRap: null, 
-        modoActual: null 
+        modoActual: null,
+        celdaAcumulada: "" 
     };
 
+    // Recorremos las filas que Python ya "aplanó" (sin celdas vacías por combinación)
     for (let i = 0; i < rows.length; i++) {
         const fila = rows[i];
-        if (!fila || fila.length === 0) continue;
+        if (!fila) continue; 
 
-        // Delegación de responsabilidades
         detectarModo(fila, contexto);
+        // Pasamos fila actual y siguiente para capturar códigos/nombres que a veces saltan de línea
         extraerCompetencia(fila, rows[i + 1] || null, contexto, todasLasCompetencias);
         extraerRap(fila, contexto);
-        extraerConocimientoProceso(fila, contexto);
+        extraerConocimientosProceso(fila, contexto);
     }
 
-    // Lógica de cierre: Guardar la última procesada
+    // Insertar la última competencia procesada
     if (contexto.currentCompetencia) {
         todasLasCompetencias.push(contexto.currentCompetencia);
     }
@@ -34,19 +29,26 @@ export const extraerTodoElContenido = (fileBuffer) => {
     return todasLasCompetencias;
 };
 
+// --- Las funciones de apoyo se mantienen casi igual, pero más confiables ---
+
 export const detectarModo = (fila, contexto) => {
-    const celda = fila[0]?.toString().trim() || "";
+    const celda = fila[0] ? fila[0].toString().trim().toUpperCase() : "";
     
-    // Añadimos la detección de la sección de RAPs (4.5)
-    if (celda.includes("4.5")) {
+    if (celda.match(/^4\.\d/)) {
+        contexto.currentRap = null; 
+    }
+
+    if (celda.includes("4.4")) {
+        contexto.modoActual = 'horas';
+    } else if (celda.includes("4.5")) {
         contexto.modoActual = 'raps';
     } else if (celda.includes("4.6.1")) {
-        contexto.modoActual = 'procesos';
+        contexto.modoActual = 'procesos'; // <--- CAMBIO AQUÍ
     } else if (celda.includes("4.6.2")) {
-        contexto.modoActual = 'saberes';
+        contexto.modoActual = 'saberes';  // <--- CAMBIO AQUÍ
     } else if (celda.includes("4.7")) {
-        contexto.modoActual = 'criterios';
-    } else if (celda.includes("4.8") || celda.includes("PERFIL")) {
+        contexto.modoActual = 'criterios'; // <--- CAMBIO AQUÍ
+    } else if (celda.match(/^4\.[8-9]/)) {
         contexto.modoActual = null;
     }
 };
@@ -54,97 +56,94 @@ export const detectarModo = (fila, contexto) => {
 export const extraerCompetencia = (fila, siguienteFila, contexto, todasLasCompetencias) => {
     const textoFilaA = fila.slice(0, 5).join(" ").trim();
     
+    // Captura de Código y Creación de Objeto
     if (textoFilaA.includes("4.2")) {
         if (contexto.currentCompetencia) todasLasCompetencias.push(contexto.currentCompetencia);
         
         const codigoRaw = fila.slice(5, 15).find(c => c) || (siguienteFila?.slice(5, 15).find(c => c));
-        const codigoStr = codigoRaw?.toString().trim() || "999999999";
-
+        
         contexto.currentCompetencia = {
-            codigo_norma: codigoStr,
-            prefijo_id: codigoStr.substring(0, 5),
-            nombre: "COMPETENCIA",
+            codigo_norma: codigoRaw?.toString().trim() || "0",
+            nombre: "SIN NOMBRE",
+            horas: 0, // Campo nuevo
             resultados: []
         };
-        return;
     }
 
+    // Captura de Nombre
     if (textoFilaA.includes("4.3") && contexto.currentCompetencia) {
         const nombreRaw = fila.slice(5, 20).find(c => c) || (siguienteFila?.slice(5, 20).find(c => c));
         if (nombreRaw) {
             contexto.currentCompetencia.nombre = nombreRaw.toString().trim().toUpperCase();
         }
     }
-};
 
-export const extraerRap = (fila, contexto) => {
-    // Solo actuamos si estamos en modo 'raps' y tenemos una competencia activa
-    if (contexto.modoActual !== 'raps' || !contexto.currentCompetencia) return;
-
-    const celda = fila[0]?.toString().trim() || "";
-    
-    // Regex para capturar el código (01, 02, etc.) y la descripción del RAP
-    // Basado en las imágenes, el formato es "Número [espacio] Descripción"
-    const match = celda.match(/^(\d{2})\s+(.+)/);
-
-    if (match) {
-        contexto.currentRap = {
-            codigo_rap: match[1],
-            denominacion: match[2].trim().toUpperCase(),
-            criterios: [], 
-            procesos: [], 
-            saberes: []
-        };
-        
-        // Lo vinculamos inmediatamente a la competencia actual
-        contexto.currentCompetencia.resultados.push(contexto.currentRap);
+    // Captura de Horas (Sección 4.4)
+    if (contexto.modoActual === 'horas' && contexto.currentCompetencia) {
+        // Buscamos el primer número que no sea el "4.4"
+        const posibleHora = fila.find(c => {
+            const n = parseInt(c);
+            return !isNaN(n) && !c.toString().includes("4.4") && n > 0;
+        });
+        if (posibleHora) {
+            contexto.currentCompetencia.horas = parseInt(posibleHora);
+        }
     }
 };
 
-/**
- * Extrae y separa cada conocimiento de proceso para que sean registros individuales.
- */
-export const extraerConocimientoProceso = (fila, contexto) => {
-    if (contexto.modoActual !== 'procesos' || !contexto.currentCompetencia) return;
+export const extraerRap = (fila, contexto) => {
+    if (contexto.modoActual !== 'raps' || !contexto.currentCompetencia) return;
 
-    const celdaRaw = fila[0]?.toString().trim() || "";
-    if (!celdaRaw || celdaRaw.includes("4.6.1") || celdaRaw.includes("CONOCIMIENTOS")) return;
-
-    // 1. DIVIDIMOS LA CELDA: El Excel mezcla títulos y asteriscos en la misma celda
-    // Usamos un split que mantenga el delimitador para no perder los asteriscos
-    const partes = celdaRaw.split(/(?=\*)/g); 
-
-    partes.forEach(parte => {
-        const textoLimpio = parte.trim();
-        if (textoLimpio.length < 3) return;
-
-        // 2. ¿ESTA PARTE ES UN TÍTULO DE RAP? 
-        // Buscamos si el texto (sin asterisco) coincide con algún RAP de la competencia
-        const textoSinAsterisco = textoLimpio.replace(/^\*\s*/, "").toUpperCase();
-        
-        const rapEncontrado = contexto.currentCompetencia.resultados.find(r => {
-            const denom = r.denominacion.toUpperCase().trim().replace(/[.:]$/, "");
-            // Match flexible: el texto contiene la denominación o viceversa
-            return textoSinAsterisco.includes(denom) || denom.includes(textoSinAsterisco.split(':')[0]);
-        });
-
-        if (rapEncontrado) {
-            contexto.currentRap = rapEncontrado;
-            // Si después de encontrar el RAP, el texto tiene un '*', 
-            // continuamos para procesar el conocimiento que viene pegado
-            if (!textoLimpio.startsWith('*')) return;
-        }
-
-        // 3. ¿ESTA PARTE ES UN CONOCIMIENTO? (Tiene asterisco)
-        if (textoLimpio.startsWith('*') && contexto.currentRap) {
-            const conocimiento = textoLimpio.replace(/^\*\s*/, "").replace(/:$/, "").trim();
-            
-            // Verificación final: Que no estemos guardando el nombre del RAP como conocimiento
-            const esNombreRap = contexto.currentRap.denominacion.toUpperCase().includes(conocimiento.toUpperCase());
-            
-            if (conocimiento.length > 3 && !esNombreRap) {
-                contexto.currentRap.procesos.push(conocimiento.toUpperCase());
-            }
-        }
+    // Buscamos en la fila un texto que parezca un RAP (longitud considerable)
+    // Evitamos el encabezado "4.5 RESULTADOS DE APRENDIZAJE..."
+    const contenido = fila.find(c => {
+        const t = c?.toString().trim();
+        return t && t.length > 15 && !t.includes("4.5") && !t.includes("RESULTADOS");
     });
+
+    if (contenido) {
+        const denominacion = contenido.toString().trim().toUpperCase();
+        
+        // Evitar duplicados si Python hizo ffill
+        const existe = contexto.currentCompetencia.resultados.some(r => r.denominacion === denominacion);
+        
+        if (!existe) {
+            contexto.currentRap = {
+                codigo_rap: (contexto.currentCompetencia.resultados.length + 1).toString(),
+                denominacion: denominacion
+            };
+            contexto.currentCompetencia.resultados.push(contexto.currentRap);
+        }
+    }
+};
+
+export const extraerConocimientosProceso = (fila, contexto) => {
+    const modosPermitidos = ['procesos', 'saberes', 'criterios'];
+    if (!modosPermitidos.includes(contexto.modoActual) || !contexto.currentCompetencia) return;
+
+    const tablaDestino = contexto.modoActual;
+    
+    // Buscamos el contenido real (texto largo)
+    let contenidoReal = fila.find(celda => {
+        const text = celda?.toString().trim();
+        return text && text.length > 15 && !text.match(/^4\.\d/);
+    })?.toString().trim() || "";
+
+    if (!contenidoReal) return;
+
+    // ESTRATEGIA: Buscar a qué RAP pertenece este bloque de texto
+    // El texto del conocimiento suele empezar con el nombre del RAP
+    const rapAsociado = contexto.currentCompetencia.resultados.find(rap => 
+        contenidoReal.toUpperCase().includes(rap.denominacion.toUpperCase().substring(0, 30))
+    );
+
+    if (rapAsociado) {
+        // Inicializar si no existe
+        if (!rapAsociado[tablaDestino]) rapAsociado[tablaDestino] = "";
+        
+        // Evitar duplicados y acumular
+        if (!rapAsociado[tablaDestino].includes(contenidoReal.substring(0, 40))) {
+            rapAsociado[tablaDestino] += (rapAsociado[tablaDestino] ? "\n" : "") + contenidoReal;
+        }
+    }
 };

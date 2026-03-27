@@ -1,20 +1,33 @@
+import { ejecutarPythonParser } from '../utils/pythonRunner.js';
 import { curriculoModel } from '../models/curriculoModel.js'; 
-import * as Extractor from '../utils/excelExtractors.js';
 
 export const curriculoService = {
 
 async procesarExcel(fileBuffer) {
-    // 1. Llamamos a la lógica extraída
-    const competenciasProcesadas = Extractor.extraerTodoElContenido(fileBuffer);
+    try {
+        console.log("1. Llamando al motor de extracción externo...");
+        
+        // Usamos la función importada
+        const competencias = await ejecutarPythonParser(fileBuffer);
 
-    // 2. Definimos metadatos básicos
-    const nombreProg = competenciasProcesadas[0]?.nombre || "IMPORTACIÓN CURRÍCULO";
+        if (!competencias || competencias.length === 0) {
+            throw new Error("No se extrajeron datos del archivo.");
+        }
 
-    // 3. Persistencia
-    return await curriculoModel.insertarDesdeExcelDetallado(
-        { nombrePrograma: nombreProg }, 
-        competenciasProcesadas
-    );
+        console.log(`2. Extracción exitosa. Procesando ${competencias.length} competencias.`);
+
+        const nombreProg = competencias[0]?.nombre || "PROGRAMA IMPORTADO";
+
+        console.log("3. Guardando en base de datos...");
+        return await curriculoModel.insertarDesdeExcelDetallado(
+            { nombrePrograma: nombreProg }, 
+            competencias
+        );
+
+    } catch (error) {
+        console.error("Error en curriculoService:", error.message);
+        throw error;
+    }
 },
 
 async obtenerCompetencias(programaId) {
