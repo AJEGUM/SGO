@@ -1,137 +1,58 @@
 import db from '../config/db.js'; // Tu pool con mysql2/promise
 
 export const curriculoModel = {
-async insertarDesdeReporte(info, competencias) {
+async insertarDesdeExcelDetallado(info, competencias) {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        // 1. Asegurar el Programa
+        // 1. Asegurar Programa
         let [prog] = await connection.query("SELECT id FROM programas WHERE nombre_programa = ?", [info.nombrePrograma]);
-        let programaId = prog.length > 0 ? prog[0].id : null;
-        
-        if (!programaId) {
-            const [newProg] = await connection.query("INSERT INTO programas (nombre_programa) VALUES (?)", [info.nombrePrograma]);
-            programaId = newProg.insertId;
-        }
+        let programaId = prog.length > 0 ? prog[0].id : (await connection.query("INSERT INTO programas (nombre_programa) VALUES (?)", [info.nombrePrograma]))[0].insertId;
 
-        // 2. Asegurar Ficha con toda la info de cabecera
-        await connection.query(`
-            INSERT INTO fichas (numero_ficha, programa_id, codigo_programa, version_programa, fecha_inicio, fecha_fin) 
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE 
-                codigo_programa = VALUES(codigo_programa),
-                version_programa = VALUES(version_programa),
-                fecha_inicio = VALUES(fecha_inicio),
-                fecha_fin = VALUES(fecha_fin)
-        `, [info.numeroFicha, programaId, info.codigoPrograma, info.versionPrograma, info.fechaInicio, info.fechaFin]);
-
-        // 3. Insertar Competencias y RAPs
         for (const comp of competencias) {
-            let [compExist] = await connection.query(
-                "SELECT id FROM competencias WHERE codigo_norma = ? AND programa_id = ?", 
-                [comp.codigo_norma, programaId]
+            // 2. Insertar/Obtener Competencia
+            let [resComp] = await connection.query(
+                "INSERT INTO competencias (programa_id, codigo_norma, prefijo_id, nombre, duracion_horas) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)",
+                [programaId, comp.codigo_norma, comp.prefijo_id, comp.nombre, comp.duracion]
             );
-
-            let competenciaId;
-            if (compExist.length > 0) {
-                competenciaId = compExist[0].id;
-            } else {
-                const [resComp] = await connection.query(
-                    "INSERT INTO competencias (programa_id, codigo_norma, prefijo_id, nombre, duracion_horas) VALUES (?, ?, ?, ?, ?)",
-                    [programaId, comp.codigo_norma, comp.prefijo_id, comp.nombre, comp.duracion]
-                );
-                competenciaId = resComp.insertId;
-            }
+            
+            // Si fue un update, buscamos el ID
+            const [compRow] = await connection.query("SELECT id FROM competencias WHERE codigo_norma = ? AND programa_id = ?", [comp.codigo_norma, programaId]);
+            const competenciaId = compRow[0].id;
 
             for (const rap of comp.resultados) {
-                await connection.query(
-                    `INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) 
-                     VALUES (?, ?, ?) 
-                     ON DUPLICATE KEY UPDATE denominacion = VALUES(denominacion)`,
+                // 3. Insertar RAP
+                const [resRap] = await connection.query(
+                    "INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE denominacion=VALUES(denominacion)",
                     [competenciaId, rap.codigo_rap, rap.denominacion]
                 );
-            }
-        }
-
-        await connection.commit();
-        return { success: true, ficha: info.numeroFicha };
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
-},
-
-async guardarDetallesCurriculo(programaId, datosExtraidos) {
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-        console.log("--- INICIANDO PERSISTENCIA DE DETALLES ---");
-
-        for (const competencia of datosExtraidos) {
-            const codPdf = competencia.codigo_norma?.trim();
-            const nomPdf = competencia.nombre_competencia?.trim();
-
-            // 1. Búsqueda híbrida (Código o Nombre)
-            let [compRows] = await connection.query(
-                "SELECT id, nombre FROM competencias WHERE (codigo_norma = ? OR nombre LIKE ?) AND programa_id = ?",
-                [codPdf, `%${nomPdf?.split(' ').slice(0, 3).join(' ')}%`, programaId]
-            );
-
-            if (compRows.length === 0) {
-                console.warn(`⚠️ Competencia no hallada: ${nomPdf}`);
-                continue; 
-            }
-
-            const competenciaId = compRows[0].id;
-
-            for (const rap of competencia.resultados) {
-                // Normalizamos el código del RAP (ej: de "03" a "3" y viceversa para el match)
-                const rapNum = rap.codigo_rap.trim().replace(/^0+/, '');
                 
-                const [rapRows] = await connection.query(
-                    "SELECT id FROM resultados_aprendizaje WHERE (codigo_rap = ? OR codigo_rap = ? OR codigo_rap LIKE ?) AND competencia_id = ?",
-                    [rap.codigo_rap.trim(), rapNum, `%${rapNum}`, competenciaId]
-                );
+                const [rapRow] = await connection.query("SELECT id FROM resultados_aprendizaje WHERE competencia_id = ? AND codigo_rap = ?", [competenciaId, rap.codigo_rap]);
+                const rapId = rapRow[0].id;
 
-                if (rapRows.length === 0) continue;
-                const rapId = rapRows[0].id;
-
-                // Limpieza de datos previos del RAP
+                // 4. Limpiar e Insertar Detalles (Bulk)
                 await connection.query("DELETE FROM conocimientos_proceso WHERE rap_id = ?", [rapId]);
+                if (rap.procesos.length) {
+                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES ?", [rap.procesos.map(d => [rapId, d])]);
+                }
+
                 await connection.query("DELETE FROM conocimientos_saber WHERE rap_id = ?", [rapId]);
+                if (rap.saberes.length) {
+                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES ?", [rap.saberes.map(d => [rapId, d])]);
+                }
+
                 await connection.query("DELETE FROM criterios_evaluacion WHERE rap_id = ?", [rapId]);
-
-                // 2. INSERCIONES MASIVAS (Bulk Inserts)
-                // Procesos
-                if (rap.procesos?.length > 0) {
-                    const values = rap.procesos.map(desc => [rapId, desc]);
-                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES ?", [values]);
+                if (rap.criterios.length) {
+                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES ?", [rap.criterios.map(d => [rapId, d])]);
                 }
-
-                // Saberes
-                if (rap.saberes?.length > 0) {
-                    const values = rap.saberes.map(desc => [rapId, desc]);
-                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES ?", [values]);
-                }
-
-                // Criterios
-                if (rap.criterios?.length > 0) {
-                    const values = rap.criterios.map(desc => [rapId, desc]);
-                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES ?", [values]);
-                }
-                
-                console.log(`✅ Detalle guardado para RAP: ${rap.codigo_rap}`);
             }
         }
 
         await connection.commit();
-        return { status: "Completado" };
+        return { success: true };
     } catch (error) {
         await connection.rollback();
-        console.error("❌ Error en guardarDetallesCurriculo:", error);
         throw error;
     } finally {
         connection.release();

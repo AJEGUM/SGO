@@ -25,24 +25,6 @@ export const importarDiseno = async (req, res) => {
     }
 };
 
-export const procesarDisenoPdf = async (req, res) => {
-    try {
-        const { programaId } = req.params;
-        if (!req.file) throw new Error("No se subió ningún archivo PDF.");
-
-        // Pasamos el buffer al service
-        const resultado = await curriculoService.procesarPdfDiseno(req.file.buffer, programaId);
-        
-        res.status(200).json({ 
-            ok: true, 
-            msg: "Diseño curricular procesado y vinculado exitosamente", 
-            resultado 
-        });
-    } catch (error) {
-        res.status(500).json({ ok: false, msg: error.message });
-    }
-};
-
 // Funcion que permite obtener las competencias registradas
 export const getCompetencias = async (req, res) => {
     try {
