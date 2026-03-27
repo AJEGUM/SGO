@@ -1,4 +1,3 @@
-import XLSX from 'xlsx';
 import { curriculoModel } from '../models/curriculoModel.js'; 
 import * as Extractor from '../utils/excelExtractors.js';
 

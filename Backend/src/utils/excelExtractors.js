@@ -22,6 +22,7 @@ export const extraerTodoElContenido = (fileBuffer) => {
         // Delegación de responsabilidades
         detectarModo(fila, contexto);
         extraerCompetencia(fila, rows[i + 1] || null, contexto, todasLasCompetencias);
+        extraerRap(fila, contexto);
         // Aquí podrías llamar a extraerRap y extraerCriterio cuando los habilites
     }
 
@@ -35,10 +36,19 @@ export const extraerTodoElContenido = (fileBuffer) => {
 
 export const detectarModo = (fila, contexto) => {
     const celda = fila[0]?.toString().trim() || "";
-    if (celda.includes("4.6.1")) contexto.modoActual = 'procesos';
-    else if (celda.includes("4.6.2")) contexto.modoActual = 'saberes';
-    else if (celda.includes("4.7"))   contexto.modoActual = 'criterios';
-    else if (celda.includes("4.8") || celda.includes("PERFIL")) contexto.modoActual = null;
+    
+    // Añadimos la detección de la sección de RAPs (4.5)
+    if (celda.includes("4.5")) {
+        contexto.modoActual = 'raps';
+    } else if (celda.includes("4.6.1")) {
+        contexto.modoActual = 'procesos';
+    } else if (celda.includes("4.6.2")) {
+        contexto.modoActual = 'saberes';
+    } else if (celda.includes("4.7")) {
+        contexto.modoActual = 'criterios';
+    } else if (celda.includes("4.8") || celda.includes("PERFIL")) {
+        contexto.modoActual = null;
+    }
 };
 
 export const extraerCompetencia = (fila, siguienteFila, contexto, todasLasCompetencias) => {
@@ -64,5 +74,29 @@ export const extraerCompetencia = (fila, siguienteFila, contexto, todasLasCompet
         if (nombreRaw) {
             contexto.currentCompetencia.nombre = nombreRaw.toString().trim().toUpperCase();
         }
+    }
+};
+
+export const extraerRap = (fila, contexto) => {
+    // Solo actuamos si estamos en modo 'raps' y tenemos una competencia activa
+    if (contexto.modoActual !== 'raps' || !contexto.currentCompetencia) return;
+
+    const celda = fila[0]?.toString().trim() || "";
+    
+    // Regex para capturar el código (01, 02, etc.) y la descripción del RAP
+    // Basado en las imágenes, el formato es "Número [espacio] Descripción"
+    const match = celda.match(/^(\d{2})\s+(.+)/);
+
+    if (match) {
+        contexto.currentRap = {
+            codigo_rap: match[1],
+            denominacion: match[2].trim().toUpperCase(),
+            criterios: [], 
+            procesos: [], 
+            saberes: []
+        };
+        
+        // Lo vinculamos inmediatamente a la competencia actual
+        contexto.currentCompetencia.resultados.push(contexto.currentRap);
     }
 };
