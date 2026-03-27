@@ -23,7 +23,7 @@ export const extraerTodoElContenido = (fileBuffer) => {
         detectarModo(fila, contexto);
         extraerCompetencia(fila, rows[i + 1] || null, contexto, todasLasCompetencias);
         extraerRap(fila, contexto);
-        // Aquí podrías llamar a extraerRap y extraerCriterio cuando los habilites
+        extraerConocimientoProceso(fila, contexto);
     }
 
     // Lógica de cierre: Guardar la última procesada
@@ -99,4 +99,52 @@ export const extraerRap = (fila, contexto) => {
         // Lo vinculamos inmediatamente a la competencia actual
         contexto.currentCompetencia.resultados.push(contexto.currentRap);
     }
+};
+
+/**
+ * Extrae y separa cada conocimiento de proceso para que sean registros individuales.
+ */
+export const extraerConocimientoProceso = (fila, contexto) => {
+    if (contexto.modoActual !== 'procesos' || !contexto.currentCompetencia) return;
+
+    const celdaRaw = fila[0]?.toString().trim() || "";
+    if (!celdaRaw || celdaRaw.includes("4.6.1") || celdaRaw.includes("CONOCIMIENTOS")) return;
+
+    // 1. DIVIDIMOS LA CELDA: El Excel mezcla títulos y asteriscos en la misma celda
+    // Usamos un split que mantenga el delimitador para no perder los asteriscos
+    const partes = celdaRaw.split(/(?=\*)/g); 
+
+    partes.forEach(parte => {
+        const textoLimpio = parte.trim();
+        if (textoLimpio.length < 3) return;
+
+        // 2. ¿ESTA PARTE ES UN TÍTULO DE RAP? 
+        // Buscamos si el texto (sin asterisco) coincide con algún RAP de la competencia
+        const textoSinAsterisco = textoLimpio.replace(/^\*\s*/, "").toUpperCase();
+        
+        const rapEncontrado = contexto.currentCompetencia.resultados.find(r => {
+            const denom = r.denominacion.toUpperCase().trim().replace(/[.:]$/, "");
+            // Match flexible: el texto contiene la denominación o viceversa
+            return textoSinAsterisco.includes(denom) || denom.includes(textoSinAsterisco.split(':')[0]);
+        });
+
+        if (rapEncontrado) {
+            contexto.currentRap = rapEncontrado;
+            // Si después de encontrar el RAP, el texto tiene un '*', 
+            // continuamos para procesar el conocimiento que viene pegado
+            if (!textoLimpio.startsWith('*')) return;
+        }
+
+        // 3. ¿ESTA PARTE ES UN CONOCIMIENTO? (Tiene asterisco)
+        if (textoLimpio.startsWith('*') && contexto.currentRap) {
+            const conocimiento = textoLimpio.replace(/^\*\s*/, "").replace(/:$/, "").trim();
+            
+            // Verificación final: Que no estemos guardando el nombre del RAP como conocimiento
+            const esNombreRap = contexto.currentRap.denominacion.toUpperCase().includes(conocimiento.toUpperCase());
+            
+            if (conocimiento.length > 3 && !esNombreRap) {
+                contexto.currentRap.procesos.push(conocimiento.toUpperCase());
+            }
+        }
+    });
 };
