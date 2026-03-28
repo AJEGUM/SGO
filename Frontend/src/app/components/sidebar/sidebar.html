@@ -1,0 +1,61 @@
+<button (click)="alternarMovil()" 
+  class="lg:hidden fixed top-4 left-4 z-50 p-3 bg-sena text-white rounded-2xl shadow-xl shadow-emerald-200 hover:scale-110 active:scale-95 transition-all">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div *ngIf="estaAbiertoMovil" (click)="alternarMovil()"
+  class="lg:hidden fixed inset-0 bg-gray-900/10 backdrop-blur-md z-40 transition-opacity">
+</div>
+
+<aside 
+  [style.width.px]="anchoSidebar"
+  [class.translate-x-0]="estaAbiertoMovil" 
+  [class.-translate-x-full]="!estaAbiertoMovil"
+  class="fixed inset-y-0 left-0 z-50 h-screen bg-white border-r border-gray-100 lg:translate-x-0 flex flex-col group/sidebar select-none transition-[transform,shadow,width] duration-300">
+  
+  <div class="h-20 px-6 flex items-center justify-between overflow-hidden">
+    <div class="flex items-center min-w-0" [class.mx-auto]="estaColapsado">
+      <span *ngIf="!estaColapsado" 
+            class="font-black text-gray-900 tracking-[0.2em] text-2xl uppercase animate-in fade-in duration-500">
+        S.G.O
+      </span>
+    </div>
+    
+    <button (click)="alternarSidebar()" 
+      class="hidden lg:flex p-2 hover:bg-emerald-50 text-gray-400 hover:text-sena rounded-xl transition-all active:scale-90">
+       <svg [class.rotate-180]="estaColapsado" class="transition-transform duration-500" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+         <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+       </svg>
+    </button>
+  </div>
+
+  <nav class="flex-1 px-4 space-y-1.5 mt-2 overflow-y-auto overflow-x-hidden">
+    <a href="#" [class.justify-center]="estaColapsado" class="group flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-all">
+      <div class="shrink-0 group-hover:scale-110 transition-transform">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <span *ngIf="!estaColapsado" class="font-bold text-sm tracking-tight whitespace-nowrap">Dashboard</span>
+    </a>
+  </nav>
+
+  <div class="p-4 border-t border-gray-50 mt-auto bg-gray-50/30">
+    <div class="flex items-center gap-3 p-2 rounded-2xl overflow-hidden" [class.justify-center]="estaColapsado">
+      <div class="w-10 h-10 rounded-xl bg-sena/10 text-sena flex items-center justify-center font-bold shrink-0 border border-sena/10 uppercase">
+        jg
+      </div>
+      <div *ngIf="!estaColapsado" class="flex flex-col min-w-0 animate-in slide-in-from-left-2 duration-300">
+        <span class="text-[11px] font-black text-gray-900 truncate uppercase tracking-tighter">Julian Guevara</span>
+        <span class="text-[9px] font-bold text-sena uppercase tracking-widest">DevOps Admin</span>
+      </div>
+    </div>
+  </div>
+
+  <div (mousedown)="iniciarRedimension($event)"
+    class="absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 group-hover/sidebar:bg-sena/10 transition-colors">
+    <div [class.bg-sena]="estaRedimensionando" class="h-full w-[2px] ml-auto opacity-0 group-hover/sidebar:opacity-100 transition-opacity"></div>
+  </div>
+</aside>

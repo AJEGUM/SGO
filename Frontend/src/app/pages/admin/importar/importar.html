@@ -1,153 +1,96 @@
-<div class="min-h-screen bg-gray-50 pt-32 pb-20">
-  <div class="max-w-7xl mx-auto px-6">
+<div class="min-h-screen bg-gray-50 pt-1 pb-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
     
-    <div class="mb-12">
-      <span class="text-sena font-bold text-sm uppercase tracking-widest mb-2 block">Panel de Administración</span>
-      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Diseños Curriculares</h1>
-      <p class="text-gray-600 mt-2">Gestiona los programas de formación y sus detalles técnicos mediante automatización.</p>
+    <div class="mb-8 md:mb-12">
+      <span class="text-sena font-black text-[10px] md:text-xs uppercase tracking-[0.2em] mb-3 block">
+        Panel de Administración
+      </span>
+      <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tighter leading-none">
+        Gestión Curricular
+      </h1>
+      <p class="text-gray-500 mt-3 text-sm md:text-base max-w-2xl leading-relaxed">
+        Administración centralizada de programas y sincronización de componentes técnicos mediante procesamiento automatizado.
+      </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      
-      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 blur-xl"></div>
+    <div class="mb-12">
+      <div class="bg-white p-6 md:p-10 xl:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-sena/5 rounded-full -mr-32 -mt-32 blur-3xl transition-all group-hover:bg-sena/10"></div>
+        
         <div class="relative z-10">
-          <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase px-3 py-1 rounded-full mb-4 inline-block">Primera Fase</span>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Estructura del Programa</h3>
-          <p class="text-gray-500 text-sm mb-6">Sube el reporte de juicios (.xlsx) para crear la ficha y las competencias base.</p>
-          
-          <div class="space-y-4">
-            <input type="file" (change)="onFileChange($event)" accept=".xlsx"
-              class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-sena hover:file:bg-emerald-100 cursor-pointer border border-dashed border-gray-200 rounded-2xl p-4 bg-gray-50/50" />
+          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-10">
             
-            <button (click)="subir()" [disabled]="!archivoSeleccionado || loading"
-              class="w-full bg-sena text-white py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-emerald-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-              @if (loading) { <span class="animate-spin text-lg">🌀</span> }
-              {{ loading ? 'Sincronizando...' : 'Cargar Estructura Excel' }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      @if (showModalPrograma) {
-      <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" (click)="showModalPrograma = false"></div>
-
-        <div class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-          <div class="p-10">
-            <div class="flex items-center gap-4 mb-8">
-              <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">🏗️</div>
-              <div>
-                <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Nuevo Programa</h3>
-                <p class="text-[11px] text-gray-500 font-medium uppercase tracking-wider">Diseño Curricular SENA</p>
+            <div class="w-full xl:flex-1 text-center xl:text-left">
+              <div class="flex items-center justify-center xl:justify-start gap-3 mb-4 md:mb-6">
+                <span class="bg-emerald-50 text-sena text-[10px] font-black uppercase px-4 py-1.5 rounded-xl border border-emerald-100/50 flex items-center gap-2">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2v20M2 12h20"/></svg>
+                  Módulo de Sincronización
+                </span>
               </div>
-            </div>
-
-            <div class="space-y-5">
-              <div>
-                <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Nombre del Programa</label>
-                <input type="text" [(ngModel)]="datosPrograma.nombrePrograma" placeholder="Ej: Análisis y Desarrollo de Software"
-                  class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm" />
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Código Programa</label>
-                  <input type="text" [(ngModel)]="datosPrograma.codigoPrograma" placeholder="228106"
-                    class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm" />
-                </div>
-
-                <div>
-                  <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Versión</label>
-                  <input type="text" [(ngModel)]="datosPrograma.versionPrograma" placeholder="1"
-                    class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm font-bold text-emerald-700" />
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-6 flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-100/50">
-              <span class="text-xs">⚠️</span>
-              <p class="text-[9px] text-amber-700 font-medium leading-tight">
-                La combinación de Código y Versión debe ser única para evitar duplicados en SQL.
+              <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
+                Importar Estructura del Programa
+              </h3>
+              <p class="text-gray-500 text-sm md:text-base leading-relaxed max-w-xl mx-auto xl:mx-0">
+                Cargue el archivo fuente en formato <strong class="text-gray-900">.xlsx</strong>. El motor procesará automáticamente las competencias y RAPs.
               </p>
             </div>
 
-            <div class="mt-10 flex gap-4">
-              <button (click)="showModalPrograma = false"
-                class="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all text-xs uppercase tracking-widest">
-                Cancelar
-              </button>
-              <button (click)="confirmarCarga()"
-                [disabled]="!datosPrograma.nombrePrograma || !datosPrograma.codigoPrograma"
-                class="flex-[1.5] bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-200 transition-all disabled:opacity-30 disabled:grayscale text-xs uppercase tracking-widest">
-                Guardar Programa
-              </button>
+            <div class="w-full xl:w-auto space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-stretch">
+                
+                <div class="relative group/input">
+                  <input type="file" (change)="onFileChange($event)" accept=".xlsx"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                  <div class="h-full border-2 border-dashed border-gray-200 rounded-3xl p-5 bg-gray-50/50 flex items-center gap-4 transition-all group-hover/input:border-sena/40 group-hover/input:bg-white">
+                    <div class="w-12 h-12 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-sm text-sena">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="text-[9px] font-black uppercase text-gray-400">Excel Source</span>
+                      <span class="text-xs font-bold text-gray-700 truncate max-w-[180px]">
+                        {{ archivoSeleccionado ? archivoSeleccionado.name : 'Vincular archivo...' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <button (click)="subir()" [disabled]="!archivoSeleccionado || loading"
+                  class="bg-sena text-white px-8 py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:brightness-110 hover:shadow-xl hover:shadow-emerald-100 transition-all disabled:opacity-40 flex items-center justify-center gap-3">
+                  @if (loading) { 
+                    <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    <span>Procesando...</span>
+                  } @else {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>Iniciar Proceso</span>
+                  }
+                </button>
+              </div>
+              
+              <div class="flex items-center justify-center xl:justify-start gap-2 px-2">
+                <svg class="text-gray-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">
+                  Estructura oficial requerida (.xlsx)
+                </p>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
-      }
-
     </div>
 
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-12">
-      <div class="p-6 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
-        <h3 class="font-bold text-gray-900 flex items-center gap-2">
-          <div class="w-1.5 h-5 bg-sena rounded-full"></div>
-          Programas Registrados
-        </h3>
-        <span class="text-xs font-medium text-gray-500">{{ listaProgramas.length }} registros</span>
-      </div>
-      
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="text-gray-400 uppercase text-[11px] font-bold tracking-widest border-b border-gray-50">
-              <th class="px-8 py-4">Código</th>
-              <th class="px-8 py-4">Denominación del Programa</th>
-              <th class="px-8 py-4 text-center">Versión</th>
-              <th class="px-8 py-4 text-right">Acción</th>
-            </tr>
-          </thead>
-          <tbody class="text-gray-700">
-            @for (prog of listaProgramas; track prog.id) {
-              <tr class="hover:bg-emerald-50/30 transition-colors border-b border-gray-50 last:border-0 group">
-                <td class="px-8 py-5">
-                  <div class="flex flex-col">
-                    <span class="font-bold text-sena text-sm">{{ prog.codigo_programa }}</span>
-                  </div>
-                </td>
-                <td class="px-8 py-5">
-                   <div class="font-medium text-gray-900 uppercase text-xs tracking-tight">
-                     {{ prog.nombre_programa }}
-                   </div>
-                </td>
-                <td class="px-8 py-5 text-center">
-                  <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-[10px] font-bold">V. {{ prog.version_programa }}</span>
-                </td>
-                <td class="px-8 py-5 text-right">
-                    <button (click)="verDetalle(prog.id)" 
-                    class="bg-gray-50 text-gray-400 group-hover:bg-sena group-hover:text-white p-2.5 rounded-xl transition-all shadow-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="px-8 py-20 text-center text-gray-400">
-                  <div class="flex flex-col items-center">
-                    <span class="text-4xl mb-2">📄</span>
-                    <p>No hay programas registrados todavía.</p>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
+
+    <app-tabla-programas 
+      [listaProgramas]="listaProgramas" 
+      [isLoading]="loading"
+      (onVerDetalle)="verDetalle($event)"> 
+    </app-tabla-programas>
+
+    <app-modal-programa 
+      [isOpen]="showModalPrograma"
+      (onClose)="showModalPrograma = false"
+      (onConfirm)="confirmarCarga($event)">
+    </app-modal-programa>
 
     @if (detalleSeleccionado) {
       <app-modal-detalle-competencia 

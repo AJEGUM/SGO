@@ -1,0 +1,49 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" (click)="cancelar()"></div>
+
+  <div class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div class="p-10">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">🏗️</div>
+        <div>
+          <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Nuevo Programa</h3>
+          <p class="text-[11px] text-gray-500 font-medium uppercase tracking-wider">Diseño Curricular SENA</p>
+        </div>
+      </div>
+
+      <div class="space-y-5">
+        <div>
+          <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Nombre del Programa</label>
+          <input type="text" [(ngModel)]="datosPrograma.nombrePrograma" placeholder="Ej: ADSO"
+            class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 outline-none transition-all shadow-sm" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Código</label>
+            <input type="text" [(ngModel)]="datosPrograma.codigoPrograma" placeholder="228106"
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 outline-none transition-all shadow-sm" />
+          </div>
+          <div>
+            <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Versión</label>
+            <input type="text" [(ngModel)]="datosPrograma.versionPrograma"
+              class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 outline-none transition-all shadow-sm font-bold text-sena" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 flex gap-4">
+        <button (click)="cancelar()" class="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-400 text-xs uppercase tracking-widest hover:bg-gray-50 transition-all">
+          Cancelar
+        </button>
+        <button (click)="confirmar()" 
+          [disabled]="!datosPrograma.nombrePrograma || !datosPrograma.codigoPrograma"
+          class="flex-[1.5] bg-sena text-white px-6 py-4 rounded-2xl font-bold hover:brightness-110 shadow-lg shadow-emerald-200 transition-all disabled:opacity-30 text-xs uppercase tracking-widest">
+          Guardar Programa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

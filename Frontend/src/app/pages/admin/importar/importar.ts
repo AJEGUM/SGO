@@ -4,11 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ModalDetalleCompetencia } from '../../../components/admin/modal-detalle-competencia/modal-detalle-competencia';
+import { ModalPrograma } from '../../../components/admin/modal-programa/modal-programa';
+import { TablaProgramas } from '../../../components/admin/tabla-programas/tabla-programas';
 
 @Component({
   selector: 'app-importar',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalDetalleCompetencia],
+  imports: [CommonModule, FormsModule, ModalDetalleCompetencia, ModalPrograma, TablaProgramas],
   templateUrl: './importar.html',
   styleUrl: './importar.css',
 })
@@ -25,11 +27,6 @@ programaSeleccionadoId: number | null = null;
 loadingPdf: boolean = false;
 // Variables para el formulario
 showModalPrograma = false;
-datosPrograma = {
-  nombrePrograma: '',
-  codigoPrograma: '',
-  versionPrograma: '1'
-};
 
 // Importadores
   constructor(private adminService: Admin) {}
@@ -59,30 +56,23 @@ subir() {
   this.showModalPrograma = true;
 }
 
-confirmarCarga() {
+confirmarCarga(datosDesdeModal: any) {
   this.loading = true;
   this.showModalPrograma = false;
 
-  // Enviamos tanto el archivo como los datos del formulario
-  this.adminService.uploadCurriculo(this.archivoSeleccionado!, this.datosPrograma).subscribe({    next: (resp) => {
-      console.log('Carga exitosa', resp);
+  this.adminService.uploadCurriculo(this.archivoSeleccionado!, datosDesdeModal).subscribe({
+    next: (resp) => {
       this.cargarProgramas();
-      alert('Diseño curricular y ficha creados correctamente.');
+      alert('Éxito');
       this.loading = false;
       this.archivoSeleccionado = null;
-      this.resetForm();
     },
     error: (err) => {
-      console.error('Error', err);
-      alert('Error al procesar. Revisa los datos.');
       this.loading = false;
+      alert('Error');
     }
   });
 }
-
-resetForm() {
-  this.datosPrograma = { nombrePrograma: '', codigoPrograma: '', versionPrograma: '1'};
-} 
 
   cargarProgramas() {
     this.adminService.getProgramas().subscribe({

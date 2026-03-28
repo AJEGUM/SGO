@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+@import 'primeicons/primeicons.css';
 
 /* En tu styles.css global */
 @layer base {
@@ -11,6 +12,10 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --color-sena: #39a900;
+}
+
+a, button{
+  cursor: pointer;
 }
 
 @layer base {
