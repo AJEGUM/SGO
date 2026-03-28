@@ -14,100 +14,86 @@ import { TablaProgramas } from '../../../components/admin/tabla-programas/tabla-
   templateUrl: './importar.html',
   styleUrl: './importar.css',
 })
-export class Importar implements OnInit{
-  // Variables
-archivoSeleccionado: File | null = null;
-loading: boolean = false;
-listaCompetencias: Competencia[] = [];
-detalleSeleccionado: any = null;
-loadingDetalle: boolean = false;
-listaProgramas: any[] = [];
-archivoPdf: File | null = null;
-programaSeleccionadoId: number | null = null;
-loadingPdf: boolean = false;
-// Variables para el formulario
-showModalPrograma = false;
+export class Importar implements OnInit {
+  // --- Variables de Estado de Archivos ---
+  archivoSeleccionado: File | null = null;
+  loading: boolean = false;
+  
+  // --- Variables de Datos ---
+  listaProgramas: any[] = [];
+  detalleSeleccionado: any = null; // Este array de competencias se le pasa al HIJO
+  loadingDetalle: boolean = false;
+  
+  // --- Variables de Control de Modales ---
+  showModalPrograma = false;
 
-// Importadores
   constructor(private adminService: Admin) {}
 
-  // Onit permite ejecutar una funcion sin tener que recargar la pagina
   ngOnInit() {
     this.cargarProgramas();
   }
 
-  // Funcion que recibe el archivo excel subido por el usuario
+  // --- Lógica de Carga de Archivos ---
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.archivoSeleccionado = event.target.files[0];
     }
   }
 
-  onPdfChange(event: any) {
-    if (event.target.files.length > 0) {
-      this.archivoPdf = event.target.files[0];
-    }
+  subir() {
+    if (!this.archivoSeleccionado) return;
+    this.showModalPrograma = true;
   }
 
-  // Funcion que se ejecuta cuando se intenta subir el archivo al backend
-subir() {
-  if (!this.archivoSeleccionado) return;
-  // Abrimos el modal para completar los datos
-  this.showModalPrograma = true;
-}
+  confirmarCarga(datosDesdeModal: any) {
+    this.loading = true;
+    this.showModalPrograma = false;
 
-confirmarCarga(datosDesdeModal: any) {
-  this.loading = true;
-  this.showModalPrograma = false;
-
-  this.adminService.uploadCurriculo(this.archivoSeleccionado!, datosDesdeModal).subscribe({
-    next: (resp) => {
-      this.cargarProgramas();
-      alert('Éxito');
-      this.loading = false;
-      this.archivoSeleccionado = null;
-    },
-    error: (err) => {
-      this.loading = false;
-      alert('Error');
-    }
-  });
-}
-
-  cargarProgramas() {
-    this.adminService.getProgramas().subscribe({
-      next: (data) => {
-        this.listaProgramas = data;
+    this.adminService.uploadCurriculo(this.archivoSeleccionado!, datosDesdeModal).subscribe({
+      next: () => {
+        this.cargarProgramas();
+        Swal.fire('Éxito', 'Currículo cargado correctamente', 'success');
+        this.loading = false;
+        this.archivoSeleccionado = null;
       },
-      error: (err) => console.error('Error al cargar programas', err)
-    });
-  }
-
-  // Función que se dispara al dar click en la lupa/botón de la tabla de programas
-  verDetalle(programaId: number) {
-    this.loadingDetalle = true;
-    
-    // Llamamos al servicio pasando el ID de la ficha/programa seleccionado
-    this.adminService.getCompetencias(programaId).subscribe({
-      next: (data) => {
-        // Guardamos el array de competencias en detalleSeleccionado para que el modal lo reciba
-        this.detalleSeleccionado = data; 
-        this.loadingDetalle = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar competencias:', err);
-        Swal.fire('Error', 'No se pudieron obtener las competencias de este programa', 'error');
-        this.loadingDetalle = false;
+      error: () => {
+        this.loading = false;
+        Swal.fire('Error', 'No se pudo subir el archivo', 'error');
       }
     });
   }
 
-  // Esta función la puedes dejar para refrescar si es necesario, 
-  // pero ahora requiere un ID.
-  cargarCompetencias(id: number) {
-    this.adminService.getCompetencias(id).subscribe({
-      next: (data) => this.listaCompetencias = data,
-      error: (err) => console.error('Error al cargar lista', err)
+  // --- Lógica de Visualización ---
+  cargarProgramas() {
+    this.adminService.getProgramas().subscribe({
+      next: (data) => this.listaProgramas = data,
+      error: (err) => console.error('Error al cargar programas', err)
+    });
+  }
+
+  // Esta función obtiene las competencias y ALIMENTA al componente hijo
+  verDetalle(programaId: number) {
+    this.loadingDetalle = true;
+    this.detalleSeleccionado = null; 
+
+    this.adminService.getCompetencias(programaId).subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.detalleSeleccionado = data; // Al setear esto, el @if del HTML muestra el modal hijo
+        } else {
+          Swal.fire({
+            icon: 'info',
+            title: 'Sin competencias',
+            text: 'Este programa aún no tiene competencias registradas.',
+            confirmButtonColor: '#39a900'
+          });
+        }
+        this.loadingDetalle = false;
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        this.loadingDetalle = false;
+      }
     });
   }
 

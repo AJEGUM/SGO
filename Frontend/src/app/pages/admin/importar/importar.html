@@ -80,24 +80,23 @@
     </div>
 
 
-    <app-tabla-programas 
-      [listaProgramas]="listaProgramas" 
-      [isLoading]="loading"
-      (onVerDetalle)="verDetalle($event)"> 
-    </app-tabla-programas>
+  <app-tabla-programas 
+    [listaProgramas]="listaProgramas" 
+    (onVerDetalle)="verDetalle($event)"> 
+  </app-tabla-programas>
+
+  @if (detalleSeleccionado) {
+    <app-modal-detalle-competencia 
+      [detalle]="detalleSeleccionado" 
+      (cerrar)="cerrarDetalle()">
+    </app-modal-detalle-competencia>
+  }
 
     <app-modal-programa 
       [isOpen]="showModalPrograma"
       (onClose)="showModalPrograma = false"
       (onConfirm)="confirmarCarga($event)">
     </app-modal-programa>
-
-    @if (detalleSeleccionado) {
-      <app-modal-detalle-competencia 
-        [detalle]="detalleSeleccionado" 
-        (cerrar)="cerrarDetalle()">
-      </app-modal-detalle-competencia>
-    }
 
   </div>
 </div>

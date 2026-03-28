@@ -8,15 +8,10 @@ const upload = multer({ storage });
 
 const router = Router();
 
-// Ruta para cargar el archivo
+router.get('/programas/:programaId/competencias', getCompetencias); 
+router.get('/competencias/detalle/:id', getDetalleCurriculo); 
 router.post('/upload-curriculo', upload.single('archivo'), importarDiseno);
-// Ruta para obtener las competencias registradas
-router.get('/competencias/:programaId', getCompetencias);
-// Ruta para obtener la informacion relacionada a una ruta
-router.get('/competencias/:id', getDetalleCurriculo);
-// Ruta para actualizar la informacion de una competencia
 router.patch('/patch/:tipo/:id', patchCurriculo);
-
 router.get('/programas', getProgramas);
 
 export default router;

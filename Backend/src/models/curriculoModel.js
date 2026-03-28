@@ -142,12 +142,22 @@ async buscarPorCodigo(codigo) {
 },
 
 async listarCompetencias(programaId) {
+    // Aseguramos que sea un número para evitar fallos de coincidencia en el WHERE
+    const idLimpio = Number(programaId);
+
     const [rows] = await db.query(
-        `SELECT id, codigo_norma, prefijo_id, nombre, duracion_horas, created_at 
-         FROM competencias 
-         WHERE programa_id = ? 
-         ORDER BY created_at DESC`,
-        [programaId]
+        `SELECT 
+            c.id, 
+            c.codigo_norma, 
+            c.prefijo_id, 
+            c.nombre, 
+            c.duracion_horas, 
+            c.created_at 
+         FROM competencias c
+         INNER JOIN programas p ON c.programa_id = p.id
+         WHERE p.id = ? 
+         ORDER BY c.id ASC`, // Cambiado a ASC para mantener el orden del diseño original
+        [idLimpio]
     );
     return rows;
 },
@@ -175,37 +185,96 @@ async listarProgramas() {
 
 // Obtener una competencia con todos sus hijos (RAPs, Saberes, Criterios)
 async obtenerDetalleCompleto(id) {
-    // 1. Obtener datos de la competencia
-    const [competencias] = await db.query('SELECT * FROM competencias WHERE id = ?', [id]);
-    if (competencias.length === 0) return null;
+    try {
+        // 1. Obtener datos básicos de la competencia
+        const [competencias] = await db.query('SELECT * FROM competencias WHERE id = ?', [id]);
+        
+        if (competencias.length === 0) {
+            return null;
+        }
 
-    // 2. Obtener los RAPs vinculados
-    const [raps] = await db.query('SELECT * FROM resultados_aprendizaje WHERE competencia_id = ?', [id]);
+        // 2. Obtener los RAPs vinculados a esa competencia
+        const [raps] = await db.query(
+            'SELECT id, competencia_id, codigo_rap, denominacion FROM resultados_aprendizaje WHERE competencia_id = ?', 
+            [id]
+        );
 
-    // 3. Mapear cada RAP con sus tablas de detalles (Trayendo ID y Descripcion)
-    const resultadosConDetalles = await Promise.all(raps.map(async (rap) => {
-        // Traemos el id para poder hacer el PATCH luego
-        const [procesos] = await db.query('SELECT id, descripcion FROM conocimientos_proceso WHERE rap_id = ?', [rap.id]);
-        const [saberes] = await db.query('SELECT id, descripcion FROM conocimientos_saber WHERE rap_id = ?', [rap.id]);
-        const [criterios] = await db.query('SELECT id, descripcion FROM criterios_evaluacion WHERE rap_id = ?', [rap.id]);
+        // 3. Mapear cada RAP para traer sus sub-detalles (Procesos, Saberes, Criterios)
+        const resultadosConDetalles = await Promise.all(raps.map(async (rap) => {
+            
+            // Ejecutamos las 3 consultas de detalle en paralelo
+            // IMPORTANTE: Guardamos la respuesta completa [rows, fields] en variables distintas
+            const [resProcesos, resSaberes, resCriterios] = await Promise.all([
+                db.query('SELECT id, descripcion FROM conocimientos_proceso WHERE rap_id = ?', [rap.id]),
+                db.query('SELECT id, descripcion FROM conocimientos_saber WHERE rap_id = ?', [rap.id]),
+                db.query('SELECT id, descripcion FROM criterios_evaluacion WHERE rap_id = ?', [rap.id])
+            ]);
 
+            // Retornamos el objeto del RAP extendido con sus listas de detalles
+            return {
+                ...rap,
+                // resX[0] contiene los registros (rows) que Angular necesita para el .map()
+                procesos: resProcesos[0], 
+                saberes: resSaberes[0],
+                criterios: resCriterios[0]
+            };
+        }));
+
+        // 4. Retornar el objeto final que espera el Frontend
         return {
-            ...rap,
-            procesos: procesos,
-            saberes: saberes,
-            criterios: criterios
+            ...competencias[0],
+            raps: resultadosConDetalles 
         };
-    }));
 
-    return {
-        ...competencias[0],
-        resultados: resultadosConDetalles
-    };
+    } catch (error) {
+        console.error("Error en obtenerDetalleCompleto:", error);
+        throw error;
+    }
 },
 
 async actualizarEntidad(tabla, id, columna, valor) {
     const query = `UPDATE ${tabla} SET ${columna} = ? WHERE id = ?`;
     const [result] = await db.query(query, [valor, id]);
     return result.affectedRows > 0;
+},
+
+async sincronizarDetallesRap(tabla, rapId, columna, textoBloque) {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // 1. Limpiamos y formateamos las líneas antes de guardar
+        const lineas = textoBloque.split('\n')
+            .map(l => {
+                // EXPLICACIÓN DE LA REGEX:
+                // ^       : Desde el inicio de la línea
+                // [\s\d\*\.\-]+ : Busca espacios, dígitos, asteriscos, puntos o guiones
+                // +       : Uno o más de estos caracteres
+                return l.replace(/^[\s\d\*\.\-]+/, '').trim();
+            })
+            // Filtramos líneas vacías o que solo tengan basura (mínimo 3 caracteres reales)
+            .filter(l => l.length > 3);
+
+        // 2. Borramos registros previos asociados a este RAP
+        await connection.query(`DELETE FROM ${tabla} WHERE rap_id = ?`, [rapId]);
+
+        // 3. Inserción masiva de la data "limpia"
+        if (lineas.length > 0) {
+            const values = lineas.map(linea => [rapId, linea]);
+            await connection.query(
+                `INSERT INTO ${tabla} (rap_id, ${columna}) VALUES ?`, 
+                [values]
+            );
+        }
+
+        await connection.commit();
+        return true;
+    } catch (error) {
+        await connection.rollback();
+        console.error(`[SQL-ERROR] Error sincronizando ${tabla}:`, error);
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 };

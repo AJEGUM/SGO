@@ -41,12 +41,12 @@ export class Admin {
 
   // Ahora recibe el ID como parámetro
   getCompetencias(programaId: number): Observable<Competencia[]> {
-    return this.http.get<Competencia[]>(`${this.apiUrl}/competencias/${programaId}`);
+    return this.http.get<Competencia[]>(`${this.apiUrl}/programas/${programaId}/competencias`);
   }
 
-  // Obtener detalle completo (RAPs, Saberes, etc.)
+  // Obtiene los RAPs y detalles (Ruta 2)
   getDetalleCompetencia(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/competencias/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/competencias/detalle/${id}`);
   }
 
   // En admin.service.ts

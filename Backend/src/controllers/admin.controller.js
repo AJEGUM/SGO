@@ -41,10 +41,19 @@ export const importarDiseno = async (req, res) => {
 // Funcion que permite obtener las competencias registradas
 export const getCompetencias = async (req, res) => {
     try {
-        const { programaId } = req.params; // Extraemos el ID
+        const { programaId } = req.params;
+        
+        // LOG CRÍTICO: Verifica que no llegue un "undefined" o un string vacío
+        console.log(`[SGO-DEBUG] Consultando competencias para programa_id: ${programaId}`);
+
         const data = await curriculoService.obtenerCompetencias(programaId);
+        
+        // Verifica si el servicio realmente retornó datos antes de enviarlos
+        console.log(`[SGO-DEBUG] Competencias encontradas: ${data.length}`);
+
         res.status(200).json(data);
     } catch (error) {
+        console.error("[SGO-ERROR] Error en getCompetencias:", error);
         res.status(500).json({ ok: false, msg: error.message });
     }
 };
@@ -60,14 +69,16 @@ export const getProgramas = async (req, res) => {
 };
 
 // Funcion que permite obtener toda la informacion de una competencia
+// En tu archivo de controladores (donde está getDetalleCurriculo)
 export const getDetalleCurriculo = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = parseInt(req.params.id); // <--- FUERZA EL ENTERO AQUÍ
+        if (isNaN(id)) return res.status(400).json({ msg: "ID inválido" });
+
         const data = await curriculoService.obtenerCurriculo(id);
         res.status(200).json(data);
     } catch (error) {
-        const status = error.message === "La competencia no existe" ? 404 : 500;
-        res.status(status).json({ ok: false, msg: error.message });
+        res.status(500).json({ ok: false, msg: error.message });
     }
 };
 
