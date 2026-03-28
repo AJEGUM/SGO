@@ -33,6 +33,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
         title: 'Importar - SGO'
       },
+      {
+        path: 'usuarios',
+        loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
+        title: 'Usuarios - SGO'
+      },
       // Aquí puedes agregar más: 'dashboard', 'usuarios', etc.
       { path: '', redirectTo: 'importar', pathMatch: 'full' }
     ]

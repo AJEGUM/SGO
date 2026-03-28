@@ -11,6 +11,10 @@ export interface Competencia {
   duracion_horas: number;
   created_at?: string;
 }
+export interface Rol {
+  id: number;
+  nombre_rol: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -57,5 +61,13 @@ export class Admin {
   // Servicio para actualizar la data de las competencias
   patchCurriculo(tipo: string, id: number, nuevoTexto: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/patch/${tipo}/${id}`, { valor: nuevoTexto });
+  }
+
+  registrarUsuario(usuario: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/registrar`, usuario);
+  }
+
+  obtenerRoles(): Observable<Rol[]> {
+    return this.http.get<Rol[]>(`${this.apiUrl}/roles`);
   }
 }

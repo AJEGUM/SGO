@@ -1,4 +1,4 @@
-import db from '../config/db.js'; // Tu pool con mysql2/promise
+import db from '../../config/db.js'; // Tu pool con mysql2/promise
 
 export const curriculoModel = {
 async insertarDesdeExcelDetallado(info, competencias) {
