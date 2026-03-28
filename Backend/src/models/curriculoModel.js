@@ -6,16 +6,55 @@ async insertarDesdeExcelDetallado(info, competencias) {
     try {
         await connection.beginTransaction();
 
-        // 1. Asegurar Programa (Uso de ID único)
-        let [prog] = await connection.query("SELECT id FROM programas WHERE nombre_programa = ?", [info.nombrePrograma]);
-        let programaId = prog.length > 0 
-            ? prog[0].id 
-            : (await connection.query("INSERT INTO programas (nombre_programa) VALUES (?)", [info.nombrePrograma]))[0].insertId;
-
-        for (const comp of competencias) {
-            // 2. Insertar/Obtener Competencia
+        // 1. GESTIÓN DEL PROGRAMA
+        // Buscamos por código y versión (la verdadera identidad del diseño curricular)
+        let [prog] = await connection.query(
+            "SELECT id FROM programas WHERE codigo_programa = ? AND version_programa = ?", 
+            [info.codigoPrograma, info.versionPrograma]
+        );
+        
+        let programaId;
+        if (prog.length > 0) {
+            programaId = prog[0].id;
+            // Actualizamos el nombre por si acaso cambió en el modal
             await connection.query(
-                "INSERT INTO competencias (programa_id, codigo_norma, prefijo_id, nombre, duracion_horas) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)",
+                "UPDATE programas SET nombre_programa = ? WHERE id = ?",
+                [info.nombrePrograma, programaId]
+            );
+        } else {
+            const [newProg] = await connection.query(
+                "INSERT INTO programas (nombre_programa, codigo_programa, version_programa) VALUES (?, ?, ?)", 
+                [info.nombrePrograma, info.codigoPrograma, info.versionPrograma]
+            );
+            programaId = newProg.insertId;
+        }
+
+        // 2. GESTIÓN DE LA FICHA
+        // Ahora la ficha solo guarda su número, fechas y el link al programa
+        await connection.query(
+            `INSERT INTO fichas 
+                (numero_ficha, programa_id, fecha_inicio, fecha_fin) 
+             VALUES (?, ?, ?, ?) 
+             ON DUPLICATE KEY UPDATE 
+                fecha_inicio = VALUES(fecha_inicio),
+                fecha_fin = VALUES(fecha_fin)`,
+            [
+                info.numeroFicha, 
+                programaId, 
+                info.fechaInicio,
+                info.fechaFin
+            ]
+        );
+
+        // 3. PROCESAR COMPETENCIAS (Vinculadas al programa_id)
+        for (const comp of competencias) {
+            await connection.query(
+                `INSERT INTO competencias 
+                    (programa_id, codigo_norma, prefijo_id, nombre, duracion_horas) 
+                 VALUES (?, ?, ?, ?, ?) 
+                 ON DUPLICATE KEY UPDATE 
+                    nombre = VALUES(nombre), 
+                    duracion_horas = VALUES(duracion_horas)`,
                 [programaId, comp.codigo_norma, comp.prefijo_id, comp.nombre, comp.duracion || 0]
             );
             
@@ -26,9 +65,13 @@ async insertarDesdeExcelDetallado(info, competencias) {
             const competenciaId = compRow[0].id;
 
             for (const rap of comp.resultados) {
-                // 3. Insertar RAP
+                // 4. INSERTAR RAP
                 await connection.query(
-                    "INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE denominacion=VALUES(denominacion)",
+                    `INSERT INTO resultados_aprendizaje 
+                        (competencia_id, codigo_rap, denominacion) 
+                     VALUES (?, ?, ?) 
+                     ON DUPLICATE KEY UPDATE 
+                        denominacion = VALUES(denominacion)`,
                     [competenciaId, rap.codigo_rap, rap.denominacion]
                 );
                 
@@ -38,23 +81,16 @@ async insertarDesdeExcelDetallado(info, competencias) {
                 );
                 const rapId = rapRow[0].id;
 
-                // 4. Función de Normalización y División Atómica
+                // 5. NORMALIZACIÓN DE ITEMS
                 const procesarYLimpiarItems = (dato, denominacionRap) => {
                     if (!dato) return [];
-                    
                     let textoCompleto = Array.isArray(dato) ? dato.join("\n") : String(dato);
-                    
-                    // Dividimos por saltos de línea o asteriscos
                     return textoCompleto
                         .split(/\n|\*/)
                         .map(item => item.trim())
                         .filter(item => {
                             const limpio = item.toUpperCase();
-                            // Filtros de calidad:
-                            // 1. Que no esté vacío
-                            // 2. Que tenga más de 3 caracteres
-                            // 3. Que no sea exactamente igual a la denominación del RAP (basura de ffill)
-                            return limpio.length > 3 && limpio !== denominacionRap.toUpperCase();
+                            return limpio.length > 3 && limpio !== (denominacionRap || "").toUpperCase();
                         })
                         .map(item => item.toUpperCase());
                 };
@@ -63,40 +99,36 @@ async insertarDesdeExcelDetallado(info, competencias) {
                 const saberesItems = procesarYLimpiarItems(rap.saberes, rap.denominacion);
                 const criteriosItems = procesarYLimpiarItems(rap.criterios, rap.denominacion);
 
-                // --- PERSISTENCIA DE CONOCIMIENTOS DE PROCESO ---
+                // 6. PERSISTENCIA ATÓMICA
+                // Nota: Usamos DELETE/INSERT porque estos detalles no tienen una llave única natural sencilla
                 await connection.query("DELETE FROM conocimientos_proceso WHERE rap_id = ?", [rapId]);
                 for (const item of procesosItems) {
-                    await connection.query(
-                        "INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)", 
-                        [rapId, item]
-                    );
+                    await connection.query("INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)", [rapId, item]);
                 }
 
-                // --- PERSISTENCIA DE CONOCIMIENTOS DEL SABER ---
                 await connection.query("DELETE FROM conocimientos_saber WHERE rap_id = ?", [rapId]);
                 for (const item of saberesItems) {
-                    await connection.query(
-                        "INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)", 
-                        [rapId, item]
-                    );
+                    await connection.query("INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)", [rapId, item]);
                 }
 
-                // --- PERSISTENCIA DE CRITERIOS DE EVALUACIÓN ---
                 await connection.query("DELETE FROM criterios_evaluacion WHERE rap_id = ?", [rapId]);
                 for (const item of criteriosItems) {
-                    await connection.query(
-                        "INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)", 
-                        [rapId, item]
-                    );
+                    await connection.query("INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)", [rapId, item]);
                 }
             }
         }
 
         await connection.commit();
-        return { success: true };
+        return { 
+            success: true, 
+            message: "Carga exitosa", 
+            programaId, 
+            ficha: info.numeroFicha 
+        };
+
     } catch (error) {
         if (connection) await connection.rollback();
-        console.error("Error crítico en carga de currículo:", error);
+        console.error("Error crítico en carga:", error);
         throw error;
     } finally {
         if (connection) connection.release();
@@ -124,17 +156,18 @@ async listarCompetencias(programaId) {
 async listarProgramas() {
     const query = `
         SELECT 
-            p.id, 
+            p.id as programa_id, 
             p.nombre_programa, 
-            f.codigo_programa, 
-            f.version_programa, 
+            p.codigo_programa, 
+            p.version_programa, 
+            f.id as ficha_id,
+            f.numero_ficha,
             f.fecha_inicio, 
             f.fecha_fin,
-            f.numero_ficha,
             p.created_at
         FROM programas p
         LEFT JOIN fichas f ON p.id = f.programa_id
-        ORDER BY p.created_at DESC
+        ORDER BY p.created_at DESC, f.numero_ficha ASC
     `;
     const [rows] = await db.query(query);
     return rows;

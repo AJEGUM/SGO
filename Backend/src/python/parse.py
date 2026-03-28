@@ -23,7 +23,7 @@ def extraer_el_mas_largo(row):
     candidatos = []
     for c in celdas:
         # Solo consideramos celdas con texto largo
-        if len(c) > 5:
+        if len(c) >= 3:
             # Si la celda contiene alguno de los títulos de arriba, la ignoramos
             if any(titulo in c.upper() for titulo in titulos_formato):
                 continue
@@ -32,13 +32,15 @@ def extraer_el_mas_largo(row):
     return max(candidatos, key=len) if candidatos else ""
 
 def manejar_competencia(fila_txt, row, comp_actual, competencias):
-    """Detecta el inicio de una competencia buscando códigos de 7+ dígitos."""
-    codigos = re.findall(r'\d{7,}', fila_txt)
+    celdas = [limpiar_texto(c) for c in row if pd.notna(c)]
     
+    # 1. Detectar inicio por código de norma (Ej: 220501046)
+    codigos = re.findall(r'\d{7,}', fila_txt)
     if codigos:
-        # Si ya hay una competencia con nombre, la guardamos
+        # Si ya había una competencia detectada antes, la guardamos antes de iniciar la nueva
         if comp_actual and comp_actual.get("nombre"):
-            competencias.append(comp_actual)
+            if not any(c['codigo_norma'] == comp_actual['codigo_norma'] for c in competencias):
+                competencias.append(comp_actual)
         
         return {
             "codigo_norma": codigos[0],
@@ -48,15 +50,18 @@ def manejar_competencia(fila_txt, row, comp_actual, competencias):
             "resultados": []
         }
     
-    # Capturar nombre: si tenemos competencia pero no nombre
+    # 2. CAPTURA DEL NOMBRE (Busca el indicador 4.3 en cualquier celda de la fila)
     if comp_actual and not comp_actual["nombre"]:
-        nombre_candidato = extraer_el_mas_largo(row)
-        if nombre_candidato:
-            # Evitar que el nombre sea "48 HORAS" o cosas así
-            if not re.search(r'^\d+\s*HORAS', nombre_candidato.upper()):
-                comp_actual["nombre"] = nombre_candidato.upper()
+        # Si alguna celda contiene exactamente "4.3" o empieza con ello
+        if any(re.match(r'^4\.3', c) for c in celdas):
+            # Buscamos la celda que NO sea el indicador y que tenga el texto (como "TIC")
+            for c in celdas:
+                c_up = c.upper()
+                if "4.3" not in c_up and "NOMBRE" not in c_up and len(c) >= 2:
+                    comp_actual["nombre"] = c.strip().upper()
+                    return comp_actual
             
-    return comp_actual
+    return comp_actual  
 
 def manejar_rap(fila_txt, comp_actual):
     """Detecta un RAP buscando patrones como '01 ', '02 '."""
@@ -128,7 +133,7 @@ def procesar():
         vistos = set()
         final = []
         for comp in competencias:
-            if comp["codigo_norma"] not in vistos and len(comp["nombre"]) > 5:
+            if comp["codigo_norma"] not in vistos and len(comp["nombre"]) >= 3:
                 final.append(comp)
                 vistos.add(comp["codigo_norma"])
 

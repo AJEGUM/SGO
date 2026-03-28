@@ -21,9 +21,15 @@ export class Admin {
   constructor(private http: HttpClient) { }
 
   // Servicio para subir el archivo excel al sistema (backend)
-  uploadCurriculo(archivo: File): Observable<any> {
+  uploadCurriculo(archivo: File, infoFicha: any): Observable<any> {
     const formData = new FormData();
+    
+    // Agregamos el archivo
     formData.append('archivo', archivo); 
+    
+    // Agregamos el objeto de la ficha como string JSON
+    formData.append('info', JSON.stringify(infoFicha)); 
+
     return this.http.post(`${this.apiUrl}/upload-curriculo`, formData);
   }
 

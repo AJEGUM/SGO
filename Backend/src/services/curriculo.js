@@ -3,11 +3,9 @@ import { curriculoModel } from '../models/curriculoModel.js';
 
 export const curriculoService = {
 
-async procesarExcel(fileBuffer) {
+async procesarExcel(fileBuffer, datosFicha) { // <-- Recibimos los datos del modal
     try {
         console.log("1. Llamando al motor de extracción externo...");
-        
-        // Usamos la función importada
         const competencias = await ejecutarPythonParser(fileBuffer);
 
         if (!competencias || competencias.length === 0) {
@@ -16,11 +14,15 @@ async procesarExcel(fileBuffer) {
 
         console.log(`2. Extracción exitosa. Procesando ${competencias.length} competencias.`);
 
-        const nombreProg = competencias[0]?.nombre || "PROGRAMA IMPORTADO";
+        // Priorizamos el nombre que viene del modal, si no, usamos el del excel
+        const infoFinal = {
+            ...datosFicha,
+            nombrePrograma: datosFicha.nombrePrograma || competencias[0]?.nombre || "PROGRAMA IMPORTADO"
+        };
 
-        console.log("3. Guardando en base de datos...");
+        console.log("3. Guardando en base de datos con info de ficha...");
         return await curriculoModel.insertarDesdeExcelDetallado(
-            { nombrePrograma: nombreProg }, 
+            infoFinal, // <-- Ahora pasamos TODO: numero_ficha, fechas, etc.
             competencias
         );
 

@@ -21,8 +21,15 @@ detalleSeleccionado: any = null;
 loadingDetalle: boolean = false;
 listaProgramas: any[] = [];
 archivoPdf: File | null = null;
-  programaSeleccionadoId: number | null = null;
-  loadingPdf: boolean = false;
+programaSeleccionadoId: number | null = null;
+loadingPdf: boolean = false;
+// Variables para el formulario
+showModalPrograma = false;
+datosPrograma = {
+  nombrePrograma: '',
+  codigoPrograma: '',
+  versionPrograma: '1'
+};
 
 // Importadores
   constructor(private adminService: Admin) {}
@@ -46,46 +53,36 @@ archivoPdf: File | null = null;
   }
 
   // Funcion que se ejecuta cuando se intenta subir el archivo al backend
-  subir() {
-    if (!this.archivoSeleccionado) return;
+subir() {
+  if (!this.archivoSeleccionado) return;
+  // Abrimos el modal para completar los datos
+  this.showModalPrograma = true;
+}
 
-    this.loading = true;
-    this.adminService.uploadCurriculo(this.archivoSeleccionado).subscribe({
-      next: (resp) => {
-        console.log('Carga exitosa', resp);
-        this.cargarProgramas();
-        alert('Diseño curricular cargado correctamente en la base de datos.');
-        this.loading = false;
-        this.archivoSeleccionado = null;
-      },
-      error: (err) => {
-        console.error('Error en la carga', err);
-        alert('Error al procesar el Excel. Revisa la consola.');
-        this.loading = false;
-      }
-    });
-  }
+confirmarCarga() {
+  this.loading = true;
+  this.showModalPrograma = false;
 
-  subirPdf() {
-    if (!this.archivoPdf || !this.programaSeleccionadoId) {
-      Swal.fire('Atención', 'Selecciona un programa y un archivo PDF', 'warning');
-      return;
+  // Enviamos tanto el archivo como los datos del formulario
+  this.adminService.uploadCurriculo(this.archivoSeleccionado!, this.datosPrograma).subscribe({    next: (resp) => {
+      console.log('Carga exitosa', resp);
+      this.cargarProgramas();
+      alert('Diseño curricular y ficha creados correctamente.');
+      this.loading = false;
+      this.archivoSeleccionado = null;
+      this.resetForm();
+    },
+    error: (err) => {
+      console.error('Error', err);
+      alert('Error al procesar. Revisa los datos.');
+      this.loading = false;
     }
+  });
+}
 
-    this.loadingPdf = true;
-    this.adminService.uploadDisenoPdf(this.archivoPdf, this.programaSeleccionadoId).subscribe({
-      next: (resp) => {
-        this.loadingPdf = false;
-        this.archivoPdf = null;
-        Swal.fire('¡IA Finalizada!', 'Saberes y Criterios vinculados correctamente', 'success');
-      },
-      error: (err) => {
-        this.loadingPdf = false;
-        console.error(err);
-        Swal.fire('Error', 'La IA no pudo procesar el PDF: ' + err.error?.msg, 'error');
-      }
-    });
-  }
+resetForm() {
+  this.datosPrograma = { nombrePrograma: '', codigoPrograma: '', versionPrograma: '1'};
+} 
 
   cargarProgramas() {
     this.adminService.getProgramas().subscribe({

@@ -5,20 +5,33 @@ export const importarDiseno = async (req, res) => {
     try {
         console.log("--- INICIO DE CARGA ---");
         if (!req.file) {
-            console.error("Error: No se recibió archivo en req.file");
             return res.status(400).json({ msg: 'No se recibió ningún archivo válido.' });
         }
 
-        console.log("Archivo recibido:", req.file.originalname, "Tamaño:", req.file.size);
+        // 1. EXTRAER LA INFO DEL MODAL
+        // Como viene de un FormData, llega en req.body.info como string.
+        let datosFicha = {};
+        if (req.body.info) {
+            try {
+                datosFicha = JSON.parse(req.body.info);
+                console.log("Datos de la ficha recibidos:", datosFicha);
+            } catch (e) {
+                console.error("Error parseando JSON de info:", e);
+            }
+        }
 
-        const resultado = await curriculoService.procesarExcel(req.file.buffer);
+        console.log("Archivo recibido:", req.file.originalname);
 
-        console.log("Proceso completado con éxito para ficha:", resultado.ficha);
+        // 2. PASAR AMBOS PARÁMETROS AL SERVICIO
+        // Ahora le pasamos el buffer Y los datos del objeto (ficha, fechas, etc)
+        const resultado = await curriculoService.procesarExcel(req.file.buffer, datosFicha);
+
+        console.log("Proceso completado con éxito");
         res.status(201).json({ ok: true, ...resultado });
+
     } catch (error) {
         console.error("LOG SERVIDOR (Error Completo):", error);
-        const statusCode = error.message.includes('ya existe') ? 400 : 500;
-        res.status(statusCode).json({ 
+        res.status(500).json({ 
             ok: false, 
             msg: error.message 
         });

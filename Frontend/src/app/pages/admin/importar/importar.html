@@ -29,33 +29,64 @@
         </div>
       </div>
 
-      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12 blur-xl"></div>
-        <div class="relative z-10">
-          <span class="bg-purple-100 text-purple-700 text-[10px] font-black uppercase px-3 py-1 rounded-full mb-4 inline-block">Segunda Fase</span>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Detalles Técnicos (IA)</h3>
-          <p class="text-gray-500 text-sm mb-6">Vincula Saberes y Criterios de Evaluación procesando el PDF del diseño curricular.</p>
-          
-          <div class="space-y-4">
-            <select [(ngModel)]="programaSeleccionadoId" 
-              class="w-full border border-gray-200 rounded-2xl p-3 text-sm bg-gray-50/50 focus:ring-2 focus:ring-purple-200 outline-none transition-all">
-              <option [ngValue]="null">-- Selecciona un programa cargado --</option>
-              @for (p of listaProgramas; track p.id) {
-                <option [value]="p.id">{{ p.numero_ficha }} - {{ p.nombre_programa }}</option>
-              }
-            </select>
+      @if (showModalPrograma) {
+      <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" (click)="showModalPrograma = false"></div>
 
-            <input type="file" (change)="onPdfChange($event)" accept=".pdf"
-              class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-purple-50 file:text-purple-600 hover:file:bg-purple-100 cursor-pointer border border-dashed border-gray-200 rounded-2xl p-4 bg-gray-50/50" />
-            
-            <button (click)="subirPdf()" [disabled]="!archivoPdf || !programaSeleccionadoId || loadingPdf"
-              class="w-full bg-purple-600 text-white py-3 rounded-2xl font-bold hover:shadow-lg hover:shadow-purple-100 transition-all disabled:opacity-40 flex items-center justify-center gap-2">
-              @if (loadingPdf) { <span class="animate-spin text-lg">✨</span> }
-              {{ loadingPdf ? 'IA Analizando Pulpa...' : 'Vincular Detalles PDF' }}
-            </button>
+        <div class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          <div class="p-10">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl shadow-sm">🏗️</div>
+              <div>
+                <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Nuevo Programa</h3>
+                <p class="text-[11px] text-gray-500 font-medium uppercase tracking-wider">Diseño Curricular SENA</p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div>
+                <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Nombre del Programa</label>
+                <input type="text" [(ngModel)]="datosPrograma.nombrePrograma" placeholder="Ej: Análisis y Desarrollo de Software"
+                  class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Código Programa</label>
+                  <input type="text" [(ngModel)]="datosPrograma.codigoPrograma" placeholder="228106"
+                    class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm" />
+                </div>
+
+                <div>
+                  <label class="text-[10px] font-black uppercase text-gray-400 ml-3 mb-1.5 block">Versión</label>
+                  <input type="text" [(ngModel)]="datosPrograma.versionPrograma" placeholder="1"
+                    class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-emerald-100 focus:bg-white outline-none transition-all shadow-sm font-bold text-emerald-700" />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-100/50">
+              <span class="text-xs">⚠️</span>
+              <p class="text-[9px] text-amber-700 font-medium leading-tight">
+                La combinación de Código y Versión debe ser única para evitar duplicados en SQL.
+              </p>
+            </div>
+
+            <div class="mt-10 flex gap-4">
+              <button (click)="showModalPrograma = false"
+                class="flex-1 px-6 py-4 rounded-2xl font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all text-xs uppercase tracking-widest">
+                Cancelar
+              </button>
+              <button (click)="confirmarCarga()"
+                [disabled]="!datosPrograma.nombrePrograma || !datosPrograma.codigoPrograma"
+                class="flex-[1.5] bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-200 transition-all disabled:opacity-30 disabled:grayscale text-xs uppercase tracking-widest">
+                Guardar Programa
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      }
 
     </div>
 
@@ -72,10 +103,9 @@
         <table class="w-full text-left">
           <thead>
             <tr class="text-gray-400 uppercase text-[11px] font-bold tracking-widest border-b border-gray-50">
-              <th class="px-8 py-4">Ficha / Código</th>
+              <th class="px-8 py-4">Código</th>
               <th class="px-8 py-4">Denominación del Programa</th>
               <th class="px-8 py-4 text-center">Versión</th>
-              <th class="px-8 py-4 text-center">Periodo</th>
               <th class="px-8 py-4 text-right">Acción</th>
             </tr>
           </thead>
@@ -84,8 +114,7 @@
               <tr class="hover:bg-emerald-50/30 transition-colors border-b border-gray-50 last:border-0 group">
                 <td class="px-8 py-5">
                   <div class="flex flex-col">
-                    <span class="font-bold text-sena text-sm">{{ prog.numero_ficha }}</span>
-                    <span class="text-[10px] text-gray-400 font-mono">{{ prog.codigo_programa }}</span>
+                    <span class="font-bold text-sena text-sm">{{ prog.codigo_programa }}</span>
                   </div>
                 </td>
                 <td class="px-8 py-5">
@@ -95,13 +124,6 @@
                 </td>
                 <td class="px-8 py-5 text-center">
                   <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-[10px] font-bold">V. {{ prog.version_programa }}</span>
-                </td>
-                <td class="px-8 py-5 text-center">
-                  <div class="flex flex-col text-[10px] text-gray-500">
-                    <span>{{ prog.fecha_inicio | date:'dd/MM/yyyy' }}</span>
-                    <span class="font-bold text-gray-300">|</span>
-                    <span>{{ prog.fecha_fin | date:'dd/MM/yyyy' }}</span>
-                  </div>
                 </td>
                 <td class="px-8 py-5 text-right">
                     <button (click)="verDetalle(prog.id)" 
