@@ -30,7 +30,7 @@ export class Usuarios implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rol_id: [null, Validators.required],
+      rol_id: [null, [Validators.required]],
       programa_id: [null]
     });
   }
@@ -41,36 +41,46 @@ export class Usuarios implements OnInit {
   }
 
   private configurarValidacionesDinamicas() {
-    // Vigilamos el cambio de rol para ajustar el formulario
+    // Detectar cambios en el Rol para activar/desactivar Programa
     this.formUsuarios.get('rol_id')?.valueChanges.subscribe(rolId => {
       this.alternarValidacionPrograma(rolId);
     });
   }
 
-  private alternarValidacionPrograma(rolId: number) {
+  private alternarValidacionPrograma(rolId: any) {
     const controlPrograma = this.formUsuarios.get('programa_id');
-    
-    if (rolId == 2) { // ID 2 = INSTRUCTOR en tu DB
-      controlPrograma?.setValidators([Validators.required]);
+    if (!controlPrograma) return;
+
+    // Si el Rol es 2 (Instructor), el programa es Obligatorio
+    if (Number(rolId) === 2) { 
+      controlPrograma.setValidators([Validators.required]);
     } else {
-      // Si no es instructor, no es obligatorio y limpiamos el valor
-      controlPrograma?.clearValidators();
-      controlPrograma?.setValue(null);
+      // Si no es instructor, limpiamos y quitamos validación
+      controlPrograma.clearValidators();
+      controlPrograma.setValue(null);
     }
-    
-    // IMPORTANTE: Avisar a Angular que las reglas del campo cambiaron
-    controlPrograma?.updateValueAndValidity();
+
+    // Sincronizar estado del control
+    controlPrograma.updateValueAndValidity({ emitEvent: false });
   }
 
   enviarRegistro() {
     if (this.formUsuarios.invalid) return;
     
+    this.cargando = true;
+    console.log("Enviando datos:", this.formUsuarios.value);
+
     this.adminService.registrarUsuario(this.formUsuarios.value).subscribe({
-      next: () => {
-        alert('Usuario creado con éxito y correo enviado');
+      next: (res) => {
+        alert('Usuario creado con éxito y asignaciones procesadas');
         this.formUsuarios.reset({ rol_id: null, programa_id: null });
+        this.cargando = false;
       },
-      error: (err) => alert(err.error?.message || 'Error en el registro')
+      error: (err) => {
+        console.error("Error en registro:", err);
+        alert(err.error?.message || 'Error en el servidor');
+        this.cargando = false;
+      }
     });
   }
 }

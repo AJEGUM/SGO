@@ -3,21 +3,29 @@ import { emailService } from '../../services/admin/emailServices.js';
 
 export const registrar = async (req, res) => {
   try {
-    // Llamamos al servicio de lógica
-    const usuario = await usuariosServices.registrarUsuario(req.body);
+    console.log("--- Inicio de Registro ---");
+    console.log("Body recibido:", req.body);
 
-    // Disparamos el email (sin await para no bloquear la respuesta)
-    emailService.enviarBienvenida(usuario.correo, usuario.nombre);
+    const usuario = await usuariosServices.registrarUsuario(req.body);
+    
+    console.log("Usuario creado en DB:", usuario);
+
+    // OJO AQUÍ: Verifica si tu objeto usa 'email' o 'correo'
+    const destinatario = usuario.correo || usuario.email; 
+    emailService.enviarBienvenida(destinatario, usuario.nombre);
 
     res.status(201).json({
       ok: true,
-      msg: "Usuario creado y competencias asignadas correctamente",
+      msg: "Usuario creado y asignaciones procesadas",
       data: { id: usuario.id, nombre: usuario.nombre }
     });
   } catch (error) {
+    // ESTO ES VITAL: Ver el error real en la consola de VS Code/Terminal
+    console.error("!!! ERROR EN CONTROLLER:", error); 
+    
     res.status(400).json({
       ok: false,
-      msg: error.message
+      msg: error.message || "Error interno en el servidor"
     });
   }
 };

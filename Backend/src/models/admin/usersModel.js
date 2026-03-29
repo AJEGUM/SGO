@@ -2,54 +2,50 @@ import pool from '../../config/db.js';
 
 export const authModel = {
   // Crea el usuario y sus asignaciones en una sola transacción
-  async crearUsuarioCompleto(userData, competenciasIds = []) {
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
+// En authModel dentro de usersModel.js
+async crearUsuarioCompleto(userData) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
 
-      // 1. Insertar en tabla usuarios
-      const queryUser = `
-        INSERT INTO usuarios (rol_id, nombre, correo, password) 
-        VALUES (?, ?, ?, ?)
+    // 1. Insertar el usuario en la tabla 'usuarios'
+    const queryUser = `INSERT INTO usuarios (rol_id, nombre, correo, password) VALUES (?, ?, ?, ?)`;
+    const [userResult] = await connection.query(queryUser, [
+      userData.rol_id,
+      userData.nombre,
+      userData.correo,
+      userData.password
+    ]);
+
+    const userId = userResult.insertId;
+
+    // 2. Si es INSTRUCTOR (Rol 2) y seleccionó un programa
+    if (userData.rol_id === 2 && userData.programa_id) {
+      
+      const queryVinculo = `
+        INSERT INTO asignaciones_programas (usuario_id, programa_id) 
+        VALUES (?, ?)
       `;
-      const [userResult] = await connection.query(queryUser, [
-        userData.rol_id,
-        userData.nombre,
-        userData.correo,
-        userData.password // Ya debe venir hasheada del service
-      ]);
-
-      const userId = userResult.insertId;
-
-      // 2. Si hay competencias para asignar (Caso Instructor)
-      if (competenciasIds.length > 0 && userData.programa_id) {
-        const values = competenciasIds.map(compId => [userId, userData.programa_id, compId]);
-        
-        const queryAsignacion = `
-          INSERT INTO asignaciones_instructor (usuario_id, programa_id, competencia_id) 
-          VALUES ?
-        `;
-        await connection.query(queryAsignacion, [values]);
-      }
-
-      await connection.commit();
-      return { id: userId, ...userData };
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
+      
+      await connection.query(queryVinculo, [userId, userData.programa_id]);
+      console.log(`[DB]: Instructor ${userId} vinculado al programa ${userData.programa_id}`);
     }
-  },
+
+    await connection.commit();
+    return { id: userId, ...userData };
+
+  } catch (error) {
+    if (connection) await connection.rollback();
+    console.error("!!! ERROR EN TRANSACCIÓN DB:", error.sqlMessage || error.message);
+    throw error;
+  } finally {
+    if (connection) connection.release();
+  }
+},
 
   async buscarPorEmail(email) {
     const [rows] = await pool.query('SELECT * FROM usuarios WHERE correo = ?', [email]);
     return rows[0];
-  },
-
-  async obtenerCompetenciasPorPrograma(programa_id) {
-    const [rows] = await pool.query('SELECT id FROM competencias WHERE programa_id = ?', [programa_id]);
-    return rows;
   },
 
   async obtenerRoles() {
