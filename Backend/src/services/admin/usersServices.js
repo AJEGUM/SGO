@@ -44,4 +44,8 @@ export const usuariosServices = {
   async listarRoles() {
     return await authModel.obtenerRoles();
   },
+
+  async listarUsuarios() {
+    return await authModel.obtenerTodosUsusarios();
+  }
 };

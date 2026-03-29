@@ -38,3 +38,13 @@ export const obtenerRoles = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener roles' });
     }
 };
+
+export const obtenerUsuarios = async (req, res) => {
+    try {
+        const data = await usuariosServices.listarUsuarios();
+        res.status(200).json(data);
+    } catch (error) {
+        console.error("Error en getUsuarios:", error);
+        res.status(500).json({ ok: false, msg: "Error al obtener usuarios" });
+    }
+};

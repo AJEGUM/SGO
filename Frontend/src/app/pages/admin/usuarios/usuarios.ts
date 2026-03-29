@@ -2,11 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Admin, Rol } from '../../../services/admin/admin';
+import { TablaUsuarios } from '../../../components/admin/tabla-usuarios/tabla-usuarios';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TablaUsuarios],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.css',
 })

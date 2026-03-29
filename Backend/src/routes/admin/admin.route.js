@@ -1,7 +1,7 @@
 // admin.routes.js o similar
 import { Router } from 'express';
 import { getCompetencias, getDetalleCurriculo, getProgramas, importarDiseno, patchCurriculo } from '../../controllers/admin/admin.controller.js'; // Asegúrate que el nombre coincida
-import { registrar, obtenerRoles } from '../../controllers/admin/users.controller.js';
+import { registrar, obtenerRoles, obtenerUsuarios } from '../../controllers/admin/users.controller.js';
 import multer from 'multer';
 
 const storage = multer.memoryStorage(); 
@@ -18,5 +18,6 @@ router.get('/programas', getProgramas);
 // Panel usuarios
 router.post('/registrar', registrar);
 router.get('/roles', obtenerRoles);
+router.get('/usuarios', obtenerUsuarios);
 
 export default router;

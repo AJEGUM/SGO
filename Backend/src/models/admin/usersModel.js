@@ -51,5 +51,25 @@ async crearUsuarioCompleto(userData) {
   async obtenerRoles() {
     const [rows] = await pool.query('SELECT id, nombre_rol FROM roles');
     return rows;
-  }
+  },
+
+  async obtenerTodosUsusarios() {
+    const query = `
+        SELECT 
+            u.id, 
+            u.nombre, 
+            u.correo, 
+            u.activo, 
+            u.created_at,
+            r.nombre_rol,
+            p.nombre_programa
+        FROM usuarios u
+        INNER JOIN roles r ON u.rol_id = r.id
+        LEFT JOIN asignaciones_programas ap ON u.id = ap.usuario_id
+        LEFT JOIN programas p ON ap.programa_id = p.id
+        ORDER BY u.created_at DESC
+    `;
+    const [rows] = await pool.query(query);
+    return rows;
+}
 };
