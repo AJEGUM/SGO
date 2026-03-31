@@ -1,17 +1,19 @@
 import { resend, EMAIL_CONFIG } from '../../config/resend.js';
-import { getWelcomeTemplate } from '../../templates/email/templates.js';
+import { plantillas } from '../../templates/email/templates.js';
 
-// En tu archivo del emailService
 export const emailService = {
-  async enviarBienvenida(correo, nombre) {
+  async enviarBienvenida(correo, nombre, rol_id) {
     try {
-      const htmlContent = getWelcomeTemplate(nombre);
+      // 1. Seleccionamos la función según el rol (1, 2, 3 o 4)
+      // Si el rol_id no coincide, usa la plantilla 'default'
+      const generador = plantillas[rol_id] || plantillas.default;
+      
+      const htmlContent = generador(nombre);
 
       const { data, error } = await resend.emails.send({
-        // CAMBIO AQUÍ: Usa tu configuración de solodeploy.com
         from: EMAIL_CONFIG.from, 
         to: [correo],
-        subject: 'Registro Exitoso - Sistema SGO',
+        subject: '🚀 Acceso Habilitado - Sistema SGO',
         html: htmlContent
       });
 
@@ -19,7 +21,7 @@ export const emailService = {
         return console.error("[RESEND_ERROR]:", error);
       }
 
-      console.log(`[EMAIL_SENT] Enviado a: ${correo} desde solodeploy.com`);
+      console.log(`[EMAIL_SENT] Plantilla Rol ${rol_id} enviada a: ${correo}`);
       
     } catch (error) {
       console.error("[EMAIL_SERVICE_ERROR]:", error.message);

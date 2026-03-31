@@ -1,44 +1,46 @@
 import { authModel } from '../../models/admin/usersModel.js';
-import { curriculoModel } from '../../models/admin/curriculoModel.js';
+import { emailService } from './emailServices.js';
 import bcrypt from 'bcrypt';
 
 export const usuariosServices = {
   async registrarUsuario(datos) {
+    // 1. Validaciones de existencia
     const existe = await authModel.buscarPorEmail(datos.email);
     if (existe) throw new Error("El correo ya está registrado");
 
+    // 2. Preparación de seguridad
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(datos.password, salt);
 
-    // --- CORRECCIÓN AQUÍ ---
-    // Si datos.programa_id es "null" (string) o undefined, lo dejamos en null
-    const rawProgramaId = datos.programa_id;
-    const programaIdNum = (rawProgramaId && rawProgramaId !== 'null') ? Number(rawProgramaId) : null;
+    // 3. Limpieza de tipos de datos
     const rolIdNum = Number(datos.rol_id);
+    const programaIdNum = (datos.programa_id && datos.programa_id !== 'null') ? Number(datos.programa_id) : null;
 
     const userData = {
       nombre: datos.nombre,
       correo: datos.email,
       password: hashedPassword,
       rol_id: rolIdNum,
-      programa_id: programaIdNum // Ahora será un número real o null, nunca NaN
+      programa_id: programaIdNum
     };
 
-    let competenciasIds = [];
-    
-    // Solo buscamos si el rol es Instructor (2) Y el programa es válido
-    if (rolIdNum === 2 && !isNaN(programaIdNum) && programaIdNum !== null) {
-      console.log(`[DEBUG]: Buscando competencias para programa ID: ${programaIdNum}`);
-      
-      const competencias = await curriculoModel.listarProgramas(programaIdNum);
-      
-      if (competencias && competencias.length > 0) {
-        competenciasIds = competencias.map(c => c.id);
-        console.log(`[DEBUG]: Se encontraron ${competenciasIds.length} competencias.`);
-      }
+    // 4. Persistencia en DB (Usuario + Vínculo a Programa)
+    // El modelo se encargará de insertar en 'usuarios' y luego en 'asignaciones_programas'
+    const nuevoUsuario = await authModel.crearUsuarioCompleto(userData);
+
+    // 5. Notificación por Email
+    try {
+      await emailService.enviarBienvenida(userData.correo, userData.nombre, rolIdNum);
+      console.log(`[MAIL SUCCESS]: Notificación enviada a ${userData.correo}`);
+    } catch (mailError) {
+      console.error("[MAIL ERROR]: Registro exitoso, pero falló el envío del correo:", mailError);
     }
 
-    return await authModel.crearUsuarioCompleto(userData, competenciasIds);
+    return { 
+      id: nuevoUsuario.id, 
+      nombre: userData.nombre, 
+      rol_id: rolIdNum 
+    };
   },
 
   async listarRoles() {
