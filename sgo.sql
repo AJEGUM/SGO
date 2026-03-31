@@ -1,7 +1,11 @@
+-- CONFIGURACIÓN INICIAL
+SET FOREIGN_KEY_CHECKS = 0;
 CREATE DATABASE IF NOT EXISTS sgo;
 USE sgo;
 
--- 1. SEGURIDAD Y ACCESO
+-- ==========================================================
+-- 1. MÓDULO DE SEGURIDAD Y ACCESO
+-- ==========================================================
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_rol VARCHAR(50) UNIQUE NOT NULL,
@@ -14,10 +18,8 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(150) UNIQUE NOT NULL,
     password VARCHAR(255) NULL,
-    -- 'activo' será FALSE por defecto hasta que el Admin lo habilite
     activo BOOLEAN DEFAULT FALSE, 
     google_id VARCHAR(255) UNIQUE,
-    -- Añadimos esto para manejar el rechazo si es necesario
     estado_validacion ENUM('pendiente', 'activo', 'rechazado') DEFAULT 'pendiente',
     motivo_rechazo TEXT, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -25,7 +27,9 @@ CREATE TABLE usuarios (
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 2. ESTRUCTURA CURRICULAR (DEFINICIÓN)
+-- ==========================================================
+-- 2. MÓDULO CURRICULAR (BASE)
+-- ==========================================================
 CREATE TABLE programas (
     programa_id INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(20), 
@@ -56,7 +60,50 @@ CREATE TABLE resultados_aprendizaje (
     CONSTRAINT fk_comp_rap FOREIGN KEY (competencia_id) REFERENCES competencias(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 3. GESTIÓN ACADÉMICA (INSTANCIAS)
+CREATE TABLE fases (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sigla VARCHAR(2) UNIQUE NOT NULL,
+    nombre_fase VARCHAR(20)
+) ENGINE=InnoDB;
+
+-- ==========================================================
+-- 3. MÓDULO DE ASIGNACIONES (JERARQUÍA DE INSTRUCTOR)
+-- ==========================================================
+CREATE TABLE asignaciones_programas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    programa_id INT NOT NULL,
+    fecha_vinculacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ap_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ap_programa FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE,
+    UNIQUE(usuario_id, programa_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE asignaciones_competencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asignacion_programa_id INT NOT NULL,
+    competencia_id INT NOT NULL,
+    fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ac_vinculo FOREIGN KEY (asignacion_programa_id) REFERENCES asignaciones_programas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ac_competencia FOREIGN KEY (competencia_id) REFERENCES competencias(id) ON DELETE CASCADE,
+    UNIQUE(asignacion_programa_id, competencia_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE asignaciones_raps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asignacion_competencia_id INT NOT NULL,
+    rap_id INT NOT NULL,
+    fase_id INT NOT NULL,
+    fecha_eleccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ar_vinculo FOREIGN KEY (asignacion_competencia_id) REFERENCES asignaciones_competencias(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ar_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ar_fase FOREIGN KEY (fase_id) REFERENCES fases(id) ON DELETE RESTRICT,
+    UNIQUE(rap_id) 
+) ENGINE=InnoDB;
+
+-- ==========================================================
+-- 4. MÓDULO ACADÉMICO (FICHAS Y APRENDICES)
+-- ==========================================================
 CREATE TABLE fichas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_ficha VARCHAR(10) UNIQUE, 
@@ -69,13 +116,19 @@ CREATE TABLE fichas (
     CONSTRAINT fk_ficha_programa FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE fases (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sigla VARCHAR(2) UNIQUE NOT NULL,
-    nombre_fase VARCHAR(20)
+CREATE TABLE usuario_fichas (
+    usuario_id INT NOT NULL,
+    ficha_id INT NOT NULL,
+    fecha_matricula TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado_aprendiz ENUM('Formación','Retirado', 'Certificado') DEFAULT 'Formación',
+    PRIMARY KEY (usuario_id, ficha_id),
+    CONSTRAINT fk_uf_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT fk_uf_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 4. CONTENIDO TÉCNICO (ESTRUCTURACIÓN)
+-- ==========================================================
+-- 5. MÓDULO DE CONTENIDO TÉCNICO (SABER/HACER)
+-- ==========================================================
 CREATE TABLE conocimientos_proceso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rap_id INT NOT NULL,
@@ -97,68 +150,20 @@ CREATE TABLE criterios_evaluacion (
     CONSTRAINT fk_crit_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. OBJETOS VIRTUALES
+-- ==========================================================
+-- 6. MÓDULO DE OBJETOS VIRTUALES (OVAs)
+-- ==========================================================
 CREATE TABLE ovas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    asignacion_rap_id INT NOT NULL, -- Ahora apunta a la asignación (que ya tiene RAP y Fase)
+    asignacion_rap_id INT NOT NULL,
     usuario_creador_id INT NOT NULL, 
-    id_secuencial VARCHAR(10), -- Ejemplo: '01', '02'
+    id_secuencial VARCHAR(10),
     codigo_anatomia VARCHAR(100) UNIQUE,
     titulo_ova TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_ova_asignacion_rap FOREIGN KEY (asignacion_rap_id) REFERENCES asignaciones_raps(id) ON DELETE CASCADE,
     CONSTRAINT fk_ova_creador FOREIGN KEY (usuario_creador_id) REFERENCES usuarios(id),
-    -- Ahora la llave única tiene sentido: No repetir secuencia para una misma asignación
     UNIQUE KEY uk_ova_secuencia (asignacion_rap_id, id_secuencial)
-) ENGINE=InnoDB;
-
--- 6. ASIGNACIONES JERÁRQUICAS (CORREGIDO)
-
--- Paso 1: Vinculamos al Instructor con el Programa
-CREATE TABLE asignaciones_programas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    programa_id INT NOT NULL,
-    fecha_vinculacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ap_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ap_programa FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE,
-    UNIQUE(usuario_id, programa_id)
-) ENGINE=InnoDB;
-
--- Paso 2: Basado en el programa asignado, vinculamos las competencias
-CREATE TABLE asignaciones_competencias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    asignacion_programa_id INT NOT NULL,
-    competencia_id INT NOT NULL,
-    fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ac_vinculo FOREIGN KEY (asignacion_programa_id) REFERENCES asignaciones_programas(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ac_competencia FOREIGN KEY (competencia_id) REFERENCES competencias(id) ON DELETE CASCADE,
-    UNIQUE(asignacion_programa_id, competencia_id)
-) ENGINE=InnoDB;
-
-CREATE TABLE asignaciones_raps (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    asignacion_competencia_id INT NOT NULL,
-    rap_id INT NOT NULL,
-    fase_id INT NOT NULL, -- <--- Nueva columna: Define el momento pedagógico
-    fecha_eleccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- Relaciones
-    CONSTRAINT fk_ar_vinculo FOREIGN KEY (asignacion_competencia_id) REFERENCES asignaciones_competencias(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ar_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ar_fase FOREIGN KEY (fase_id) REFERENCES fases(id) ON DELETE RESTRICT,
-    -- Un RAP solo puede ser elegido por UN instructor para evitar duplicidad de esfuerzos
-    UNIQUE(rap_id) 
-) ENGINE=InnoDB;
-
--- Asignación de aprendices a fichas
-CREATE TABLE usuario_fichas (
-    usuario_id INT NOT NULL,
-    ficha_id INT NOT NULL,
-    fecha_matricula TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado_aprendiz ENUM('Formación','Retirado', 'Certificado') DEFAULT 'Formación',
-    PRIMARY KEY (usuario_id, ficha_id),
-    CONSTRAINT fk_uf_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    CONSTRAINT fk_uf_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE ova_secciones (
@@ -167,11 +172,14 @@ CREATE TABLE ova_secciones (
     tipo_seccion ENUM('Reflexion', 'Contextualizacion', 'Apropiacion', 'Transferencia') NOT NULL,
     titulo VARCHAR(255),
     contenido_html TEXT, 
-    url_recurso_apoyo TEXT, -- Para archivos en R2 o Hostinger
+    url_recurso_apoyo TEXT, 
     orden INT DEFAULT 1,
     CONSTRAINT fk_seccion_ova FOREIGN KEY (ova_id) REFERENCES ovas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- ==========================================================
+-- 7. MÓDULO DE EVALUACIÓN Y SEGUIMIENTO
+-- ==========================================================
 CREATE TABLE examenes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     seccion_id INT NOT NULL, 
@@ -220,7 +228,9 @@ CREATE TABLE intentos_examenes (
     CONSTRAINT fk_intento_examen FOREIGN KEY (examen_id) REFERENCES examenes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. DATA INICIAL
+-- ==========================================================
+-- 8. DATA INICIAL (SEEDERS)
+-- ==========================================================
 INSERT INTO roles (nombre_rol, descripcion) VALUES 
 ('ADMIN', 'Administrador total del sistema'),
 ('INSTRUCTOR', 'Gestor de contenidos y fichas'),
@@ -233,3 +243,5 @@ INSERT INTO fases (sigla, nombre_fase) VALUES
 ('PL', 'Planeación'),
 ('EJ', 'Ejecución'),
 ('EV', 'Evaluación');
+
+SET FOREIGN_KEY_CHECKS = 1;

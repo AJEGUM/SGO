@@ -9,21 +9,20 @@ async insertarDesdeExcelDetallado(info, competencias) {
         // 1. GESTIÓN DEL PROGRAMA
         // Buscamos por código y versión (la verdadera identidad del diseño curricular)
         let [prog] = await connection.query(
-            "SELECT id FROM programas WHERE codigo_programa = ? AND version_programa = ?", 
+            "SELECT programa_id FROM programas WHERE codigo = ? AND version = ?", 
             [info.codigoPrograma, info.versionPrograma]
         );
         
         let programaId;
         if (prog.length > 0) {
-            programaId = prog[0].id;
-            // Actualizamos el nombre por si acaso cambió en el modal
+            programaId = prog[0].programa_id; // <-- Cambiado de .id a .programa_id
             await connection.query(
-                "UPDATE programas SET nombre_programa = ? WHERE id = ?",
+                "UPDATE programas SET nombre = ? WHERE programa_id = ?",
                 [info.nombrePrograma, programaId]
             );
         } else {
             const [newProg] = await connection.query(
-                "INSERT INTO programas (nombre_programa, codigo_programa, version_programa) VALUES (?, ?, ?)", 
+                "INSERT INTO programas (nombre, codigo, version) VALUES (?, ?, ?)", 
                 [info.nombrePrograma, info.codigoPrograma, info.versionPrograma]
             );
             programaId = newProg.insertId;
@@ -154,9 +153,9 @@ async listarCompetencias(programaId) {
             c.duracion_horas, 
             c.created_at 
          FROM competencias c
-         INNER JOIN programas p ON c.programa_id = p.id
-         WHERE p.id = ? 
-         ORDER BY c.id ASC`, // Cambiado a ASC para mantener el orden del diseño original
+         INNER JOIN programas p ON c.programa_id = p.programa_id
+         WHERE p.programa_id = ? 
+         ORDER BY c.id ASC`,
         [idLimpio]
     );
     return rows;
@@ -166,17 +165,17 @@ async listarCompetencias(programaId) {
 async listarProgramas() {
     const query = `
         SELECT 
-            p.id as programa_id, 
-            p.nombre_programa, 
-            p.codigo_programa, 
-            p.version_programa, 
+            p.programa_id,
+            p.nombre,
+            p.codigo,
+            p.version,
             f.id as ficha_id,
             f.numero_ficha,
             f.fecha_inicio, 
             f.fecha_fin,
             p.created_at
         FROM programas p
-        LEFT JOIN fichas f ON p.id = f.programa_id
+        LEFT JOIN fichas f ON p.programa_id = f.programa_id -- JOIN corregido
         ORDER BY p.created_at DESC, f.numero_ficha ASC
     `;
     const [rows] = await db.query(query);

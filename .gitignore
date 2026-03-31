@@ -1,6 +1,5 @@
 # Dependencias
 node_modules/
-package-lock.json
 
 # Archivos de entorno
 .env
@@ -50,3 +49,22 @@ uploads/*
 *.pid
 *.seed
 *.pid.lock
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+include/
+share/
+
+# Python cache y temporales
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Excel temporales (por si abres el archivo mientras testeas)
+~$*.xlsx
