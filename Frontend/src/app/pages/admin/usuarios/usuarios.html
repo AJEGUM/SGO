@@ -87,7 +87,7 @@
                       class="w-full pl-12 pr-10 py-4 bg-transparent outline-none text-sm font-black text-sena appearance-none cursor-pointer uppercase tracking-tighter">
                       <option [value]="null" disabled selected>Vincular Programa de Formación</option>
                       <option *ngFor="let prog of programas" [value]="prog.programa_id">
-                        {{ prog.nombre_programa }}
+                        {{ prog.nombre }}
                       </option>
                     </select>
                     <i class="pi pi-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-sena pointer-events-none"></i>

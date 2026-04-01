@@ -62,11 +62,11 @@ async crearUsuarioCompleto(userData) {
             u.activo, 
             u.created_at,
             r.nombre_rol,
-            p.nombre_programa
+            p.nombre
         FROM usuarios u
         INNER JOIN roles r ON u.rol_id = r.id
         LEFT JOIN asignaciones_programas ap ON u.id = ap.usuario_id
-        LEFT JOIN programas p ON ap.programa_id = p.id
+        LEFT JOIN programas p ON ap.programa_id = p.programa_id
         ORDER BY u.created_at DESC
     `;
     const [rows] = await pool.query(query);
