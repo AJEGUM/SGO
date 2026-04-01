@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Admin, Rol } from '../../../services/admin/admin';
+import { Admin, Rol, InvitacionData } from '../../../services/admin/admin';
 import { TablaUsuarios } from '../../../components/admin/tabla-usuarios/tabla-usuarios';
 
 @Component({
@@ -15,71 +15,68 @@ export class Usuarios implements OnInit {
   private fb = inject(FormBuilder);
   private adminService = inject(Admin);
 
-  formUsuarios!: FormGroup;
+  invitacionForm: FormGroup;
   roles: Rol[] = [];
   programas: any[] = [];
   cargando: boolean = false;
 
-  ngOnInit() {
-    this.inicializarFormulario();
-    this.cargarDatosIniciales();
-    this.configurarValidacionesDinamicas();
-  }
-
-  private inicializarFormulario() {
-    this.formUsuarios = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(3)]],
+  constructor() {
+    this.invitacionForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      rol_id: [null, [Validators.required]],
-      programa_id: [null]
+      rol_id: ['', Validators.required],
+      // Inicializamos como array vacío explícito
+      programas: [[]] 
     });
   }
 
-  private cargarDatosIniciales() {
-    this.adminService.obtenerRoles().subscribe(res => this.roles = res);
-    this.adminService.getProgramas().subscribe(res => this.programas = res);
+  ngOnInit(): void {
+    this.cargarDatosIniciales();
   }
 
-  private configurarValidacionesDinamicas() {
-    // Detectar cambios en el Rol para activar/desactivar Programa
-    this.formUsuarios.get('rol_id')?.valueChanges.subscribe(rolId => {
-      this.alternarValidacionPrograma(rolId);
+  cargarDatosIniciales(): void {
+    this.adminService.obtenerRoles().subscribe({
+      next: (res) => this.roles = res,
+      error: (err) => console.error('Error al cargar roles', err)
     });
+
+    this.adminService.getProgramas().subscribe({
+      next: (res) => this.programas = res,
+      error: (err) => console.error('Error al cargar programas', err)
+    });
+
+    this.adminService.obtenerUsuarios();
   }
 
-  private alternarValidacionPrograma(rolId: any) {
-    const controlPrograma = this.formUsuarios.get('programa_id');
-    if (!controlPrograma) return;
+  enviarInvitacion(): void {
+    if (this.invitacionForm.invalid) return;
 
-    // Si el Rol es 2 (Instructor), el programa es Obligatorio
-    if (Number(rolId) === 2) { 
-      controlPrograma.setValidators([Validators.required]);
-    } else {
-      // Si no es instructor, limpiamos y quitamos validación
-      controlPrograma.clearValidators();
-      controlPrograma.setValue(null);
-    }
-
-    // Sincronizar estado del control
-    controlPrograma.updateValueAndValidity({ emitEvent: false });
-  }
-
-  enviarRegistro() {
-    if (this.formUsuarios.invalid) return;
-    
     this.cargando = true;
-    console.log("Enviando datos:", this.formUsuarios.value);
 
-    this.adminService.registrarUsuario(this.formUsuarios.value).subscribe({
+    // --- LIMPIEZA DE DATOS ANTES DE ENVIAR ---
+    const rawValues = this.invitacionForm.value;
+    
+    const data: InvitacionData = {
+      email: rawValues.email,
+      rol_id: Number(rawValues.rol_id),
+      // Filtramos cualquier valor nulo, undefined o vacío que el select haya colado
+      programas: Array.isArray(rawValues.programas) 
+        ? rawValues.programas.filter((p: any) => p !== null && p !== undefined && p !== '') 
+        : []
+    };
+
+    this.adminService.enviarInvitacion(data).subscribe({
       next: (res) => {
-        alert('Usuario creado con éxito y asignaciones procesadas');
-        this.formUsuarios.reset({ rol_id: null, programa_id: null });
+        alert('¡Invitación enviada con éxito!');
+        // Reseteamos a valores limpios
+        this.invitacionForm.reset({
+          email: '',
+          rol_id: '',
+          programas: []
+        });
         this.cargando = false;
       },
       error: (err) => {
-        console.error("Error en registro:", err);
-        alert(err.error?.message || 'Error en el servidor');
+        alert(err.error?.msg || 'Error al enviar la invitación');
         this.cargando = false;
       }
     });

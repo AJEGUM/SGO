@@ -3,6 +3,12 @@ import { environment } from '../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
+export interface InvitacionData {
+  email: string;
+  rol_id: number;
+  programas: number[];
+}
+
 export interface Competencia {
   id: number;
   codigo_norma: string;
@@ -39,12 +45,6 @@ export class Admin {
     return this.http.post(`${this.apiUrl}/upload-curriculo`, formData);
   }
 
-  uploadDisenoPdf(archivo: File, programaId: number): Observable<any> {
-    const formData = new FormData();
-    formData.append('pdf', archivo); // 'pdf' debe coincidir con upload.single('pdf') en el backend
-    return this.http.post(`${this.apiUrl}/programas/procesar-pdf/${programaId}`, formData);
-  }
-
   // Ahora recibe el ID como parámetro
   getCompetencias(programaId: number): Observable<Competencia[]> {
     return this.http.get<Competencia[]>(`${this.apiUrl}/programas/${programaId}/competencias`);
@@ -65,8 +65,10 @@ export class Admin {
     return this.http.patch(`${this.apiUrl}/patch/${tipo}/${id}`, { valor: nuevoTexto });
   }
 
-  registrarUsuario(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/registrar`, data).pipe(
+  // USUARIOS 
+
+  enviarInvitacion(data: InvitacionData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/invitar`, data).pipe(
       tap(() => this.obtenerUsuarios())
     );
   }

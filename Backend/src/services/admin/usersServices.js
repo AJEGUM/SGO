@@ -1,46 +1,36 @@
+import crypto from 'crypto';
 import { authModel } from '../../models/admin/usersModel.js';
 import { emailService } from './emailServices.js';
-import bcrypt from 'bcrypt';
 
 export const usuariosServices = {
-  async registrarUsuario(datos) {
-    // 1. Validaciones de existencia
-    const existe = await authModel.buscarPorEmail(datos.email);
-    if (existe) throw new Error("El correo ya está registrado");
+  async procesarInvitacion(datos) {
+    // 1. Validar si el usuario ya existe en la tabla de usuarios activos
+    const usuarioExistente = await authModel.buscarPorEmail(datos.email);
+    if (usuarioExistente) throw new Error("El correo ya está registrado como usuario activo");
 
-    // 2. Preparación de seguridad
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(datos.password, salt);
+    // 2. Generar Token y Expiración (24 horas)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiracion = new Date();
+    expiracion.setHours(expiracion.getHours() + 24);
 
-    // 3. Limpieza de tipos de datos
-    const rolIdNum = Number(datos.rol_id);
-    const programaIdNum = (datos.programa_id && datos.programa_id !== 'null') ? Number(datos.programa_id) : null;
-
-    const userData = {
-      nombre: datos.nombre,
+    const invitacionData = {
       correo: datos.email,
-      password: hashedPassword,
-      rol_id: rolIdNum,
-      programa_id: programaIdNum
+      rol_id: Number(datos.rol_id),
+      token,
+      expiracion,
+      programas: datos.programas || [] // Array de IDs de programas
     };
 
-    // 4. Persistencia en DB (Usuario + Vínculo a Programa)
-    // El modelo se encargará de insertar en 'usuarios' y luego en 'asignaciones_programas'
-    const nuevoUsuario = await authModel.crearUsuarioCompleto(userData);
+    // 3. Guardar en DB (Invitación + Programas vinculados)
+    await authModel.guardarInvitacionCompleta(invitacionData);
 
-    // 5. Notificación por Email
-    try {
-      await emailService.enviarBienvenida(userData.correo, userData.nombre, rolIdNum);
-      console.log(`[MAIL SUCCESS]: Notificación enviada a ${userData.correo}`);
-    } catch (mailError) {
-      console.error("[MAIL ERROR]: Registro exitoso, pero falló el envío del correo:", mailError);
-    }
+    // 4. Disparar Correo
+    const urlRegistro = `${process.env.FRONTEND_URL}/completar-registro?token=${token}`;
+    
+    // Aquí puedes usar tu servicio de Resend que ya tienes
+    await emailService.enviarInvitacion(invitacionData.correo, urlRegistro, invitacionData.rol_id);
 
-    return { 
-      id: nuevoUsuario.id, 
-      nombre: userData.nombre, 
-      rol_id: rolIdNum 
-    };
+    return { correo: datos.email, token }; // Retornamos para loggear o debug
   },
 
   async listarRoles() {

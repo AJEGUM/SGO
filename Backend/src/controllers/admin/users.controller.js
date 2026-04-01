@@ -1,19 +1,23 @@
 import { usuariosServices } from '../../services/admin/usersServices.js';
 
-export const registrar = async (req, res) => {
+export const invitar = async (req, res) => {
+  console.log("BODY RECIBIDO:", req.body);
+  console.log("TIPO DE PROGRAMAS:", Array.isArray(req.body.programas));
+  console.log("CONTENIDO DE PROGRAMAS:", JSON.stringify(req.body.programas));
   try {
-    // Solo llamamos al service y el service hace TODO
-    const data = await usuariosServices.registrarUsuario(req.body);
+    // req.body trae: { email, rol_id, programas: [1, 2...] }
+    const resultado = await usuariosServices.procesarInvitacion(req.body);
 
     res.status(201).json({
       ok: true,
-      msg: "Proceso completado con éxito",
-      data
+      msg: "Invitación enviada con éxito",
+      data: resultado
     });
   } catch (error) {
+    console.error("Error en invitar:", error);
     res.status(400).json({
       ok: false,
-      msg: error.message || "Error en el registro"
+      msg: error.message || "Error al procesar la invitación"
     });
   }
 };

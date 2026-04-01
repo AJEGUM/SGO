@@ -27,6 +27,17 @@ CREATE TABLE usuarios (
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+CREATE TABLE invitaciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    correo VARCHAR(255) UNIQUE NOT NULL,
+    rol_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiracion DATETIME NOT NULL,
+    usada BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_inv_rol_fk FOREIGN KEY (rol_id) REFERENCES roles(id)
+) ENGINE=InnoDB;
+
 -- ==========================================================
 -- 2. MÓDULO CURRICULAR (BASE)
 -- ==========================================================
@@ -37,6 +48,15 @@ CREATE TABLE programas (
     version VARCHAR(10), 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(codigo, version) 
+) ENGINE=InnoDB;
+
+-- 12. INVITACIONES_PROGRAMAS (Lo que el admin le "promete" al invitarlo)
+CREATE TABLE invitaciones_programas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invitacion_id INT NOT NULL,
+    programa_id INT NOT NULL,
+    CONSTRAINT fk_ip_inv FOREIGN KEY (invitacion_id) REFERENCES invitaciones(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ip_prog FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE competencias (
@@ -66,9 +86,6 @@ CREATE TABLE fases (
     nombre_fase VARCHAR(20)
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 3. MÓDULO DE ASIGNACIONES (JERARQUÍA DE INSTRUCTOR)
--- ==========================================================
 CREATE TABLE asignaciones_programas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -243,5 +260,3 @@ INSERT INTO fases (sigla, nombre_fase) VALUES
 ('PL', 'Planeación'),
 ('EJ', 'Ejecución'),
 ('EV', 'Evaluación');
-
-SET FOREIGN_KEY_CHECKS = 1;

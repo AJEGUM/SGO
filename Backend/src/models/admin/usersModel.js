@@ -1,45 +1,44 @@
 import pool from '../../config/db.js';
 
 export const authModel = {
-  // Crea el usuario y sus asignaciones en una sola transacción
-// En authModel dentro de usersModel.js
-async crearUsuarioCompleto(userData) {
+ // ... dentro de tu objeto de modelo
+// src/models/admin/usersModel.js
+async guardarInvitacionCompleta(data) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // 1. Insertar el usuario en la tabla 'usuarios'
-    const queryUser = `INSERT INTO usuarios (rol_id, nombre, correo, password) VALUES (?, ?, ?, ?)`;
-    const [userResult] = await connection.query(queryUser, [
-      userData.rol_id,
-      userData.nombre,
-      userData.correo,
-      userData.password
-    ]);
+    const [invResult] = await connection.query(
+      'INSERT INTO invitaciones (correo, rol_id, token, expiracion) VALUES (?, ?, ?, ?)',
+      [data.correo, data.rol_id, data.token, data.expiracion]
+    );
 
-    const userId = userResult.insertId;
+    const invitacionId = invResult.insertId;
 
-    // 2. Si es INSTRUCTOR (Rol 2) y seleccionó un programa
-    if (userData.rol_id === 2 && userData.programa_id) {
-      
-      const queryVinculo = `
-        INSERT INTO asignaciones_programas (usuario_id, programa_id) 
-        VALUES (?, ?)
-      `;
-      
-      await connection.query(queryVinculo, [userId, userData.programa_id]);
-      console.log(`[DB]: Instructor ${userId} vinculado al programa ${userData.programa_id}`);
+    // LIMPIEZA RADICAL: Filtramos nulos, undefined y valores vacíos
+    if (Array.isArray(data.programas)) {
+      const valoresValidos = data.programas
+        .filter(id => id !== null && id !== undefined && id !== '') 
+        .map(id => [invitacionId, Number(id)]); // Aseguramos que sea número
+
+      if (valoresValidos.length > 0) {
+        await connection.query(
+          'INSERT INTO invitaciones_programas (invitacion_id, programa_id) VALUES ?',
+          [valoresValidos]
+        );
+        console.log(`[DB] Se vincularon ${valoresValidos.length} programas a la invitación ${invitacionId}`);
+      } else {
+        console.warn("[DB] La invitación se creó sin programas vinculados (Array vacío o nulo)");
+      }
     }
 
     await connection.commit();
-    return { id: userId, ...userData };
-
+    return invitacionId;
   } catch (error) {
-    if (connection) await connection.rollback();
-    console.error("!!! ERROR EN TRANSACCIÓN DB:", error.sqlMessage || error.message);
+    await connection.rollback();
     throw error;
   } finally {
-    if (connection) connection.release();
+    connection.release();
   }
 },
 
