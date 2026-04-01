@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-completar-registro',
@@ -21,6 +22,7 @@ export class CompletarRegistro implements OnInit {
   verModal: boolean = false; // Controla la visibilidad del modal de programas
   cargando: boolean = true;  // Pantalla de carga inicial
   enviando: boolean = false; // Estado del botón de registro
+  mensajeError: string | null = null;
   
   // --- Datos y Formulario ---
   datosInvitacion: any = null;
@@ -36,29 +38,22 @@ export class CompletarRegistro implements OnInit {
     }, { validators: this.passwordMatchValidator });
   }
 
-  ngOnInit(): void {
-    // 1. Capturar el token de la URL (?token=xxxx)
-    const token = this.route.snapshot.queryParams['token'];
+ngOnInit(): void {
+  const token = this.route.snapshot.queryParams['token'];
+  if (!token) { this.router.navigate(['/login']); return; }
 
-    if (!token) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    // 2. Validar el token contra el Backend para pintar la UI
-    this.authService.verificarInvitacion(token).subscribe({
-      next: (res) => {
-        // Asignamos la data (rol, programas, correo) que viene del backend
-        this.datosInvitacion = res.data;
-        this.registroForm.patchValue({ token: token });
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Token inválido:', err);
-        this.router.navigate(['/login']);
-      }
-    });
-  }
+  this.authService.verificarInvitacion(token).subscribe({
+    next: (res) => {
+      this.datosInvitacion = res.data;
+      this.registroForm.patchValue({ token: token });
+      this.cargando = false;
+      
+      // Inicializar el botón de Google después de que cargue la UI
+      setTimeout(() => this.inicializarGoogleButton(), 100);
+    },
+    error: () => this.router.navigate(['/login'])
+  });
+}
 
   // --- Lógica del Modal ---
   toggleModal(): void {
@@ -80,4 +75,43 @@ export class CompletarRegistro implements OnInit {
     }
     console.log('Formulario listo para registro:', this.registroForm.value);
   }
+
+inicializarGoogleButton() {
+  // @ts-ignore
+  google.accounts.id.initialize({
+    client_id: environment.googleClientId,
+    callback: this.onGoogleLoginSuccess.bind(this)
+  });
+
+  // @ts-ignore
+  google.accounts.id.renderButton(
+    document.getElementById("googleBtn"),
+    { 
+      theme: "outline", 
+      size: "large", 
+      width: "100%", 
+      text: "continue_with", 
+      shape: "pill" 
+    }
+  );
+}
+
+onGoogleLoginSuccess(response: any) {
+  this.enviando = true;
+  this.mensajeError = null;
+  const tokenGoogle = response.credential;
+  const tokenInvitacion = this.route.snapshot.queryParams['token']; // Asegúrate que sea queryParams
+
+  this.authService.completarRegistroGoogle(tokenGoogle, tokenInvitacion).subscribe({
+    next: (res) => {
+      this.enviando = false;
+      this.router.navigate(['/dashboard']);
+    },
+    error: (err) => {
+      this.enviando = false;
+      // Capturamos el 403 de "Correo X no es Correo Y"
+      this.mensajeError = err.error.msg || 'Error en la autenticación';
+    }
+  });
+}
 }

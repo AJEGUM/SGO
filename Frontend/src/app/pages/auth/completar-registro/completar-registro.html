@@ -61,71 +61,89 @@
           <i class="pi pi-verified text-xl text-sena"></i>
         </div>
         <h1 class="text-slate-900 font-black text-xl tracking-tighter italic">SGO <span class="text-sena font-medium text-xs not-italic tracking-widest ml-1">CBI</span></h1>
-        
-        <button (click)="toggleModal()" class="mt-4 flex items-center gap-2 px-4 py-2 bg-sena/10 rounded-full group active:scale-95 transition-all">
-          <span class="text-[10px] font-black text-sena uppercase tracking-widest">Ver programas a vincular</span>
-          <i class="pi pi-chevron-right text-[10px] text-sena group-hover:translate-x-1 transition-transform"></i>
+        <button (click)="toggleModal()" class="mt-4 flex items-center gap-2 px-4 py-2 bg-sena/10 rounded-full group">
+          <span class="text-[10px] font-black text-sena uppercase tracking-widest">Ver programas</span>
         </button>
       </div>
 
-      <div class="hidden md:block mb-12">
+      <div class="hidden md:block mb-8">
         <h3 class="text-3xl font-black text-slate-900 tracking-tighter">Finalizar Registro</h3>
-        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
           <span class="w-2 h-2 bg-sena rounded-full animate-ping"></span>
-          Paso único de activación
+          Activación de cuenta institucional
         </p>
       </div>
 
-      <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="space-y-6 md:space-y-7">
+      <div *ngIf="mensajeError" class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 animate-bounce">
+        <i class="pi pi-exclamation-triangle text-red-500 mt-1"></i>
+        <p class="text-[11px] font-bold text-red-600 uppercase tracking-tight leading-tight">{{ mensajeError }}</p>
+      </div>
+
+      <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="space-y-6">
         
         <div class="space-y-2">
-          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Identidad Institucional</label>
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Correo Autorizado</label>
           <div class="relative group">
             <i class="pi pi-at absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
             <input [value]="datosInvitacion.correo" disabled
-              class="w-full pl-14 pr-6 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[2rem] font-bold text-slate-400 cursor-not-allowed italic text-sm">
+              class="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[2rem] font-bold text-slate-400 cursor-not-allowed italic text-sm">
           </div>
+        </div>
+
+        <div class="pt-2 space-y-4">
+          <div class="flex items-center gap-4 px-4">
+            <div class="h-[1px] flex-1 bg-slate-100"></div>
+            <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">Vía Rápida</span>
+            <div class="h-[1px] flex-1 bg-slate-100"></div>
+          </div>
+          
+          <div class="flex justify-center">
+            <div id="googleBtn" class="w-full"></div>
+          </div>
+        </div>
+
+        <div class="pt-4 flex items-center gap-4 px-4">
+          <div class="h-[1px] flex-1 bg-slate-100"></div>
+          <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">O completa tus datos</span>
+          <div class="h-[1px] flex-1 bg-slate-100"></div>
         </div>
 
         <div class="space-y-2">
           <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Nombre Completo</label>
           <div class="relative">
-            <i class="pi pi-user absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 transition-colors"></i>
-            <input formControlName="nombre_completo" type="text" placeholder="Tu nombre y apellidos"
-              class="w-full pl-14 pr-6 py-4 md:py-5 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 shadow-sm text-sm">
+            <i class="pi pi-user absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input formControlName="nombre_completo" type="text" placeholder="Como aparece en tu documento"
+              class="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 text-sm">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 md:gap-6">
-          <div class="space-y-2">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Seguridad de la Cuenta</label>
-            <div class="relative">
-              <i class="pi pi-lock absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
-              <input formControlName="password" type="password" placeholder="Nueva contraseña"
-                class="w-full pl-14 pr-6 py-4 md:py-5 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 shadow-sm text-sm">
-            </div>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="relative">
+            <i class="pi pi-lock absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
+            <input formControlName="password" type="password" placeholder="Contraseña de acceso"
+              class="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 text-sm">
           </div>
-
           <div class="relative">
             <i class="pi pi-shield absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
-            <input formControlName="confirmar_password" type="password" placeholder="Repite la contraseña"
-              class="w-full pl-14 pr-6 py-4 md:py-5 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 shadow-sm text-sm">
+            <input formControlName="confirmar_password" type="password" placeholder="Confirmar contraseña"
+              class="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] outline-none focus:border-sena focus:ring-4 focus:ring-sena/5 transition-all font-bold text-slate-700 text-sm">
           </div>
         </div>
 
         <div class="pt-6">
           <button type="submit" [disabled]="registroForm.invalid || enviando"
-            class="w-full group relative bg-slate-900 text-white py-5 md:py-6 rounded-2xl md:rounded-[2rem] font-black text-[12px] uppercase tracking-[0.3em] hover:bg-sena hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-20 shadow-2xl shadow-slate-200 overflow-hidden">
+            class="w-full group relative bg-slate-900 text-white py-5 rounded-2xl md:rounded-[2rem] font-black text-[12px] uppercase tracking-[0.3em] hover:bg-sena hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-20 shadow-2xl">
             <div class="relative z-10 flex items-center justify-center gap-3">
-              <i *ngIf="!enviando" class="pi pi-bolt group-hover:animate-bounce"></i>
+              <i *ngIf="!enviando" class="pi pi-bolt"></i>
               <i *ngIf="enviando" class="pi pi-spin pi-spinner"></i>
-              <span>{{ enviando ? 'Procesando...' : 'Finalizar y Entrar' }}</span>
+              <span>{{ enviando ? 'Activando...' : 'Finalizar Registro' }}</span>
             </div>
           </button>
         </div>
       </form>
     </div>
   </div>
+</div>
 
   <div *ngIf="verModal" 
     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -154,4 +172,3 @@
       </button>
     </div>
   </div>
-</div>

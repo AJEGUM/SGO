@@ -39,5 +39,64 @@ export const AuthModel = {
         };
 
         return detalle;
+    },
+
+async finalizarProcesoInvitacion(token, payloadGoogle) {
+        const { sub: googleId, email, name } = payloadGoogle;
+        const connection = await pool.getConnection();
+        
+        try {
+            await connection.beginTransaction();
+
+            // 1. Obtener datos de la invitación antes de quemarla
+            const [inv] = await connection.query(
+                'SELECT id, rol_id, correo FROM invitaciones WHERE token = ? AND usada = 0',
+                [token]
+            );
+
+            if (inv.length === 0) throw new Error("Invitación no válida");
+            const invitacion = inv[0];
+
+            // 2. Crear el usuario en la tabla 'usuarios'
+            // Usamos 'activo' = true y estado_validacion = 'activo' porque ya viene de invitación
+            const [userResult] = await connection.query(
+                `INSERT INTO usuarios (rol_id, nombre, correo, google_id, activo, estado_validacion) 
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [invitacion.rol_id, name, email, googleId, true, 'activo']
+            );
+
+            const nuevoUsuarioId = userResult.insertId;
+
+            // 3. Vincular los programas "prometidos" en la invitación a la tabla 'asignaciones_programas'
+            // Buscamos qué programas tenía asociados esa invitación
+            const [programasInvitados] = await connection.query(
+                'SELECT programa_id FROM invitaciones_programas WHERE invitacion_id = ?',
+                [invitacion.id]
+            );
+
+            if (programasInvitados.length > 0) {
+                const valoresAsignacion = programasInvitados.map(p => [nuevoUsuarioId, p.programa_id]);
+                await connection.query(
+                    'INSERT INTO asignaciones_programas (usuario_id, programa_id) VALUES ?',
+                    [valoresAsignacion]
+                );
+            }
+
+            // 4. Quemar la invitación
+            await connection.query(
+                'UPDATE invitaciones SET usada = 1 WHERE id = ?',
+                [invitacion.id]
+            );
+
+            await connection.commit();
+            return { usuarioId: nuevoUsuarioId };
+
+        } catch (error) {
+            await connection.rollback();
+            console.error("ERROR EN TRANSACCION SQL:", error);
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 }
