@@ -1,4 +1,4 @@
-import { curriculoService } from '../services/curriculo.js';
+import { curriculoService } from '../../services/admin/curriculo.js';
 
 // Funcion que permite extraer la informacion del excel cargado por el administrador
 export const importarDiseno = async (req, res) => {

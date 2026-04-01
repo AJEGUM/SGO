@@ -4,7 +4,7 @@ import cors from 'cors';
 import session from 'express-session';
 // import passport from './config/passportGoogle.js'; // Importamos tu estrategia corregida
 // import authRoutes from './routes/authGoogle.route.js';
-import admin from './routes/admin.route.js';
+import admin from './routes/admin/admin.route.js';
 
 const app = express();
 

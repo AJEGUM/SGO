@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Competencia {
   id: number;
@@ -11,12 +11,18 @@ export interface Competencia {
   duracion_horas: number;
   created_at?: string;
 }
+export interface Rol {
+  id: number;
+  nombre_rol: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class Admin {
   private apiUrl = `${environment.apiUrl}/admin`; 
+  private usuariosSubject = new BehaviorSubject<any[]>([]); // Estado inicial vacío
+  usuarios$ = this.usuariosSubject.asObservable();  
 
   constructor(private http: HttpClient) { }
 
@@ -57,5 +63,22 @@ export class Admin {
   // Servicio para actualizar la data de las competencias
   patchCurriculo(tipo: string, id: number, nuevoTexto: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/patch/${tipo}/${id}`, { valor: nuevoTexto });
+  }
+
+  registrarUsuario(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/registrar`, data).pipe(
+      tap(() => this.obtenerUsuarios())
+    );
+  }
+
+  obtenerRoles(): Observable<Rol[]> {
+    return this.http.get<Rol[]>(`${this.apiUrl}/roles`);
+  }
+
+  obtenerUsuarios(): void {
+    this.http.get<any[]>(`${this.apiUrl}/usuarios`).subscribe({
+      next: (res) => this.usuariosSubject.next(res), // Notifica el cambio a todos
+      error: (err) => console.error('Error al traer usuarios', err)
+    });
   }
 }

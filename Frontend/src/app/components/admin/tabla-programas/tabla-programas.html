@@ -23,16 +23,16 @@
         @for (prog of listaProgramas; track prog.programa_id) {
           <tr class="hover:bg-emerald-50/40 transition-all duration-300 border-b border-gray-50 last:border-0 group">
             <td class="px-10 py-6">
-              <span class="font-black text-sena text-sm tracking-tight">{{ prog.codigo_programa }}</span>
+              <span class="font-black text-sena text-sm tracking-tight">{{ prog.codigo }}</span>
             </td>
             <td class="px-10 py-6">
               <div class="font-bold text-gray-800 uppercase text-xs leading-relaxed max-w-md">
-                {{ prog.nombre_programa }}
+                {{ prog.nombre}}
               </div>
             </td>
             <td class="px-10 py-6 text-center">
               <span class="bg-gray-100 text-gray-500 px-4 py-1.5 rounded-xl text-[10px] font-black border border-gray-200/50">
-                V. {{ prog.version_programa }}
+                V. {{ prog.version }}
               </span>
             </td>
             <td class="px-10 py-6 text-right">

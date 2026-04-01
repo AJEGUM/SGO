@@ -1,5 +1,5 @@
-import { ejecutarPythonParser } from '../utils/pythonRunner.js';
-import { curriculoModel } from '../models/curriculoModel.js'; 
+import { ejecutarPythonParser } from '../../utils/pythonRunner.js';
+import { curriculoModel } from '../../models/admin/curriculoModel.js'; 
 
 export const curriculoService = {
 
