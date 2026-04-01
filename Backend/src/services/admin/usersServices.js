@@ -4,6 +4,7 @@ import { emailService } from './emailServices.js';
 
 export const usuariosServices = {
   async procesarInvitacion(datos) {
+    console.log("DEBUG ENV:", process.env.FRONTEND_URL);
     // 1. Validar si el usuario ya existe en la tabla de usuarios activos
     const usuarioExistente = await authModel.buscarPorEmail(datos.email);
     if (usuarioExistente) throw new Error("El correo ya está registrado como usuario activo");

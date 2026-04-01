@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { CompletarRegistro } from './pages/auth/completar-registro/completar-registro';
+import { invitacionGuard } from './guards/auth/invitacion-guard';
 
 export const routes: Routes = [
   // --- RUTAS PÚBLICAS (Sin Sidebar) ---
@@ -41,6 +43,12 @@ export const routes: Routes = [
       // Aquí puedes agregar más: 'dashboard', 'usuarios', etc.
       { path: '', redirectTo: 'importar', pathMatch: 'full' }
     ]
+  },
+
+  { 
+    path: 'completar-registro', 
+    component: CompletarRegistro,
+    canActivate: [invitacionGuard] 
   },
 
   // Manejo de rutas no encontradas
