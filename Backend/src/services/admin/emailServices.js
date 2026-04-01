@@ -1,28 +1,22 @@
 import { resend, EMAIL_CONFIG } from '../../config/resend.js';
 import { plantillas } from '../../templates/email/templates.js';
 
+// Este está perfecto, recibe la URL ya lista y se la entrega a la plantilla
 export const emailService = {
-  async enviarBienvenida(correo, nombre, rol_id) {
+  async enviarInvitacion(correo, urlRegistro, rol_id) {
     try {
-      // 1. Seleccionamos la función según el rol (1, 2, 3 o 4)
-      // Si el rol_id no coincide, usa la plantilla 'default'
       const generador = plantillas[rol_id] || plantillas.default;
       
-      const htmlContent = generador(nombre);
+      // Aquí 'urlRegistro' ya es el link completo: http://.../registro?token=xyz
+      const htmlContent = generador(urlRegistro); 
 
-      const { data, error } = await resend.emails.send({
+      await resend.emails.send({
         from: EMAIL_CONFIG.from, 
         to: [correo],
-        subject: '🚀 Acceso Habilitado - Sistema SGO',
+        subject: '🚀 Invitación de Acceso - Sistema SGO',
         html: htmlContent
       });
-
-      if (error) {
-        return console.error("[RESEND_ERROR]:", error);
-      }
-
-      console.log(`[EMAIL_SENT] Plantilla Rol ${rol_id} enviada a: ${correo}`);
-      
+      console.log(`[EMAIL_SENT] Enviado a: ${correo}`);
     } catch (error) {
       console.error("[EMAIL_SERVICE_ERROR]:", error.message);
     }

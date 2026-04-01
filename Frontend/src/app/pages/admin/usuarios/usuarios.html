@@ -1,114 +1,104 @@
-<div class="min-h-screen bg-gray-50 pt-1 pb-20 font-sans">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<div class="min-h-screen bg-[#F8FAFC] pt-8 pb-20 font-sans">
+  <div class="max-w-7xl mx-auto px-6">
     
-    <div class="mb-8 md:mb-12">
-      <span class="text-sena font-black text-[10px] md:text-xs uppercase tracking-[0.2em] mb-3 block">
-        Panel de Administración
-      </span>
-      <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tighter leading-none">
-        Control de Acceso
+    <div class="mb-12">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="h-1 w-8 bg-sena rounded-full"></span>
+        <span class="text-sena font-black text-xs uppercase tracking-[0.3em]">Gestión de Personal</span>
+      </div>
+      <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none mb-4">
+        Control de <span class="text-transparent bg-clip-text bg-gradient-to-r from-sena to-emerald-600">Acceso</span>
       </h1>
-      <p class="text-gray-500 mt-3 text-sm md:text-base max-w-2xl leading-relaxed">
-        Registro y vinculación de usuarios. El sistema automatiza la asignación de competencias según el rol administrativo.
+      <p class="text-slate-500 text-base md:text-lg max-w-2xl font-medium leading-relaxed">
+        Despliegue de credenciales mediante invitaciones seguras.
       </p>
     </div>
 
-    <div class="mb-12">
-      <div class="bg-white p-6 md:p-10 xl:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-sena/5 rounded-full -mr-32 -mt-32 blur-3xl transition-all group-hover:bg-sena/10"></div>
-        
-        <div class="relative z-10">
-          <form [formGroup]="formUsuarios" (ngSubmit)="enviarRegistro()">
-            <div class="flex flex-col xl:flex-row gap-10">
-              
-              <div class="w-full xl:w-1/3 text-center xl:text-left">
-                <div class="flex items-center justify-center xl:justify-start gap-3 mb-4 md:mb-6">
-                  <span class="bg-emerald-50 text-sena text-[10px] font-black uppercase px-4 py-1.5 rounded-xl border border-emerald-100/50 flex items-center gap-2">
-                    <i class="pi pi-user-plus text-[10px]"></i>
-                    Nuevo Registro
-                  </span>
-                </div>
-                <h3 class="text-2xl md:text-3xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
-                  Registro de usuarios
-                </h3>
-                <p class="text-gray-500 text-sm md:text-base leading-relaxed">
-                  Complete las credenciales básicas. Si el rol es <strong class="text-gray-900">Instructor</strong>, vincule el programa para sincronizar el diseño curricular.
-                </p>
+    <div class="mb-16">
+      <div class="bg-white rounded-[3rem] border border-slate-200/60 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden">
+        <div class="flex flex-col lg:flex-row">
+          
+          <div class="lg:w-1/3 bg-slate-50/50 p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-12 h-12 bg-sena/10 rounded-2xl flex items-center justify-center text-sena">
+                <i class="pi pi-user-plus text-xl"></i>
               </div>
+              <h3 class="font-black text-slate-900 uppercase text-sm tracking-tighter">Invitación</h3>
+            </div>
+            <ul class="space-y-6">
+              <li class="flex gap-4">
+                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">1</div>
+                <p class="text-sm text-slate-600 font-medium">Se genera un token único de 24h.</p>
+              </li>
+              <li class="flex gap-4">
+                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</div>
+                <p class="text-sm text-slate-600 font-medium">Se vinculan los programas de formación.</p>
+              </li>
+            </ul>
+          </div>
 
-              <div class="w-full xl:flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="lg:flex-1 p-8 md:p-12">
+            <form [formGroup]="invitacionForm" (ngSubmit)="enviarInvitacion()" class="space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div class="relative group/input">
-                  <div class="absolute inset-y-0 left-5 flex items-center text-gray-400 group-focus-within/input:text-sena transition-colors">
-                    <i class="pi pi-user text-sm"></i>
-                  </div>
-                  <input formControlName="nombre" type="text" placeholder="Nombre Completo"
-                    class="w-full pl-12 pr-5 py-5 bg-gray-50/50 border-2 border-transparent rounded-3xl outline-none focus:bg-white focus:border-sena/20 transition-all text-sm font-bold text-gray-700 placeholder:text-gray-400">
-                </div>
-
-                <div class="relative group/input">
-                  <div class="absolute inset-y-0 left-5 flex items-center text-gray-400 group-focus-within/input:text-sena transition-colors">
-                    <i class="pi pi-envelope text-sm"></i>
-                  </div>
-                  <input formControlName="email" type="email" placeholder="Correo SENA"
-                    class="w-full pl-12 pr-5 py-5 bg-gray-50/50 border-2 border-transparent rounded-3xl outline-none focus:bg-white focus:border-sena/20 transition-all text-sm font-bold text-gray-700">
-                </div>
-
-                <div class="relative group/input">
-                  <div class="absolute inset-y-0 left-5 flex items-center text-gray-400 group-focus-within/input:text-sena transition-colors z-10">
-                    <i class="pi pi-shield text-sm"></i>
-                  </div>
-                  <select formControlName="rol_id" 
-                    (change)="formUsuarios.get('rol_id')?.setValue(+$any($event.target).value)"
-                    class="w-full pl-12 pr-10 py-5 bg-gray-50/50 border-2 border-transparent rounded-3xl outline-none focus:bg-white focus:border-sena/20 transition-all text-sm font-bold text-gray-700 appearance-none cursor-pointer relative z-0">
-                    <option [value]="null" disabled selected>Seleccionar Rol</option>
-                    <option *ngFor="let rol of roles" [value]="rol.id">{{ rol.nombre_rol }}</option>
-                  </select>
-                  <i class="pi pi-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none"></i>
-                </div>
-
-                <div class="relative group/input">
-                  <div class="absolute inset-y-0 left-5 flex items-center text-gray-400 group-focus-within/input:text-sena transition-colors">
-                    <i class="pi pi-lock text-sm"></i>
-                  </div>
-                  <input formControlName="password" type="password" placeholder="Password Temporal"
-                    class="w-full pl-12 pr-5 py-5 bg-gray-50/50 border-2 border-transparent rounded-3xl outline-none focus:bg-white focus:border-sena/20 transition-all text-sm font-bold text-gray-700">
-                </div>
-
-                <div *ngIf="formUsuarios.get('rol_id')?.value === 2" 
-                    class="md:col-span-2 p-2 bg-emerald-50/50 rounded-[2rem] border border-emerald-100/50 animate-in fade-in zoom-in duration-300">
+                <div class="md:col-span-2 group">
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-4">Correo Institucional</label>
                   <div class="relative">
-                    <div class="absolute inset-y-0 left-5 flex items-center text-sena">
-                      <i class="pi pi-book text-sm"></i>
-                    </div>
-                    <select 
-                      formControlName="programa_id" 
-                      (change)="formUsuarios.get('programa_id')?.setValue(+$any($event.target).value)"
-                      class="w-full pl-12 pr-10 py-4 bg-transparent outline-none text-sm font-black text-sena appearance-none cursor-pointer uppercase tracking-tighter">
-                      <option [value]="null" disabled selected>Vincular Programa de Formación</option>
-                      <option *ngFor="let prog of programas" [value]="prog.programa_id">
+                    <i class="pi pi-envelope absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
+                    <input formControlName="email" type="email" placeholder="ejemplo@sena.edu.co"
+                      class="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:bg-white focus:border-sena/20 transition-all font-bold text-slate-700 shadow-inner">
+                  </div>
+                </div>
+
+                <div class="group">
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-4">Rol Administrativo</label>
+                  <div class="relative">
+                    <i class="pi pi-shield absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena z-10"></i>
+                    <select formControlName="rol_id" 
+                      class="w-full pl-14 pr-10 py-5 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:bg-white focus:border-sena/20 transition-all font-bold text-slate-700 appearance-none cursor-pointer">
+                      <option value="" disabled selected>Seleccionar Rol</option>
+                      <option *ngFor="let rol of roles" [value]="rol.id">{{ rol.nombre_rol }}</option>
+                    </select>
+                    <i class="pi pi-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
+                  </div>
+                </div>
+
+                <div class="group">
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-4">Programas Vinculados</label>
+                  <div class="relative">
+                    <i class="pi pi-book absolute left-6 top-8 -translate-y-1/2 text-slate-300 group-focus-within:text-sena z-10"></i>
+                    <select formControlName="programas" multiple
+                      class="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:bg-white focus:border-sena/20 transition-all font-bold text-slate-700 cursor-pointer min-h-[120px] shadow-inner">
+                      <option *ngFor="let prog of programas" [value]="prog.id || prog.programa_id">
                         {{ prog.nombre }}
                       </option>
                     </select>
-                    <i class="pi pi-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-sena pointer-events-none"></i>
                   </div>
+                  <p class="text-[9px] text-slate-400 mt-2 ml-4 font-bold uppercase">Ctrl + Click para seleccionar</p>
                 </div>
+
               </div>
 
-              <div class="w-full xl:w-auto flex flex-col justify-end">
-                <button type="submit" [disabled]="formUsuarios.invalid || cargando"
-                  class="bg-sena text-white px-10 py-6 rounded-3xl font-black text-xs uppercase tracking-widest hover:brightness-110 hover:shadow-xl hover:shadow-emerald-100 transition-all disabled:opacity-40 flex items-center justify-center gap-3 w-full">
-                  <i *ngIf="!cargando" class="pi pi-save text-base"></i>
-                  <i *ngIf="cargando" class="pi pi-spin pi-spinner text-base"></i>
-                  <span>{{ cargando ? 'Registrando...' : 'Confirmar' }}</span>
+              <div class="flex justify-end pt-4">
+                <button type="submit" [disabled]="invitacionForm.invalid || cargando"
+                  class="group relative bg-slate-900 text-white px-12 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-sena transition-all disabled:opacity-20 shadow-2xl shadow-slate-200">
+                  <div class="relative z-10 flex items-center gap-3">
+                    <i *ngIf="!cargando" class="pi pi-send group-hover:translate-x-1 group-hover:-translate-y-1 transition-all"></i>
+                    <i *ngIf="cargando" class="pi pi-spin pi-spinner"></i>
+                    <span>{{ cargando ? 'Enviando...' : 'Enviar Acceso' }}</span>
+                  </div>
                 </button>
               </div>
 
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-    <app-tabla-usuarios></app-tabla-usuarios>
+
+    <div class="mt-20">
+      <app-tabla-usuarios></app-tabla-usuarios>
+    </div>
+
   </div>
 </div>
