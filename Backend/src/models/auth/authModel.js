@@ -1,8 +1,26 @@
 import pool from '../../config/db.js';
 
-// src/models/admin/usersModel.js
-
 export const AuthModel = {
+    
+    // --- MÉTODO PARA LOGIN NORMAL (EL QUE TE FALTABA) ---
+    async buscarUsuarioPorGoogleId(googleId) {
+        const query = `
+            SELECT 
+                u.id, 
+                u.nombre, 
+                u.correo, 
+                u.rol_id, 
+                r.nombre_rol, 
+                u.activo 
+            FROM usuarios u
+            INNER JOIN roles r ON u.rol_id = r.id
+            WHERE u.google_id = ?
+        `;
+        const [rows] = await pool.query(query, [googleId]);
+        return rows[0] || null;
+    },
+
+    // --- MÉTODO PARA VALIDAR LA INVITACIÓN ANTES DE REGISTRAR ---
     async obtenerDetalleInvitacion(token) {
         const query = `
             SELECT 
@@ -10,7 +28,7 @@ export const AuthModel = {
                 i.correo,
                 i.rol_id,
                 r.nombre_rol,
-                p.programa_id AS programa_id, -- <--- CAMBIADO AQUÍ
+                p.programa_id,
                 p.nombre AS nombre_programa
             FROM invitaciones i
             INNER JOIN roles r ON i.rol_id = r.id
@@ -22,11 +40,9 @@ export const AuthModel = {
         `;
         
         const [rows] = await pool.query(query, [token]);
-        
         if (rows.length === 0) return null;
 
-        // El mapeo se mantiene igual porque usamos el AS programa_id
-        const detalle = {
+        return {
             correo: rows[0].correo,
             rol_id: rows[0].rol_id,
             nombre_rol: rows[0].nombre_rol,
@@ -37,38 +53,33 @@ export const AuthModel = {
                     nombre: r.nombre_programa
                 }))
         };
-
-        return detalle;
     },
 
-async finalizarProcesoInvitacion(token, payloadGoogle) {
+    // --- MÉTODO TRANSACCIONAL PARA CREAR USUARIO Y QUEMAR TOKEN ---
+    async finalizarProcesoInvitacion(token, payloadGoogle) {
         const { sub: googleId, email, name } = payloadGoogle;
         const connection = await pool.getConnection();
         
         try {
             await connection.beginTransaction();
 
-            // 1. Obtener datos de la invitación antes de quemarla
+            // 1. Obtener datos de la invitación
             const [inv] = await connection.query(
-                'SELECT id, rol_id, correo FROM invitaciones WHERE token = ? AND usada = 0',
+                'SELECT id, rol_id FROM invitaciones WHERE token = ? AND usada = 0',
                 [token]
             );
-
             if (inv.length === 0) throw new Error("Invitación no válida");
             const invitacion = inv[0];
 
-            // 2. Crear el usuario en la tabla 'usuarios'
-            // Usamos 'activo' = true y estado_validacion = 'activo' porque ya viene de invitación
+            // 2. Crear el usuario
             const [userResult] = await connection.query(
                 `INSERT INTO usuarios (rol_id, nombre, correo, google_id, activo, estado_validacion) 
                  VALUES (?, ?, ?, ?, ?, ?)`,
                 [invitacion.rol_id, name, email, googleId, true, 'activo']
             );
-
             const nuevoUsuarioId = userResult.insertId;
 
-            // 3. Vincular los programas "prometidos" en la invitación a la tabla 'asignaciones_programas'
-            // Buscamos qué programas tenía asociados esa invitación
+            // 3. Vincular programas asignados
             const [programasInvitados] = await connection.query(
                 'SELECT programa_id FROM invitaciones_programas WHERE invitacion_id = ?',
                 [invitacion.id]
@@ -82,21 +93,17 @@ async finalizarProcesoInvitacion(token, payloadGoogle) {
                 );
             }
 
-            // 4. Quemar la invitación
-            await connection.query(
-                'UPDATE invitaciones SET usada = 1 WHERE id = ?',
-                [invitacion.id]
-            );
+            // 4. Marcar invitación como usada
+            await connection.query('UPDATE invitaciones SET usada = 1 WHERE id = ?', [invitacion.id]);
 
             await connection.commit();
             return { usuarioId: nuevoUsuarioId };
 
         } catch (error) {
             await connection.rollback();
-            console.error("ERROR EN TRANSACCION SQL:", error);
             throw error;
         } finally {
             connection.release();
         }
     }
-}
+};

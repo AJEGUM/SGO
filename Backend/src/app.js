@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import passport from './config/passport.js'; // El archivo que creamos arriba
 // import passport from './config/passportGoogle.js'; // Importamos tu estrategia corregida
 // import authRoutes from './routes/authGoogle.route.js';
 import admin from './routes/admin/admin.route.js';
@@ -33,18 +34,17 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: isProduction, // Cámbialo a true porque el túnel te da HTTPS
+    // Si estás en localhost sin SSL, esto DEBE ser false
+    secure: isProduction, 
     httpOnly: true,
-    sameSite: 'lax', // Obligatorio para que la cookie viaje entre los dos túneles
+    sameSite: isProduction ? 'none' : 'lax', 
     maxAge: 24 * 60 * 60 * 1000 
   },
   proxy: true 
 }));
 
-// 4. INICIALIZACIÓN DE PASSPORT (ESTO FALTABA)
-// Debe ir después de express-session para que passport pueda usar la sesión
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 5. Rutas
 app.use('/api/admin', admin);

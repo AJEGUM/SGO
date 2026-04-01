@@ -1,56 +1,67 @@
 import { Routes } from '@angular/router';
-import { CompletarRegistro } from './pages/auth/completar-registro/completar-registro';
+import { roleGuard } from './guards/auth/role-guard';
 import { invitacionGuard } from './guards/auth/invitacion-guard';
+import { CompletarRegistro } from './pages/auth/completar-registro/completar-registro';
 
 export const routes: Routes = [
   // --- RUTAS PÚBLICAS (Sin Sidebar) ---
   {
     path: '',
     loadComponent: () => import('./pages/publico/inicio/inicio').then(m => m.Inicio),
-    title: 'SGO - Sistema de Gestion de OVAs'
+    title: 'SGO - Inicio'
   },
   {
     path: 'login',
     loadComponent: () => import('./pages/publico/login/login').then(m => m.Login),
-    title: 'Login - Sistema de Gestion de OVAs'
+    title: 'SGO - Login'
   },
   {
-    path: 'como-funciona',
-    loadComponent: () => import('./pages/publico/como-funciona/como-funciona').then(m => m.ComoFunciona),
-    title: 'Como Funciona - Sistema de Gestion de OVAs'
-  },
-  {
-    path: 'beneficios',
-    loadComponent: () => import('./pages/publico/beneficios/beneficios').then(m => m.Beneficios),
-    title: 'Beneficios - Sistema de Gestion de OVAs'
+    path: 'login-success',
+    loadComponent: () => import('./pages/auth/login-success/login-success').then(m => m.LoginSuccess),
   },
 
-  // --- RUTAS DE ADMINISTRACIÓN (Con Sidebar) ---
+  {
+    path: 'instructor',
+    loadComponent: () => import('./pages/instructor/instructor-layout/instructor-layout').then(m => m.InstructorLayout),
+    canActivate: [roleGuard],
+    data: { roles: [2] },
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/instructor/instructor-dashboard/instructor-dashboard').then(m => m.InstructorDashboard),
+        title: 'Dashboard - Instructor'
+      },
+      // Agrega aquí futuras rutas: programas, ovas, etc.
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
+
   {
     path: 'admin',
     loadComponent: () => import('./pages/admin/admin-layout/admin-layout').then(m => m.AdminLayout),
+    canActivate: [roleGuard],
+    data: { roles: [1] },
     children: [
-      {
-        path: 'importar',
+      { 
+        path: 'importar', 
         loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
-        title: 'Importar - SGO'
+        title: 'Importar Datos - SGO'
       },
-      {
-        path: 'usuarios',
+      { 
+        path: 'usuarios', 
         loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
-        title: 'Usuarios - SGO'
+        title: 'Gestión de Usuarios - SGO'
       },
-      // Aquí puedes agregar más: 'dashboard', 'usuarios', etc.
       { path: '', redirectTo: 'importar', pathMatch: 'full' }
     ]
   },
 
+  // --- RUTAS DE REGISTRO ---
   { 
     path: 'completar-registro', 
     component: CompletarRegistro,
     canActivate: [invitacionGuard] 
   },
 
-  // Manejo de rutas no encontradas
   { path: '**', redirectTo: '' }
 ];
