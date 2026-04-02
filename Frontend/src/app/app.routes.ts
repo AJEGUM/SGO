@@ -52,6 +52,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
         title: 'Gestión de Usuarios - SGO'
       },
+      { 
+        path: 'gestor-ia', 
+        loadComponent: () => import('./pages/admin/gestor-ia/gestor-ia').then(m => m.GestorIa),
+        title: 'Gestor IA - SGO'
+      },
       { path: '', redirectTo: 'importar', pathMatch: 'full' }
     ]
   },
