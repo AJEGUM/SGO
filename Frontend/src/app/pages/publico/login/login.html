@@ -82,19 +82,91 @@
         </div>
 
         <button type="button" (click)="loginConGoogle()" 
-          class="w-full group relative bg-white border-2 border-slate-200 text-slate-700 py-5 rounded-2xl font-black text-[12px] uppercase tracking-[0.2em] hover:border-sena hover:bg-slate-50 transition-all flex items-center justify-center gap-4 shadow-sm">
-          <i class="pi pi-google text-red-500 text-xl"></i>
-          <span>Ingresar con Google</span>
+          class="w-full group relative bg-white border border-slate-200 text-slate-600 py-4 rounded-2xl font-bold text-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-sm mb-4">
+          
+          <div class="w-5 h-5 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-full h-full">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+          </div>
+
+          <span class="tracking-tight">Continuar con Google</span>
         </button>
       </form>
 
       <div class="mt-12 text-center">
-        <p class="text-sm text-gray-500 font-medium">
+        <p class="text-sm text-slate-500 font-medium">
           ¿No tiene acceso? 
-          <a href="#" class="text-sena font-bold hover:underline">Solicitar a Coordinación</a>
+          <button (click)="mostrarModalInfo = true" class="text-sena font-bold hover:underline cursor-pointer">
+            Solicitar a Coordinación
+          </button>
         </p>
       </div>
 
     </div>
   </div>
 </div>
+
+@if (mostrarModalInfo) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="mostrarModalInfo = false"></div>
+
+    <div class="relative bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-fade-up">
+      
+      <div class="bg-slate-50 p-8 border-b border-slate-100 flex items-center gap-4">
+        <div class="w-14 h-14 bg-sena/10 rounded-2xl flex items-center justify-center text-sena">
+          <i class="pi pi-info-circle text-2xl"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Solicitud de Acceso</h2>
+          <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Protocolo Administrativo</p>
+        </div>
+      </div>
+
+      <div class="p-8 space-y-6">
+        <p class="text-slate-600 leading-relaxed">
+          Para garantizar la seguridad del <strong class="text-slate-900">SGO + IA</strong>, 
+          el acceso está restringido a instructores y personal administrativo autorizado 
+          por el <strong class="text-slate-900">CBI SENA Palmira</strong>.
+        </p>
+
+        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <i class="pi pi-envelope"></i> Paso a seguir:
+          </h3>
+          <p class="text-sm text-slate-700">
+            Envíe un correo electrónico a la coordinación académica para su vinculación:
+          </p>
+          
+          <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center justify-between group">
+            <code class="text-sena font-bold text-sm">coordinacion.cbi@sena.edu.co</code>
+            <button class="text-slate-300 hover:text-sena transition-colors" title="Copiar correo">
+              <i class="pi pi-copy"></i>
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Información requerida:</p>
+            <ul class="text-xs text-slate-600 space-y-1 ml-4 list-disc italic">
+              <li>Nombre completo y número de documento.</li>
+              <li>Correo institucional (@sena.edu.co).</li>
+              <li>Programas de formación a los que pertenece.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 bg-slate-50 flex justify-end">
+        <button 
+          (click)="mostrarModalInfo = false"
+          class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-sena transition-all shadow-lg shadow-slate-200">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+}
