@@ -52,6 +52,6 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('tokenSGO');
-    window.location.href = '/login';
+    window.location.href = '/';
   }
 }

@@ -16,6 +16,16 @@ export const routes: Routes = [
     title: 'SGO - Login'
   },
   {
+    path: 'como-funciona',
+    loadComponent: () => import('./pages/publico/como-funciona/como-funciona').then(m => m.ComoFunciona),
+    title: 'Como funciona'
+  },  
+  {
+    path: 'beneficios',
+    loadComponent: () => import('./pages/publico/beneficios/beneficios').then(m => m.Beneficios),
+    title: 'Beneficios'
+  },
+  {
     path: 'login-success',
     loadComponent: () => import('./pages/auth/login-success/login-success').then(m => m.LoginSuccess),
   },
@@ -48,9 +58,19 @@ export const routes: Routes = [
         title: 'Importar Datos - SGO'
       },
       { 
+        path: 'fichas', 
+        loadComponent: () => import('./pages/admin/gestion-fichas/gestion-fichas').then(m => m.GestionFichas),
+        title: 'Gestion de fichas - SGO'
+      },
+      { 
         path: 'usuarios', 
         loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
         title: 'Gestión de Usuarios - SGO'
+      },
+      { 
+        path: 'gestor-ia', 
+        loadComponent: () => import('./pages/admin/gestor-ia/gestor-ia').then(m => m.GestorIa),
+        title: 'Gestor IA - SGO'
       },
       { path: '', redirectTo: 'importar', pathMatch: 'full' }
     ]

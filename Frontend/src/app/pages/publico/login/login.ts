@@ -15,6 +15,7 @@ export class Login implements OnInit {
   private route = inject(ActivatedRoute); // Inyectamos la ruta activa
   private router = inject(Router);
 
+  mostrarModalInfo: boolean = false;
   mensajeError: string | null = null;
 
 ngOnInit() {

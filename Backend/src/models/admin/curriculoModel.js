@@ -28,23 +28,6 @@ async insertarDesdeExcelDetallado(info, competencias) {
             programaId = newProg.insertId;
         }
 
-        // 2. GESTIÓN DE LA FICHA
-        // Ahora la ficha solo guarda su número, fechas y el link al programa
-        await connection.query(
-            `INSERT INTO fichas 
-                (numero_ficha, programa_id, fecha_inicio, fecha_fin) 
-             VALUES (?, ?, ?, ?) 
-             ON DUPLICATE KEY UPDATE 
-                fecha_inicio = VALUES(fecha_inicio),
-                fecha_fin = VALUES(fecha_fin)`,
-            [
-                info.numeroFicha, 
-                programaId, 
-                info.fechaInicio,
-                info.fechaFin
-            ]
-        );
-
         // 3. PROCESAR COMPETENCIAS (Vinculadas al programa_id)
         for (const comp of competencias) {
             await connection.query(
@@ -163,20 +146,16 @@ async listarCompetencias(programaId) {
 
 // En curriculoModel.js
 async listarProgramas() {
+    // Agregamos DISTINCT para que solo traiga programas únicos
     const query = `
-        SELECT 
+        SELECT DISTINCT
             p.programa_id,
             p.nombre,
             p.codigo,
             p.version,
-            f.id as ficha_id,
-            f.numero_ficha,
-            f.fecha_inicio, 
-            f.fecha_fin,
             p.created_at
         FROM programas p
-        LEFT JOIN fichas f ON p.programa_id = f.programa_id -- JOIN corregido
-        ORDER BY p.created_at DESC, f.numero_ficha ASC
+        ORDER BY p.created_at DESC
     `;
     const [rows] = await db.query(query);
     return rows;

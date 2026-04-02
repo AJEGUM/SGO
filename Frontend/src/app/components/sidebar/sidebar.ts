@@ -30,7 +30,9 @@ export class Sidebar implements OnInit {
 private readonly CONFIG_MENUS: { [key: number]: any[] } = {
   1: [ // ADMIN
     { label: 'Importar Datos', route: '/admin/importar', icon: 'pi pi-upload' },
-    { label: 'Usuarios', route: '/admin/usuarios', icon: 'pi pi-users' }
+    { label: 'Gestión de Fichas', route: '/admin/fichas', icon: 'pi pi-folder' },
+    { label: 'Usuarios', route: '/admin/usuarios', icon: 'pi pi-users' },
+    { label: 'IA', route: '/admin/gestor-ia', icon: 'pi pi-sparkles' },
   ],
   3: [ // INSTRUCTOR
     { label: 'Dashboard', route: '/instructor/dashboard', icon: 'pi pi-th-large' },

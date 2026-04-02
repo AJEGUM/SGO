@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-slate-50 p-6 lg:p-5 font-sans">
+  <div class="max-w-6xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-2">
+          <i class="pi pi-users text-sena"></i>
+          Gestión de Fichas
+        </h1>
+        <p class="text-slate-500 text-lg italic mt-1">Administra los grupos y vincúlalos a sus programas.</p>
+      </div>
+      
+      <button (click)="mostrarModal = true" 
+              class="bg-sena text-white px-6 py-3.5 rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-sena/20">
+        <i class="pi pi-plus"></i>
+        Nueva Ficha
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="md:col-span-2 relative">
+        <i class="pi pi-search absolute left-4 top-4 text-slate-400"></i>
+        <input type="text" 
+               [(ngModel)]="filtroTexto" 
+               (input)="aplicarFiltros()"
+               placeholder="Buscar por número o programa..."
+               class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-sena/10 transition-all shadow-sm">
+      </div>
+      
+      <div class="relative">
+        <select [(ngModel)]="filtroProgramaId" 
+                (change)="aplicarFiltros()"
+                class="w-full p-3.5 bg-white border border-slate-200 rounded-2xl outline-none appearance-none cursor-pointer shadow-sm">
+          <option [ngValue]="0">Todos los programas</option>
+          @for (p of programas; track p.programa_id) {
+            <option [ngValue]="p.programa_id">{{ p.nombre }}</option>
+          }
+        </select>
+        <i class="pi pi-chevron-down absolute right-4 top-4 text-[10px] text-slate-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <app-tabla-fichas 
+      [fichas]="fichasFiltradas" 
+      [loading]="loading" 
+      (eliminar)="eliminarFicha($event)">
+    </app-tabla-fichas>
+
+  </div>
+</div>
+
+@if (mostrarModal) {
+  <app-modal-ficha 
+    [programas]="programas"
+    (cerrar)="mostrarModal = false"
+    (guardar)="onGuardarFicha($event)">
+  </app-modal-ficha>
+}
