@@ -89,3 +89,10 @@
 
   </div>
 </div>
+
+@if (showModal) {
+  <app-modal-test 
+    [competencia]="competenciaSeleccionada" 
+    (close)="cerrarModal()">
+  </app-modal-test>
+}
