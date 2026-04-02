@@ -28,3 +28,22 @@ export const getFichasPorPrograma = async (req, res) => {
         res.status(500).json({ ok: false, msg: error.message });
     }
 };
+
+export const checkEvaluacion = async (req, res) => {
+    try {
+        const { fichaId, competenciaId } = req.query;
+        
+        if (!fichaId || !competenciaId) {
+            return res.status(400).json({ ok: false, msg: 'Faltan parámetros: fichaId y competenciaId' });
+        }
+        
+        const evaluacion = await fichasService.validarTest(fichaId, competenciaId);
+        
+        res.json({ 
+            existe: !!evaluacion, 
+            detalles: evaluacion 
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, msg: error.message });
+    }
+};

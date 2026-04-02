@@ -31,5 +31,16 @@ export const fichasModel = {
         const query = `SELECT * FROM fichas WHERE programa_id = ? ORDER BY numero_ficha ASC`;
         const [rows] = await db.query(query, [programaId]);
         return rows;
+    },
+
+    async verificarExistencia(fichaId, competenciaId) {
+        const query = `
+            SELECT id, activo, fecha_lanzamiento 
+            FROM evaluaciones_diagnosticas 
+            WHERE ficha_id = ? AND competencia_id = ? 
+            LIMIT 1
+        `;
+        const [rows] = await db.query(query, [fichaId, competenciaId]);
+        return rows[0] || null; // Retornamos el objeto o null
     }
 };

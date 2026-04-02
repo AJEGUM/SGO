@@ -1,0 +1,42 @@
+<div class="animate-in fade-in zoom-in duration-300">
+      <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+        <button (click)="onCancelar()" class="text-slate-400 hover:text-slate-600 transition-colors">
+          <i class="pi pi-arrow-left text-lg"></i>
+        </button>
+        <div class="text-left">
+          <h3 class="text-lg font-bold text-slate-800">Parámetros del RAG</h3>
+          <p class="text-xs text-slate-400 uppercase tracking-tighter">Configuración de Inteligencia Artificial</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Número de Preguntas</label>
+          <input type="number" [(ngModel)]="config.numPreguntas" 
+            class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-sena/10 outline-none font-bold">
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nivel de Dificultad</label>
+          <select [(ngModel)]="config.dificultad" 
+            class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold appearance-none">
+            <option value="basico">Principiante / Inducción</option>
+            <option value="intermedio">Técnico Medio</option>
+            <option value="avanzado">Experto / Proyecto</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2 space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Enfoque Personalizado (Opcional)</label>
+          <textarea [(ngModel)]="config.enfoque" rows="3" placeholder="Ej: Enfocarse en seguridad en el trabajo..."
+            class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-medium text-sm"></textarea>
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        <button (click)="iniciarGeneracion()" 
+          class="flex-1 bg-sena text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:shadow-lg hover:shadow-sena/30 transition-all flex items-center justify-center gap-3">
+          <i class="pi pi-sparkles"></i> Iniciar Motor IA
+        </button>
+      </div>
+    </div>

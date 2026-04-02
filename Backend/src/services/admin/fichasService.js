@@ -12,5 +12,9 @@ export const fichasService = {
 
     async listarPorPrograma(programaId) {
         return await fichasModel.filtrarPorPrograma(programaId);
+    },
+    
+    async validarTest(fichaId, competenciaId) {
+        return await fichasModel.verificarExistencia(fichaId, competenciaId);
     }
 };

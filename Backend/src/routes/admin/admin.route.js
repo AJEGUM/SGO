@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { protectAdmin } from '../../middlewares/auth.middleware.js'; // <-- IMPORTANTE
 import { getCompetencias, getDetalleCurriculo, getProgramas, importarDiseno, patchCurriculo } from '../../controllers/admin/admin.controller.js'; // Asegúrate que el nombre coincida
 import { invitar, obtenerRoles, obtenerUsuarios } from '../../controllers/admin/users.controller.js';
-import { crearFicha, getFichas, getFichasPorPrograma } from '../../controllers/admin/fichas.controller.js';
+import { checkEvaluacion, crearFicha, getFichas, getFichasPorPrograma } from '../../controllers/admin/fichas.controller.js';
 import multer from 'multer';
 
 const storage = multer.memoryStorage(); 
@@ -27,5 +27,6 @@ router.get('/usuarios', obtenerUsuarios);
 router.post('/fichas', crearFicha);
 router.get('/fichas', getFichas);
 router.get('/programas/:programaId/fichas', getFichasPorPrograma);
+router.get('/evaluaciones/check', checkEvaluacion);
 
 export default router;
