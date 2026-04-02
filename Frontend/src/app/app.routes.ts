@@ -48,6 +48,11 @@ export const routes: Routes = [
         title: 'Importar Datos - SGO'
       },
       { 
+        path: 'fichas', 
+        loadComponent: () => import('./pages/admin/gestion-fichas/gestion-fichas').then(m => m.GestionFichas),
+        title: 'Gestion de fichas - SGO'
+      },
+      { 
         path: 'usuarios', 
         loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
         title: 'Gestión de Usuarios - SGO'
