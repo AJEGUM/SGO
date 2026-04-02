@@ -18,7 +18,7 @@ export class ConfiguradorTest {
   @Output() generar = new EventEmitter<any>();
 
   config = {
-    numPreguntas: 10,
+    numPreguntas: 5,
     dificultad: 'intermedio',
     enfoque: ''
   };

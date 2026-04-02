@@ -108,13 +108,18 @@
                     <div class="w-20 h-20 bg-sena/10 text-sena rounded-3xl flex items-center justify-center mx-auto mb-6 border border-sena/20">
                       <i class="pi pi-bolt text-4xl"></i>
                     </div>
+
                     <h2 class="text-2xl font-black text-slate-900 mb-2">Sin Evaluación</h2>
-                    <p class="text-slate-500 mb-8 leading-relaxed">No se ha detectado un test para esta ficha. Utilice el motor RAG para generar uno basado en el diseño curricular.</p>
+                    <p class="text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">
+                      No se ha detectado un test para esta ficha. Pulse el botón 
+                      <span class="text-sena font-bold">Crear test con IA</span> 
+                      según el diseño del programa.
+                    </p>
                     
                     <button (click)="mostrandoConfigurador = true"
                       class="w-full max-w-md bg-sena text-white px-8 py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-sena/20 flex items-center justify-center gap-3 mx-auto">
                       <i class="pi pi-sparkles"></i>
-                      Generar Evaluación con IA
+                      Crear Test con IA
                     </button>
                   </div>
                 } @else {
