@@ -43,10 +43,10 @@
           <div class="relative group">
             <i class="pi pi-list absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
             <select [(ngModel)]="competenciaId" [disabled]="!programaId" (change)="verificarExistenciaTest()"
-              class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-bold text-slate-700 appearance-none cursor-pointer disabled:cursor-not-allowed">
+              class="w-full pl-12 pr-10 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-medium text-sm text-slate-700 appearance-none cursor-pointer disabled:cursor-not-allowed whitespace-normal">
               <option [ngValue]="null">Seleccionar Competencia...</option>
               @for (c of competencias; track c.id) {
-                <option [ngValue]="c.id">{{ c.nombre }}</option>
+                <option [ngValue]="c.id">{{ c.nombre.length > 80 ? (c.nombre | slice:0:80) + '...' : c.nombre }}</option>
               }
             </select>
           </div>
