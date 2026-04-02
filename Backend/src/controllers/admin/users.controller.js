@@ -22,6 +22,8 @@ export const invitar = async (req, res) => {
   }
 };
 
+
+
 export const obtenerRoles = async (req, res) => {
     try {
         const roles = await usuariosServices.listarRoles();

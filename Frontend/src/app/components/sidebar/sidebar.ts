@@ -1,41 +1,78 @@
+import { Component, EventEmitter, HostListener, inject, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { AuthService } from '../../services/auth/auth';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
 export class Sidebar implements OnInit {
   @Output() anchoActualizado = new EventEmitter<number>();
+  private authService = inject(AuthService);
+  
+  usuario: any = null;
+  menuItems: any[] = []; // Se llena dinámicamente
 
-  // Llama a esta función cada vez que cambies el ancho (redimensionar o colapsar)
-  actualizarAncho() {
-    this.anchoActualizado.emit(this.anchoSidebar);
-  }
+  // --- VARIABLES DE UI ---
   estaAbiertoMovil = false;
   anchoSidebar = 280; 
   estaRedimensionando = false;
-  anchoMinimo = 80;   // Cuando solo se ven iconos
+  anchoMinimo = 80;   
   anchoMaximo = 450;
-  
-  // Memoria para restaurar el ancho previo
   ultimoAnchoExpandido = 280;
 
-ngOnInit() {
-  const anchoGuardado = localStorage.getItem('sidebar-width');
-  if (anchoGuardado) {
-    this.anchoSidebar = parseInt(anchoGuardado, 10);
-    this.ultimoAnchoExpandido = this.anchoSidebar > this.anchoMinimo ? this.anchoSidebar : 280;
+  // --- DICCIONARIO DE MENÚS POR ROL ---
+// sidebar.component.ts
+private readonly CONFIG_MENUS: { [key: number]: any[] } = {
+  1: [ // ADMIN
+    { label: 'Importar Datos', route: '/admin/importar', icon: 'pi pi-upload' },
+    { label: 'Usuarios', route: '/admin/usuarios', icon: 'pi pi-users' }
+  ],
+  3: [ // INSTRUCTOR
+    { label: 'Dashboard', route: '/instructor/dashboard', icon: 'pi pi-th-large' },
+    { label: 'Mis Programas', route: '/instructor/programas', icon: 'pi pi-book' },
+    { label: 'Gestión de OVAs', route: '/instructor/ovas', icon: 'pi pi-clone' },
+    { label: 'Banco de Preguntas', route: '/instructor/questions', icon: 'pi pi-question-circle' }
+  ],
+  6: [ // APRENDIZ
+    { label: 'Mis OVAs', route: '/aprendiz/mis-ovas', icon: 'pi pi-play' },
+    { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
+  ],
+  2: [ // COORDINADOR
+    { label: 'Mis OVAs', route: '/aprendiz/mis-ovas', icon: 'pi pi-play' },
+    { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
+  ]
+};
+
+  ngOnInit() {
+    // 1. Obtener usuario y asignar su menú según rol
+    this.usuario = this.authService.getUsuarioActual();
+    if (this.usuario && this.usuario.rol_id) {
+      this.menuItems = this.CONFIG_MENUS[this.usuario.rol_id] || [];
+    }
+
+    // 2. Persistencia de ancho
+    const anchoGuardado = localStorage.getItem('sidebar-width');
+    if (anchoGuardado) {
+      this.anchoSidebar = parseInt(anchoGuardado, 10);
+      this.ultimoAnchoExpandido = this.anchoSidebar > this.anchoMinimo ? this.anchoSidebar : 280;
+    }
+    this.actualizarAncho();
   }
-  this.actualizarAncho(); // <-- Añadir esto
-}
 
+  // --- MÉTODOS DE FUNCIONAMIENTO ---
+  actualizarAncho() {
+    this.anchoActualizado.emit(this.anchoSidebar);
+  }
 
+  logout() {
+    this.authService.logout();
+  }
 
-  // Alternar entre colapsado (80px) y el último ancho que eligió el usuario
   alternarSidebar() {
     if (this.anchoSidebar > this.anchoMinimo) {
       this.ultimoAnchoExpandido = this.anchoSidebar;
@@ -50,22 +87,11 @@ ngOnInit() {
   @HostListener('window:mousemove', ['$event'])
   alMoverMouse(evento: MouseEvent) {
     if (!this.estaRedimensionando) return;
-
     let nuevoAncho = evento.clientX;
     if (nuevoAncho >= this.anchoMinimo && nuevoAncho <= this.anchoMaximo) {
       this.anchoSidebar = nuevoAncho;
       this.actualizarAncho();
     }
-  }
-
-  alternarMovil() {
-    this.estaAbiertoMovil = !this.estaAbiertoMovil;
-  }
-
-  iniciarRedimension(evento: MouseEvent) {
-    this.estaRedimensionando = true;
-    document.body.style.cursor = 'col-resize';
-    evento.preventDefault();
   }
 
   @HostListener('window:mouseup')
@@ -74,11 +100,14 @@ ngOnInit() {
       this.estaRedimensionando = false;
       document.body.style.cursor = 'default';
       this.guardarPreferencia();
-      
-      if (this.anchoSidebar > this.anchoMinimo) {
-        this.ultimoAnchoExpandido = this.anchoSidebar;
-      }
+      if (this.anchoSidebar > this.anchoMinimo) this.ultimoAnchoExpandido = this.anchoSidebar;
     }
+  }
+
+  iniciarRedimension(evento: MouseEvent) {
+    this.estaRedimensionando = true;
+    document.body.style.cursor = 'col-resize';
+    evento.preventDefault();
   }
 
   private guardarPreferencia() {
@@ -87,5 +116,9 @@ ngOnInit() {
 
   get estaColapsado() {
     return this.anchoSidebar <= 120;
+  }
+
+  alternarMovil() {
+    this.estaAbiertoMovil = !this.estaAbiertoMovil;
   }
 }

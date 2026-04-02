@@ -1,11 +1,7 @@
--- CONFIGURACIÓN INICIAL
 SET FOREIGN_KEY_CHECKS = 0;
 CREATE DATABASE IF NOT EXISTS sgo;
 USE sgo;
 
--- ==========================================================
--- 1. MÓDULO DE SEGURIDAD Y ACCESO
--- ==========================================================
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_rol VARCHAR(50) UNIQUE NOT NULL,
@@ -38,9 +34,6 @@ CREATE TABLE invitaciones (
     CONSTRAINT fk_inv_rol_fk FOREIGN KEY (rol_id) REFERENCES roles(id)
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 2. MÓDULO CURRICULAR (BASE)
--- ==========================================================
 CREATE TABLE programas (
     programa_id INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(20), 
@@ -50,7 +43,6 @@ CREATE TABLE programas (
     UNIQUE(codigo, version) 
 ) ENGINE=InnoDB;
 
--- 12. INVITACIONES_PROGRAMAS (Lo que el admin le "promete" al invitarlo)
 CREATE TABLE invitaciones_programas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     invitacion_id INT NOT NULL,
@@ -112,15 +104,12 @@ CREATE TABLE asignaciones_raps (
     rap_id INT NOT NULL,
     fase_id INT NOT NULL,
     fecha_eleccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ar_vinculo FOREIGN KEY (asignacion_competencia_id) REFERENCES asignaciones_competencias(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ar_vinculo FOREIGN KEY (asignacion_competencia_id) REFERENCES asignaciones_programas(id) ON DELETE CASCADE,
     CONSTRAINT fk_ar_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE,
     CONSTRAINT fk_ar_fase FOREIGN KEY (fase_id) REFERENCES fases(id) ON DELETE RESTRICT,
-    UNIQUE(rap_id) 
+    UNIQUE(asignacion_competencia_id, rap_id) 
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 4. MÓDULO ACADÉMICO (FICHAS Y APRENDICES)
--- ==========================================================
 CREATE TABLE fichas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_ficha VARCHAR(10) UNIQUE, 
@@ -143,9 +132,6 @@ CREATE TABLE usuario_fichas (
     CONSTRAINT fk_uf_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 5. MÓDULO DE CONTENIDO TÉCNICO (SABER/HACER)
--- ==========================================================
 CREATE TABLE conocimientos_proceso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rap_id INT NOT NULL,
@@ -167,45 +153,47 @@ CREATE TABLE criterios_evaluacion (
     CONSTRAINT fk_crit_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 6. MÓDULO DE OBJETOS VIRTUALES (OVAs)
--- ==========================================================
-CREATE TABLE ovas (
+CREATE TABLE ciclos_didacticos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    asignacion_rap_id INT NOT NULL,
     usuario_creador_id INT NOT NULL, 
-    id_secuencial VARCHAR(10),
+    id_secuencial VARCHAR(10), -- Ej: CD-001
     codigo_anatomia VARCHAR(100) UNIQUE,
-    titulo_ova TEXT,
+    titulo VARCHAR(255),
+    descripcion_general TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ova_asignacion_rap FOREIGN KEY (asignacion_rap_id) REFERENCES asignaciones_raps(id) ON DELETE CASCADE,
-    CONSTRAINT fk_ova_creador FOREIGN KEY (usuario_creador_id) REFERENCES usuarios(id),
-    UNIQUE KEY uk_ova_secuencia (asignacion_rap_id, id_secuencial)
+    CONSTRAINT fk_cd_creador FOREIGN KEY (usuario_creador_id) REFERENCES usuarios(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE ova_secciones (
+CREATE TABLE ciclo_raps (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ova_id INT NOT NULL,
+    ciclo_id INT NOT NULL,
+    asignacion_rap_id INT NOT NULL,
+    CONSTRAINT fk_cr_ciclo FOREIGN KEY (ciclo_id) REFERENCES ciclos_didacticos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cr_rap FOREIGN KEY (asignacion_rap_id) REFERENCES asignaciones_raps(id) ON DELETE CASCADE,
+    UNIQUE(ciclo_id, asignacion_rap_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE ciclo_secciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ciclo_id INT NOT NULL,
     tipo_seccion ENUM('Reflexion', 'Contextualizacion', 'Apropiacion', 'Transferencia') NOT NULL,
     titulo VARCHAR(255),
     contenido_html TEXT, 
     url_recurso_apoyo TEXT, 
     orden INT DEFAULT 1,
-    CONSTRAINT fk_seccion_ova FOREIGN KEY (ova_id) REFERENCES ovas(id) ON DELETE CASCADE
+    CONSTRAINT fk_seccion_ciclo FOREIGN KEY (ciclo_id) REFERENCES ciclos_didacticos(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_ciclo_momento (ciclo_id, tipo_seccion)
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 7. MÓDULO DE EVALUACIÓN Y SEGUIMIENTO
--- ==========================================================
 CREATE TABLE examenes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     seccion_id INT NOT NULL, 
     nombre_examen VARCHAR(255),
     descripcion TEXT,
     ponderacion INT DEFAULT 100,
-    intentos_permitidos INT DEFAULT 1,
+    intentos_permitidos INT DEFAULT 2,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_examen_seccion FOREIGN KEY (seccion_id) REFERENCES ova_secciones(id) ON DELETE CASCADE
+    CONSTRAINT fk_examen_seccion FOREIGN KEY (seccion_id) REFERENCES ciclo_secciones(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE preguntas (
@@ -224,15 +212,16 @@ CREATE TABLE opciones_respuesta (
     CONSTRAINT fk_opcion_pregunta FOREIGN KEY (pregunta_id) REFERENCES preguntas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE seguimiento_ovas (
+CREATE TABLE seguimiento_ciclos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
-    ova_id INT NOT NULL,
+    ciclo_id INT NOT NULL,
+    fase_actual ENUM('Reflexion', 'Contextualizacion', 'Apropiacion', 'Transferencia') DEFAULT 'Reflexion',
     estado ENUM('no_iniciado', 'en_progreso', 'completado') DEFAULT 'no_iniciado',
     fecha_ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_seg_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    CONSTRAINT fk_seg_ova FOREIGN KEY (ova_id) REFERENCES ovas(id) ON DELETE CASCADE,
-    UNIQUE(usuario_id, ova_id)
+    CONSTRAINT fk_seg_ciclo FOREIGN KEY (ciclo_id) REFERENCES ciclos_didacticos(id) ON DELETE CASCADE,
+    UNIQUE(usuario_id, ciclo_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE intentos_examenes (
@@ -245,18 +234,52 @@ CREATE TABLE intentos_examenes (
     CONSTRAINT fk_intento_examen FOREIGN KEY (examen_id) REFERENCES examenes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ==========================================================
--- 8. DATA INICIAL (SEEDERS)
--- ==========================================================
 INSERT INTO roles (nombre_rol, descripcion) VALUES 
-('ADMIN', 'Administrador total del sistema'),
-('INSTRUCTOR', 'Gestor de contenidos y fichas'),
+('ADMIN', 'Administrador total del sistema (Control de usuarios y configuración)'),
+('COORDINADOR', 'Supervisión académica y gestión de procesos del centro'),
+('INSTRUCTOR', 'Gestor de contenidos, diseño curricular y fichas'),
 ('PEDAGOGO', 'Responsable de la validación pedagógica de los objetos de aprendizaje'),
 ('DISENADOR WEB', 'Responsable de la interfaz gráfica y experiencia de usuario de los OVAs'),
-('APRENDIZ', 'Usuario de consulta de OVAs');
+('APRENDIZ', 'Usuario final para consulta y consumo de OVAs');
 
 INSERT INTO fases (sigla, nombre_fase) VALUES 
 ('AN', 'Análisis'),
 ('PL', 'Planeación'),
 ('EJ', 'Ejecución'),
 ('EV', 'Evaluación');
+
+CREATE TABLE plantillas_prompts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_plantilla VARCHAR(100) DEFAULT 'Estándar SENA',
+    prompt_maestro TEXT NOT NULL,
+    creado_por_admin_id INT NOT NULL,
+    CONSTRAINT fk_plantilla_admin FOREIGN KEY (creado_por_admin_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE evaluaciones_diagnosticas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plantilla_id INT NOT NULL,
+    ficha_id INT NOT NULL,
+    competencia_id INT NOT NULL,
+    admin_id INT NOT NULL,
+    anotaciones_especificas TEXT,
+    json_test JSON NOT NULL,
+    activo BOOLEAN DEFAULT FALSE,
+    fecha_lanzamiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_diag_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_diag_comp FOREIGN KEY (competencia_id) REFERENCES competencias(id),
+    CONSTRAINT fk_diag_admin FOREIGN KEY (admin_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE resultados_diagnosticos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    evaluacion_id INT NOT NULL,
+    respuestas_usuario JSON,
+    puntaje DECIMAL(5,2),
+    nivel_detectado ENUM('Bajo', 'Medio', 'Alto'),
+    fecha_presentacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_res_user FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT fk_res_eval FOREIGN KEY (evaluacion_id) REFERENCES evaluaciones_diagnosticas(id) ON DELETE CASCADE,
+    UNIQUE(usuario_id, evaluacion_id)
+) ENGINE=InnoDB;
