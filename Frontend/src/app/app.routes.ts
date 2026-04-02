@@ -24,7 +24,7 @@ export const routes: Routes = [
     path: 'instructor',
     loadComponent: () => import('./pages/instructor/instructor-layout/instructor-layout').then(m => m.InstructorLayout),
     canActivate: [roleGuard],
-    data: { roles: [2] },
+    data: { roles: [3] },
     children: [
       {
         path: 'dashboard',

@@ -30,16 +30,19 @@ export class Sidebar implements OnInit {
 private readonly CONFIG_MENUS: { [key: number]: any[] } = {
   1: [ // ADMIN
     { label: 'Importar Datos', route: '/admin/importar', icon: 'pi pi-upload' },
-    { label: 'Usuarios', route: '/admin/usuarios', icon: 'pi pi-users' },
-    { label: 'Logs Sistema', route: '/admin/chart-line', icon: 'pi pi-chart-line' }
+    { label: 'Usuarios', route: '/admin/usuarios', icon: 'pi pi-users' }
   ],
-  2: [ // INSTRUCTOR
+  3: [ // INSTRUCTOR
     { label: 'Dashboard', route: '/instructor/dashboard', icon: 'pi pi-th-large' },
     { label: 'Mis Programas', route: '/instructor/programas', icon: 'pi pi-book' },
     { label: 'Gestión de OVAs', route: '/instructor/ovas', icon: 'pi pi-clone' },
     { label: 'Banco de Preguntas', route: '/instructor/questions', icon: 'pi pi-question-circle' }
   ],
-  5: [ // APRENDIZ
+  6: [ // APRENDIZ
+    { label: 'Mis OVAs', route: '/aprendiz/mis-ovas', icon: 'pi pi-play' },
+    { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
+  ],
+  2: [ // COORDINADOR
     { label: 'Mis OVAs', route: '/aprendiz/mis-ovas', icon: 'pi pi-play' },
     { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
   ]
