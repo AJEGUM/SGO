@@ -1,13 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
-import { provideRouter } from '@angular/router';
-import { routes } from './app/app.routes';
-import { HttpClientModule } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
+import { appConfig } from './app/app.config'; // Importamos tu configuración con el interceptor
 
-bootstrapApplication(App, {
-  providers: [
-    provideRouter(routes),
-    importProvidersFrom(HttpClientModule)
-  ]
-});
+bootstrapApplication(App, appConfig)
+  .catch((err) => console.error(err));
