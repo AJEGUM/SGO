@@ -1,1 +1,91 @@
-<p>gestor-ia works!</p>
+<div class="min-h-screen bg-slate-50 p-6 lg:p-10 font-sans">
+  
+  <header class="max-w-5xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-2">
+      <i class="pi pi-sparkles text-sena"></i>
+      Generación de Tests por Competencia
+    </h1>
+    <p class="text-slate-500">Seleccione un programa para gestionar sus evaluaciones diagnósticas.</p>
+  </header>
+
+  <div class="max-w-5xl mx-auto mb-8">
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+      <label class="block text-sm font-bold text-slate-700 mb-3 ml-1">
+        1. Seleccione el Programa de Formación
+      </label>
+      <div class="relative">
+        <select 
+        [(ngModel)]="programaSeleccionadoId" 
+        (change)="onProgramaChange()"
+        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl appearance-none focus:ring-2 focus:ring-sena outline-none transition-all text-slate-700 font-medium cursor-pointer">
+        
+        <option [ngValue]="null" disabled>Escoja un programa de la lista...</option>
+        
+        @for (p of programas; track p.programa_id) {
+            <option [ngValue]="p.programa_id">{{ p.nombre }}</option>
+        }
+        </select>
+        <i class="pi pi-chevron-down absolute right-5 top-5 text-slate-400 pointer-events-none"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto">
+    
+    @if (!programaSeleccionadoId) {
+      <div class="text-center py-20 bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
+        <i class="pi pi-arrow-up text-3xl mb-3"></i>
+        <p>Debe seleccionar un programa para ver las competencias disponibles.</p>
+      </div>
+    }
+
+    @if (cargandoCompetencias) {
+      <div class="text-center py-20">
+        <i class="pi pi-spin pi-spinner text-3xl text-sena mb-2"></i>
+        <p class="text-slate-500 font-medium">Cargando competencias del programa...</p>
+      </div>
+    }
+
+    @if (programaSeleccionadoId && !cargandoCompetencias) {
+      <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm animate-fade-in">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Competencias Vinculadas</h2>
+          <span class="bg-sena/10 text-sena px-3 py-1 rounded-full text-xs font-bold">
+            {{ competencias.length }} Total
+          </span>
+        </div>
+
+        <div class="divide-y divide-slate-100">
+          @for (item of competencias; track item.id) {
+            <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors group">
+              <div class="max-w-2xl">
+                <div class="flex items-center gap-3 mb-1">
+                  <span class="text-xs font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
+                    {{ item.codigo_norma }}
+                  </span>
+                </div>
+                <h4 class="text-lg font-bold text-slate-800 group-hover:text-sena transition-colors">
+                  {{ item.nombre }}
+                </h4>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button 
+                  (click)="generarTest(item)"
+                  class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-black transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-slate-200">
+                  <i class="pi pi-bolt"></i>
+                  Generar Test
+                </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="p-10 text-center text-slate-400">
+              No se encontraron competencias para este programa.
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
