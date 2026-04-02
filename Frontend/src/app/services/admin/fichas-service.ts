@@ -31,4 +31,8 @@ export class FichasService {
   crearFicha(ficha: Ficha): Observable<any> {
     return this.http.post(`${this.apiUrl}/fichas`, ficha);
   }
+
+  checkTestInicial(fichaId: number, competenciaId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/evaluaciones/check?fichaId=${fichaId}&competenciaId=${competenciaId}`);
+  }
 }

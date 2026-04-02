@@ -14,7 +14,7 @@
   --color-sena: #39a900;
 }
 
-a, button{
+a, button, select{
   cursor: pointer;
 }
 
