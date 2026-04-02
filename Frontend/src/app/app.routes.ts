@@ -16,6 +16,16 @@ export const routes: Routes = [
     title: 'SGO - Login'
   },
   {
+    path: 'como-funciona',
+    loadComponent: () => import('./pages/publico/como-funciona/como-funciona').then(m => m.ComoFunciona),
+    title: 'Como funciona'
+  },  
+  {
+    path: 'beneficios',
+    loadComponent: () => import('./pages/publico/beneficios/beneficios').then(m => m.Beneficios),
+    title: 'Beneficios'
+  },
+  {
     path: 'login-success',
     loadComponent: () => import('./pages/auth/login-success/login-success').then(m => m.LoginSuccess),
   },
