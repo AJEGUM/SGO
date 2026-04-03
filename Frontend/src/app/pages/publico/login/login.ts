@@ -18,25 +18,27 @@ export class Login implements OnInit {
   mostrarModalInfo: boolean = false;
   mensajeError: string | null = null;
 
-ngOnInit() {
-  this.route.queryParams.subscribe(params => {
-    // 1. ¿Viene un token en la URL? (Ej: ?token=ey...)
-    if (params['token']) {
-      localStorage.setItem('tokenSGO', params['token']);
-      
-      // 2. Ahora que ya hay token, navegamos al dashboard o donde corresponda
-      // Al navegar por Router, el Interceptor ya estará listo para la próxima petición
-      this.router.navigate(['/instructor']); 
-      return;
-    }
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['token']) {
+        // 1. Guardar token
+        localStorage.setItem('tokenSGO', params['token']);
+        
+        // 2. Obtener usuario (para saber el rol)
+        const user = this.authService.getUsuarioActual();
+        
+        // 3. Redirección profesional y dinámica
+        if (user) {
+          this.authService.redirigirSegunRol(user.rol_id);
+        }
+        return;
+      }
 
-    // 3. Si no hay token, verificar si hay errores
-    if (params['error']) {
-      const errorKey = params['error'];
-      this.mensajeError = this.mapearError(errorKey);
-    }
-  });
-}
+      if (params['error']) {
+        this.mensajeError = this.mapearError(params['error']);
+      }
+    });
+  }
 
 private mapearError(key: string): string {
   const errores: any = {

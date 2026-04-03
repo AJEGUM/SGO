@@ -74,7 +74,6 @@ const layoutBase = (urlRegistro, badge, titulo, mensaje, pasos) => {
 `;
 };
 
-// Las plantillas reciben la URL (u) que viene del Service
 export const plantillas = {
   1: (u) => layoutBase(
     u, 'ADMINISTRADOR', 'Gestión de Infraestructura', 
@@ -83,18 +82,25 @@ export const plantillas = {
      <li>Supervisar las estadísticas globales de los OVAs.</li>`
   ),
   2: (u) => layoutBase(
+    u, 'COORDINADOR', 'Liderazgo Académico', 
+    'Tu visión estratégica permite alinear los proyectos de formación con los objetivos del centro. Eres el puente entre la parte administrativa y la ejecución pedagógica de los instructores.',
+    `<li>Monitorear el avance de las fichas de formación.</li>
+     <li>Asignar instructores a competencias específicas.</li>
+     <li>Validar el cumplimiento de metas institucionales.</li>`
+  ),
+  3: (u) => layoutBase(
     u, 'INSTRUCTOR', 'Experto Temático', 
     'Tu experiencia técnica es el motor de los OVAs. Tu propósito es estructurar contenidos precisos que faciliten el aprendizaje de los aprendices en sus respectivas competencias.',
     `<li>Vincular programas de formación.</li>
      <li>Cargar los contenidos técnicos de tus competencias.</li>`
   ),
-  3: (u) => layoutBase(
+  4: (u) => layoutBase(
     u, 'PEDAGOGO', 'Asesoría Pedagógica', 
     'Eres el filtro de calidad educativa. Tu misión es asegurar que cada Objeto Virtual cumpla con los lineamientos pedagógicos institucionales.',
     `<li>Revisar y validar la estructura de los OVAs.</li>
      <li>Emitir conceptos técnicos de aprobación.</li>`
   ),
-  4: (u) => layoutBase(
+  5: (u) => layoutBase(
     u, 'DISEÑADOR', 'Diseño Web & Multimedia', 
     'Le das vida visual a la educación. Tu propósito es transformar los contenidos en experiencias visuales atractivas y accesibles.',
     `<li>Diseñar interfaces para los nuevos objetos.</li>
