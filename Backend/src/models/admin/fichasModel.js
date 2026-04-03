@@ -35,7 +35,7 @@ export const fichasModel = {
 
     async verificarExistencia(fichaId, competenciaId) {
         const query = `
-            SELECT id, activo, fecha_lanzamiento 
+            SELECT id, activo, fecha_lanzamiento, json_test
             FROM evaluaciones_diagnosticas 
             WHERE ficha_id = ? AND competencia_id = ? 
             LIMIT 1
