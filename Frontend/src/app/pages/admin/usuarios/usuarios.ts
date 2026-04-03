@@ -24,8 +24,19 @@ export class Usuarios implements OnInit {
     this.invitacionForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       rol_id: ['', Validators.required],
-      // Inicializamos como array vacío explícito
       programas: [[]] 
+    });
+
+    // Escuchamos el cambio de rol para manejar la validación dinámicamente
+    this.invitacionForm.get('rol_id')?.valueChanges.subscribe(rolId => {
+      const programasControl = this.invitacionForm.get('programas');
+      if (rolId == '3') { // ID de Instructor
+        programasControl?.setValidators([Validators.required, Validators.minLength(1)]);
+      } else {
+        programasControl?.clearValidators();
+        programasControl?.setValue([]); // Limpiamos la selección si cambia de rol
+      }
+      programasControl?.updateValueAndValidity();
     });
   }
 
@@ -47,32 +58,26 @@ export class Usuarios implements OnInit {
     this.adminService.obtenerUsuarios();
   }
 
+  get esInstructor(): boolean {
+    return this.invitacionForm.get('rol_id')?.value == '3';
+  }
+
   enviarInvitacion(): void {
     if (this.invitacionForm.invalid) return;
-
     this.cargando = true;
 
-    // --- LIMPIEZA DE DATOS ANTES DE ENVIAR ---
     const rawValues = this.invitacionForm.value;
-    
     const data: InvitacionData = {
       email: rawValues.email,
       rol_id: Number(rawValues.rol_id),
-      // Filtramos cualquier valor nulo, undefined o vacío que el select haya colado
-      programas: Array.isArray(rawValues.programas) 
-        ? rawValues.programas.filter((p: any) => p !== null && p !== undefined && p !== '') 
-        : []
+      // Solo enviamos programas si es instructor
+      programas: this.esInstructor ? rawValues.programas : []
     };
 
     this.adminService.enviarInvitacion(data).subscribe({
       next: (res) => {
         alert('¡Invitación enviada con éxito!');
-        // Reseteamos a valores limpios
-        this.invitacionForm.reset({
-          email: '',
-          rol_id: '',
-          programas: []
-        });
+        this.invitacionForm.reset({ email: '', rol_id: '', programas: [] });
         this.cargando = false;
       },
       error: (err) => {

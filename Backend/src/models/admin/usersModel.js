@@ -48,8 +48,10 @@ async guardarInvitacionCompleta(data) {
   },
 
   async obtenerRoles() {
-    const [rows] = await pool.query('SELECT id, nombre_rol FROM roles');
-    return rows;
+      const [rows] = await pool.query(
+          'SELECT id, nombre_rol FROM roles WHERE nombre_rol NOT IN ("APRENDIZ", "Aprendiz")'
+      );
+      return rows;
   },
 
   async obtenerTodosUsusarios() {
