@@ -5,6 +5,7 @@ import { getCompetencias, getDetalleCurriculo, getProgramas, importarDiseno, pat
 import { invitar, obtenerRoles, obtenerUsuarios } from '../../controllers/admin/users.controller.js';
 import { checkEvaluacion, crearFicha, getFichas, getFichasPorPrograma } from '../../controllers/admin/fichas.controller.js';
 import multer from 'multer';
+import { postGenerarTestIA, postGuardarTestEditado } from '../../controllers/admin/testInicial.controller.js';
 
 const storage = multer.memoryStorage(); 
 const upload = multer({ storage }); 
@@ -28,5 +29,9 @@ router.post('/fichas', crearFicha);
 router.get('/fichas', getFichas);
 router.get('/programas/:programaId/fichas', getFichasPorPrograma);
 router.get('/evaluaciones/check', checkEvaluacion);
+
+// IA
+router.post('/ia/generar-evaluacion', postGenerarTestIA);
+router.post('/evaluaciones/guardar', postGuardarTestEditado);
 
 export default router;

@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-slate-50 p-6 lg:p-10 font-sans">
-  
+
   <header class="max-w-6xl mx-auto mb-10">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
@@ -16,55 +16,42 @@
   <div class="max-w-6xl mx-auto mb-8">
     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
       <div class="absolute top-0 right-0 w-40 h-40 bg-sena/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-      
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-3">
           <label class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-            <span class="w-5 h-5 rounded-full bg-sena text-white flex items-center justify-center text-[8px]">1</span>
-            Programa
+            <span class="w-5 h-5 rounded-full bg-sena text-white flex items-center justify-center text-[8px]">1</span> Programa
           </label>
           <div class="relative group">
             <i class="pi pi-book absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
-            <select [(ngModel)]="programaId" (change)="onProgramaChange()"
-              class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-bold text-slate-700 appearance-none cursor-pointer">
+            <select [(ngModel)]="programaId" (change)="onProgramaChange()" class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 transition-all font-bold text-slate-700 appearance-none cursor-pointer">
               <option [ngValue]="null">Seleccionar Programa...</option>
-              @for (p of programas; track p.programa_id) {
-                <option [ngValue]="p.programa_id">{{ p.nombre }}</option>
-              }
+              @for (p of programas; track p.programa_id) { <option [ngValue]="p.programa_id">{{ p.nombre }}</option> }
             </select>
           </div>
         </div>
 
         <div class="space-y-3" [class.opacity-40]="!programaId">
           <label class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[8px]" [class.bg-sena]="programaId" [class.text-white]="programaId">2</span>
-            Competencia
+            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[8px]" [class.bg-sena]="programaId" [class.text-white]="programaId">2</span> Competencia
           </label>
           <div class="relative group">
             <i class="pi pi-list absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
-            <select [(ngModel)]="competenciaId" [disabled]="!programaId" (change)="verificarExistenciaTest()"
-              class="w-full pl-12 pr-10 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-medium text-sm text-slate-700 appearance-none cursor-pointer disabled:cursor-not-allowed whitespace-normal">
+            <select [(ngModel)]="competenciaId" [disabled]="!programaId" (change)="verificarExistenciaTest()" class="w-full pl-12 pr-10 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 transition-all text-sm font-medium text-slate-700 appearance-none cursor-pointer">
               <option [ngValue]="null">Seleccionar Competencia...</option>
-              @for (c of competencias; track c.id) {
-                <option [ngValue]="c.id">{{ c.nombre.length > 80 ? (c.nombre | slice:0:80) + '...' : c.nombre }}</option>
-              }
+              @for (c of competencias; track c.id) { <option [ngValue]="c.id">{{ c.nombre | slice:0:80 }}...</option> }
             </select>
           </div>
         </div>
 
         <div class="space-y-3" [class.opacity-40]="!programaId">
           <label class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[8px]" [class.bg-sena]="programaId" [class.text-white]="programaId">3</span>
-            Ficha (Grupo)
+            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[8px]" [class.bg-sena]="programaId" [class.text-white]="programaId">3</span> Ficha
           </label>
           <div class="relative group">
             <i class="pi pi-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
-            <select [(ngModel)]="fichaId" [disabled]="!programaId" (change)="verificarExistenciaTest()"
-              class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-bold text-slate-700 appearance-none cursor-pointer disabled:cursor-not-allowed">
+            <select [(ngModel)]="fichaId" [disabled]="!programaId" (change)="verificarExistenciaTest()" class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 transition-all font-bold text-slate-700 appearance-none cursor-pointer">
               <option [ngValue]="null">Seleccionar Ficha...</option>
-              @for (f of fichasFiltradas; track f.id) {
-                <option [ngValue]="f.id">{{ f.numero_ficha }}</option>
-              }
+              @for (f of fichasFiltradas; track f.id) { <option [ngValue]="f.id">{{ f.numero_ficha }}</option> }
             </select>
           </div>
         </div>
@@ -74,76 +61,93 @@
 
   <div class="max-w-6xl mx-auto">
     @if (programaId && competenciaId && fichaId) {
-      <div class="bg-white rounded-[2.5rem] border border-slate-200 p-10 text-center animate-in shadow-sm min-h-[400px] flex items-center justify-center">
-        
-        @if (cargandoEstado) {
-          <div>
-            <i class="pi pi-spin pi-spinner text-4xl text-sena mb-4"></i>
-            <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Consultando Base de Datos...</p>
-          </div>
-        } @else {
-          
-          <div class="w-full">
-            @if (testExistente) {
-              <div class="max-w-md mx-auto animate-in fade-in zoom-in">
-                <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-emerald-100">
-                  <i class="pi pi-check-circle text-4xl"></i>
-                </div>
-                <h2 class="text-2xl font-black text-slate-900 mb-2">Evaluación Lista</h2>
-                <p class="text-slate-500 mb-8 leading-relaxed">Esta ficha ya cuenta con un test generado para esta competencia.</p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2">
-                    <i class="pi pi-eye"></i> Ver Resultados
-                  </button>
-                  <button (click)="generarNuevo()" class="bg-white border border-slate-200 text-slate-600 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">
-                    Regenerar con IA
-                  </button>
-                </div>
+      
+      @if (cargandoEstado || (!testVisualizar && !mostrandoConfigurador)) {
+        <div class="bg-white rounded-[2.5rem] border border-slate-200 p-10 text-center animate-in shadow-sm min-h-[400px] flex items-center justify-center mb-8">
+          @if (cargandoEstado) {
+            <div class="animate-pulse">
+              <i class="pi pi-spin pi-spinner text-4xl text-sena mb-4"></i>
+              <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Consultando Base de Datos...</p>
+            </div>
+          } @else if (!testExistente) {
+            <div class="animate-in fade-in zoom-in">
+              <div class="w-20 h-20 bg-sena/10 text-sena rounded-3xl flex items-center justify-center mx-auto mb-6 border border-sena/20">
+                <i class="pi pi-bolt text-4xl"></i>
               </div>
-            } @else {
-              <div class="max-w-2xl mx-auto">
-                @if (!mostrandoConfigurador) {
-                  <div class="animate-in fade-in zoom-in">
-                    <div class="w-20 h-20 bg-sena/10 text-sena rounded-3xl flex items-center justify-center mx-auto mb-6 border border-sena/20">
-                      <i class="pi pi-bolt text-4xl"></i>
-                    </div>
+              <h2 class="text-2xl font-black text-slate-900 mb-2">Sin Evaluación</h2>
+              <p class="text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">No hay test para esta ficha. Pulsa para crear uno.</p>
+              <button (click)="mostrandoConfigurador = true" class="w-full max-w-md bg-sena text-white px-8 py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-sena/20 flex items-center justify-center gap-3 mx-auto">
+                <i class="pi pi-sparkles"></i> Crear Test con IA
+              </button>
+            </div>
+          }
+        </div>
+      }
 
-                    <h2 class="text-2xl font-black text-slate-900 mb-2">Sin Evaluación</h2>
-                    <p class="text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">
-                      No se ha detectado un test para esta ficha. Pulse el botón 
-                      <span class="text-sena font-bold">Crear test con IA</span> 
-                      según el diseño del programa.
-                    </p>
-                    
-                    <button (click)="mostrandoConfigurador = true"
-                      class="w-full max-w-md bg-sena text-white px-8 py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-sena/20 flex items-center justify-center gap-3 mx-auto">
-                      <i class="pi pi-sparkles"></i>
-                      Crear Test con IA
-                    </button>
-                  </div>
-                } @else {
-                <app-configurador-test 
-                  [programaId]="programaId!" 
-                  [nombrePrograma]="nombreProgramaActivo"
-                  [fichaId]="fichaId!" 
-                  [competenciaId]="competenciaId!"
-                  (cancelar)="mostrandoConfigurador = false"
-                  (generar)="ejecutarIA($event)">
-                </app-configurador-test>
-                }
+      @if (mostrandoConfigurador) {
+        <div class="bg-white rounded-[2.5rem] border border-slate-200 p-10 shadow-sm mb-8">
+          <div *ngIf="cargandoIA" class="flex flex-col items-center justify-center p-12">
+            <i class="pi pi-spin pi-spinner text-sena text-5xl mb-4"></i>
+            <p class="text-slate-600 font-medium animate-pulse">Gemini está redactando las preguntas...</p>
+          </div>
+          <app-configurador-test *ngIf="!cargandoIA" 
+            [programaId]="programaId!" 
+            [nombrePrograma]="nombreProgramaActivo" 
+            [fichaId]="fichaId!" 
+            [competenciaId]="competenciaId!" 
+            (cancelar)="mostrandoConfigurador = false" 
+            (generar)="ejecutarIA($event)">
+          </app-configurador-test>
+        </div>
+      }
+
+      <div class="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+        
+        @if (!testExistente && testVisualizar && !cargandoIA) {
+          <div class="max-w-6xl mx-auto mb-6 animate-in slide-in-from-top-4 duration-500">
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
+                  <i class="pi pi-eye text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Modo Revisión (IA)</h3>
+                  <p class="text-slate-500 text-sm italic">Revise el contenido y la justificación antes de guardar.</p>
+                </div>
               </div>
-            }
+              
+              <div class="flex gap-3 w-full md:w-auto">
+                <button (click)="mostrandoConfigurador = true" class="flex-1 md:flex-none px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs uppercase hover:bg-slate-50 transition-all">
+                  Descartar
+                </button>
+                <button (click)="confirmarYGuardarEvaluacion()" class="flex-1 md:flex-none px-8 py-3 bg-sena text-white rounded-xl font-bold text-xs uppercase tracking-[0.1em] shadow-lg shadow-sena/20 hover:scale-105 transition-all">
+                  <i class="pi pi-save mr-2"></i> Confirmar y Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <app-visualizador-test [test]="testVisualizar"></app-visualizador-test>
+        }
+
+        @if (testExistente && testVisualizar) {
+          <app-visualizado-final-test [datosTest]="testVisualizar"></app-visualizado-final-test>
+          
+          <div class="flex justify-center pb-20">
+            <button (click)="generarNuevo()" class="group flex items-center gap-2 text-slate-400 hover:text-sena transition-colors font-bold text-xs uppercase tracking-widest">
+              <i class="pi pi-refresh group-hover:rotate-180 transition-transform duration-500"></i>
+              ¿Deseas regenerar esta evaluación con IA?
+            </button>
           </div>
         }
       </div>
+
     } @else {
       <div class="text-center py-32 bg-slate-100/50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-slate-400">
         <i class="pi pi-filter text-4xl mb-4 opacity-20"></i>
         <p class="font-bold uppercase text-[10px] tracking-[0.3em]">Filtro incompleto</p>
-        <p class="text-sm italic mt-1">Seleccione los tres parámetros superiores para gestionar la evaluación.</p>
+        <p class="text-sm italic mt-1">Seleccione programa, competencia y ficha para gestionar.</p>
       </div>
     }
   </div>
-
 </div>

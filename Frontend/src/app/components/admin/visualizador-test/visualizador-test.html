@@ -1,0 +1,67 @@
+<div class="grid gap-8">
+  @for (item of test.preguntas; track $index) {
+    <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group hover:border-sena/30 transition-all duration-500">
+      
+      <div class="absolute top-0 right-0 bg-slate-50 text-slate-200 font-black text-9xl -mr-6 -mt-6 pointer-events-none z-0 group-hover:text-sena/5 transition-colors leading-none">
+        {{ $index + 1 }}
+      </div>
+
+      <div class="relative z-10">
+        
+        <div class="flex items-start gap-6 mb-10">
+          <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shrink-0">
+            {{ $index + 1 }}
+          </div>
+          <div class="grow">
+            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Pregunta</label>
+            <textarea [(ngModel)]="item.pregunta" 
+                      [name]="'pregunta-' + $index"
+                      rows="2"
+                      class="w-full bg-white/50 border border-transparent focus:border-sena/20 text-xl md:text-2xl font-bold text-slate-800 leading-snug focus:ring-2 focus:ring-sena/10 rounded-xl p-2 resize-none transition-all">
+            </textarea>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+          @for (opcion of ['a', 'b', 'c', 'd']; track opcion) {
+            <div [class.border-emerald-500]="item.respuesta_correcta === opcion"
+                 [class.bg-emerald-50]="item.respuesta_correcta === opcion"
+                 class="p-5 border border-slate-100 rounded-[1.5rem] flex items-center gap-4 transition-all group/opt">
+              
+              <button type="button" 
+                      (click)="item.respuesta_correcta = opcion"
+                      [class.bg-emerald-500]="item.respuesta_correcta === opcion"
+                      [class.text-white]="item.respuesta_correcta === opcion"
+                      class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center font-black uppercase text-xs shrink-0 transition-all active:scale-90">
+                {{ opcion }}
+              </button>
+              
+              <input [(ngModel)]="item.opciones[opcion]" 
+                     [name]="'opcion-' + $index + '-' + opcion"
+                     class="bg-transparent font-bold text-slate-600 grow text-sm border-none focus:ring-0 p-1 focus:bg-white/40 rounded-md" />
+              
+              @if (item.respuesta_correcta === opcion) {
+                <i class="pi pi-check-circle text-emerald-500 text-xl"></i>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="bg-blue-50/50 border border-blue-100 rounded-[2rem] p-6 md:p-8 flex items-start gap-5">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-md">
+            <i class="pi pi-pencil"></i>
+          </div>
+          <div class="grow">
+            <h4 class="text-blue-900 font-black text-[10px] uppercase tracking-[0.2em] mb-2">Sustentación Técnica (Editable)</h4>
+            <textarea [(ngModel)]="item.justificacion" 
+                      [name]="'justificacion-' + $index"
+                      rows="3"
+                      class="w-full bg-transparent text-blue-800/80 border-none focus:ring-0 leading-relaxed font-medium italic text-sm resize-none focus:bg-white/20 rounded-lg p-1">
+            </textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>
