@@ -1,4 +1,5 @@
-name: Semantic Release
+name: "SGO: Versionamiento y Release"
+run-name: "Despliegue de @${{ github.actor }} en ${{ github.ref_name }}"
 
 on:
   push:
@@ -12,25 +13,25 @@ permissions:
 
 jobs:
   release:
-    name: Release
+    name: "Generar Nueva Versión"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: "Clonando el Repositorio"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Node.js
+      - name: "Configurando Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: "Instalando Dependencias"
         run: npm install
 
-      - name: Release
+      - name: "Ejecutando Semantic Release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
