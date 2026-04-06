@@ -76,6 +76,22 @@ export const routes: Routes = [
     ]
   },
 
+    {
+    path: 'coordinador',
+    loadComponent: () => import('./pages/coordinador/coodinador-layout/coodinador-layout').then(m => m.CoodinadorLayout),
+    canActivate: [roleGuard],
+    data: { roles: [2] },
+    children: [
+      {
+        path: 'gestion-de-expertos',
+        loadComponent: () => import('./pages/coordinador/gestion-expertos/gestion-expertos').then(m => m.GestionExpertos),
+        title: 'Expertos tematicos'
+      },
+      // Agrega aquí futuras rutas: programas, ovas, etc.
+      { path: '', redirectTo: 'gestion-de-expertos', pathMatch: 'full' }
+    ]
+  },
+
   // --- RUTAS DE REGISTRO ---
   { 
     path: 'completar-registro', 

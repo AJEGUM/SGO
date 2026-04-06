@@ -25,8 +25,6 @@ export class Sidebar implements OnInit {
   anchoMaximo = 450;
   ultimoAnchoExpandido = 280;
 
-  // --- DICCIONARIO DE MENÚS POR ROL ---
-// sidebar.component.ts
 private readonly CONFIG_MENUS: { [key: number]: any[] } = {
   1: [ // ADMIN
     { label: 'Importar Datos', route: '/admin/importar', icon: 'pi pi-upload' },
@@ -45,7 +43,7 @@ private readonly CONFIG_MENUS: { [key: number]: any[] } = {
     { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
   ],
   2: [ // COORDINADOR
-    { label: 'Mis OVAs', route: '/aprendiz/mis-ovas', icon: 'pi pi-play' },
+    { label: 'Expertos', route: '/coordinador/gestion-de-expertos', icon: 'pi pi-play' },
     { label: 'Progreso', route: '/aprendiz/progreso', icon: 'pi pi-percentage' }
   ]
 };

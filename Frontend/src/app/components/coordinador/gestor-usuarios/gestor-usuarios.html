@@ -1,0 +1,78 @@
+<div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden relative">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50/80 border-b border-slate-100">
+          <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Identidad del Experto</th>
+          <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Carga Académica</th>
+          <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Estado Disponibilidad</th>
+          <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fichas / Programas</th>
+        </tr>
+      </thead>
+      
+      <tbody class="divide-y divide-slate-50">
+        <tr *ngFor="let exp of expertos" class="group hover:bg-slate-50/50 transition-all duration-300">
+          
+          <td class="px-10 py-7">
+            <div class="flex items-center gap-4">
+              <div class="flex flex-col">
+                <span class="text-base font-black text-slate-800 tracking-tight leading-none mb-1 capitalize">
+                  {{ exp.nombre }}
+                </span>
+                <span class="text-xs text-slate-400 font-medium lowercase">
+                  {{ exp.correo }}
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <td class="px-10 py-7">
+            <div class="flex flex-col items-center gap-2 max-w-[180px] mx-auto">
+              <div class="flex justify-between w-full">
+                <span class="text-[10px] font-black text-slate-500">{{ exp.carga_raps }} RAPs</span>
+                <span class="text-[10px] font-black" [ngStyle]="{'color': 'var(--color-' + exp.color_alerta + '-500)'}">
+                  {{ exp.porcentaje_carga }}%
+                </span>
+              </div>
+              <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden p-[1px]">
+                <div class="h-full rounded-full transition-all duration-1000 shadow-sm"
+                  [ngClass]="{
+                    'bg-emerald-500': exp.color_alerta === 'emerald',
+                    'bg-amber-500': exp.color_alerta === 'amber',
+                    'bg-red-500': exp.color_alerta === 'red'
+                  }"
+                  [style.width.%]="exp.porcentaje_carga">
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <td class="px-10 py-7">
+            <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl border transition-all duration-500"
+              [ngClass]="{
+                'bg-emerald-50 border-emerald-100 text-emerald-700': exp.color_alerta === 'emerald',
+                'bg-amber-50 border-amber-100 text-amber-700': exp.color_alerta === 'amber',
+                'bg-red-50 border-red-100 text-red-700': exp.color_alerta === 'red'
+              }">
+              <div class="w-1.5 h-1.5 rounded-full animate-pulse" 
+                   [ngClass]="'bg-' + exp.color_alerta + '-500'"></div>
+              <span class="text-[10px] font-black uppercase tracking-widest">{{ exp.disponibilidad }}</span>
+            </div>
+          </td>
+
+          <td class="px-10 py-7">
+            <div class="max-w-[200px] group/item">
+              <p class="text-xs font-bold text-slate-500 leading-relaxed truncate" [title]="exp.programas">
+                {{ exp.programas || 'N/A' }}
+              </p>
+              <span class="text-[9px] text-slate-300 font-medium uppercase tracking-tighter group-hover/item:text-sena transition-colors">
+                Ver detalles <i class="pi pi-arrow-right text-[8px]"></i>
+              </span>
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

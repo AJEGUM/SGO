@@ -57,9 +57,12 @@
 
             <td class="px-8 py-5">
               <div class="flex flex-col">
-                <span class="text-xs font-black text-gray-600 tracking-tight">
-                  {{ user.nombre || 'Sin Asignación' }}
-                </span>
+                <button *ngIf="user.programas" (click)="abrirModalProgramas(user)"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-sena/10 border border-gray-100 hover:border-sena/20 rounded-xl transition-all group/btn w-fit">
+                  <i class="pi pi-briefcase text-[10px] text-gray-400 group-hover/btn:text-sena"></i>
+                  <span class="text-xs font-black text-gray-600 group-hover/btn:text-sena tracking-tight">Ver Programas</span>
+                </button>
+                <span *ngIf="!user.programas" class="text-xs font-bold text-gray-300 italic px-2">Sin Asignación</span>
               </div>
             </td>
 
@@ -96,6 +99,42 @@
         </div>
         <p class="text-gray-400 text-sm font-bold uppercase tracking-widest">Esperando registros...</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="mostrarModalProgramas" 
+     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+  
+  <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden animate-in zoom-in-95 duration-300">
+    
+    <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+      <div>
+        <h4 class="text-xl font-black text-gray-900 tracking-tight">Programas Asignados</h4>
+        <p class="text-[11px] text-sena font-bold uppercase tracking-widest">{{ usuarioSeleccionado?.nombre }}</p>
+      </div>
+      <button (click)="cerrarModal()" class="w-10 h-10 rounded-2xl hover:bg-white hover:shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 transition-all">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="p-8">
+      <div class="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div *ngFor="let programa of programasDelUsuario" 
+             class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl hover:border-sena/20 hover:shadow-sm transition-all group">
+          <div class="w-8 h-8 rounded-xl bg-sena/5 flex items-center justify-center text-sena group-hover:bg-sena group-hover:text-white transition-colors">
+            <i class="pi pi-book text-xs"></i>
+          </div>
+          <span class="text-sm font-bold text-gray-700">{{ programa }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 text-right">
+      <button (click)="cerrarModal()" 
+        class="px-6 py-3 bg-white border border-gray-100 text-gray-500 font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-gray-100 transition-all">
+        Cerrar Panel
+      </button>
     </div>
   </div>
 </div>

@@ -48,24 +48,28 @@ async guardarInvitacionCompleta(data) {
   },
 
   async obtenerRoles() {
-    const [rows] = await pool.query('SELECT id, nombre_rol FROM roles');
-    return rows;
+      const [rows] = await pool.query(
+          'SELECT id, nombre_rol FROM roles WHERE nombre_rol NOT IN ("APRENDIZ", "Aprendiz")'
+      );
+      return rows;
   },
 
-  async obtenerTodosUsusarios() {
+async obtenerTodosUsuarios() {
     const query = `
         SELECT 
             u.id, 
             u.nombre, 
             u.correo, 
             u.activo, 
+            u.estado_validacion,
             u.created_at,
             r.nombre_rol,
-            p.nombre
+            GROUP_CONCAT(p.nombre SEPARATOR ', ') AS programas
         FROM usuarios u
         INNER JOIN roles r ON u.rol_id = r.id
         LEFT JOIN asignaciones_programas ap ON u.id = ap.usuario_id
         LEFT JOIN programas p ON ap.programa_id = p.programa_id
+        GROUP BY u.id
         ORDER BY u.created_at DESC
     `;
     const [rows] = await pool.query(query);

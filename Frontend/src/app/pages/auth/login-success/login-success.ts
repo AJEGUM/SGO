@@ -13,38 +13,26 @@ import { AuthService } from '../../../services/auth/auth';
       </p>
     </div>`
 })
+// En login-success.ts
 export class LoginSuccess implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const token = params['token'];
       
       if (token) {
-        // 1. Guardamos el token primero
         localStorage.setItem('tokenSGO', token);
-        
-        // 2. Obtenemos el usuario decodificado desde el servicio
         const user = this.authService.getUsuarioActual();
         
-        // 3. Redirección dinámica basada en el ID de tu DB [cite: 2026-02-27]
-        this.redirigirSegunRol(user.rol_id);
+        if (user) {
+          this.authService.redirigirSegunRol(user.rol_id);
+        }
       } else {
         this.router.navigate(['/login'], { queryParams: { error: 'NO_TOKEN' } });
       }
     });
   }
-
-// Dentro de login-success.ts
-private redirigirSegunRol(rolId: number) {
-  if (rolId === 2) {
-    this.router.navigate(['/instructor/dashboard']);
-  } else if (rolId === 1) {
-    this.router.navigate(['/admin/importar']); // Ruta por defecto para el admin
-  } else {
-    this.router.navigate(['/']); // O al inicio para otros roles
-  }
-}
 }
