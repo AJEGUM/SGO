@@ -39,6 +39,6 @@ export const usuariosServices = {
   },
 
   async listarUsuarios() {
-    return await authModel.obtenerTodosUsusarios();
+    return await authModel.obtenerTodosUsuarios();
   }
 };

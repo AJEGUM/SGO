@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const protectAdmin = (req, res, next) => {
+export const protectAuth = (req, res, next) => {
     // 1. Obtener el token del header (Bearer token)
     const authHeader = req.headers.authorization;
     
