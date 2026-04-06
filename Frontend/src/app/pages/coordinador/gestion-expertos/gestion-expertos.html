@@ -1,1 +1,20 @@
-<p>gestion-expertos works!</p>
+<div class="min-h-screen bg-slate-50/50 p-6 lg:p-10 font-sans animate-in fade-in duration-700">
+  <div class="max-w-7xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <div class="space-y-1">
+        <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter flex items-center gap-3">
+          <span class="w-2 h-10 bg-sena rounded-full"></span>
+          Gestión de Expertos
+        </h2>
+        <p class="text-slate-500 font-medium text-lg italic pl-5">
+          Monitoreo de carga académica y disponibilidad técnica en tiempo real.
+        </p>
+      </div>
+
+    </div>
+
+    <app-gestor-usuarios [expertos]="expertos"></app-gestor-usuarios>
+    
+  </div>
+</div>

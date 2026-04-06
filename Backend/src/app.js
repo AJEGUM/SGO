@@ -6,6 +6,7 @@ import passport from './config/passport.js'; // El archivo que creamos arriba
 // import passport from './config/passportGoogle.js'; // Importamos tu estrategia corregida
 // import authRoutes from './routes/authGoogle.route.js';
 import admin from './routes/admin/admin.route.js';
+import coodinador from './routes/coordinador/coodinador.routes.js';
 import auth from './routes/auth/auth.routes.js';
 
 const app = express();
@@ -48,6 +49,7 @@ app.use(passport.session());
 
 // 5. Rutas
 app.use('/api/admin', admin);
+app.use('/api/coordinador', coodinador);
 app.use('/api/auth', auth);
 // Exportamos solo app para el server.js o index.js
 export { app };
