@@ -7,7 +7,7 @@ import { Footer } from '../../../components/publico/footer/footer';
 @Component({
   selector: 'app-beneficios',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule, Navbar, Footer],
+  imports: [CommonModule, Navbar, Footer],
   templateUrl: './beneficios.html',
   styleUrl: './beneficios.css',
 })
