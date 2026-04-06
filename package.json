@@ -1,0 +1,65 @@
+{
+  "name": "sgo",
+  "version": "0.1.0",
+  "description": "Sistema de Gestión de Objetos - ADSO SENA",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "install-all": "npm install && cd Backend && npm install && cd ../Frontend && npm install",
+    "dev-back": "cd Backend && npm run dev",
+    "dev-front": "cd Frontend && npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AJEGUM/SGO.git"
+  },
+  "keywords": [
+    "SENA",
+    "ADSO",
+    "DevOps"
+  ],
+  "author": "Julián Guevara",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AJEGUM/SGO/issues"
+  },
+  "homepage": "https://github.com/AJEGUM/SGO#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^25.0.3"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            "package.json",
+            "CHANGELOG.md"
+          ]
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
+  }
+}
