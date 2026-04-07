@@ -7,13 +7,12 @@ export const emailService = {
     try {
       const generador = plantillas[rol_id] || plantillas.default;
       
-      // Aquí 'urlRegistro' ya es el link completo: http://.../registro?token=xyz
       const htmlContent = generador(urlRegistro); 
 
       await resend.emails.send({
         from: EMAIL_CONFIG.from, 
         to: [correo],
-        subject: '🚀 Invitación de Acceso - Sistema SGO',
+        subject: 'Invitación de Acceso - Sistema SGO',
         html: htmlContent
       });
       console.log(`[EMAIL_SENT] Enviado a: ${correo}`);

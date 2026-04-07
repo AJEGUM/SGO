@@ -23,18 +23,6 @@
           Has sido invitado como <span class="text-white font-bold decoration-sena decoration-2 underline-offset-4">{{ datosInvitacion.nombre_rol }}</span>.
         </p>
         
-        <div class="space-y-6">
-          <div class="flex items-center gap-3">
-             <div class="h-[1px] w-8 bg-sena"></div>
-             <p class="text-[10px] font-black text-sena uppercase tracking-[0.2em]">Programas Vinculados</p>
-          </div>
-          <div class="flex flex-wrap gap-3">
-            <span *ngFor="let prog of datosInvitacion.programas" 
-              class="px-4 py-2 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-bold uppercase tracking-tight text-slate-300 backdrop-blur-sm">
-              {{ prog.nombre }}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
 

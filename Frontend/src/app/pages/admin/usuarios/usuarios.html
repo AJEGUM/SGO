@@ -36,8 +36,8 @@
               <li class="flex gap-4">
                 <div class="w-6 h-6 rounded-lg bg-white shadow-sm text-sena border border-slate-100 flex items-center justify-center text-[10px] font-bold shrink-0">2</div>
                 <div>
-                  <p class="text-sm text-slate-700 font-bold">Asignación Curricular</p>
-                  <p class="text-xs text-slate-400 italic">Obligatorio solo para instructores técnicos.</p>
+                  <p class="text-sm text-slate-700 font-bold">Asignación de Rol</p>
+                  <p class="text-xs text-slate-400 italic">Define el nivel de acceso al sistema.</p>
                 </div>
               </li>
             </ul>
@@ -46,9 +46,9 @@
           <div class="lg:flex-1 p-8 md:p-10">
             <form [formGroup]="invitacionForm" (ngSubmit)="enviarInvitacion()" class="space-y-6">
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 gap-6">
                 
-                <div class="md:col-span-2 group">
+                <div class="group">
                   <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Correo Institucional</label>
                   <div class="relative">
                     <i class="pi pi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena transition-colors"></i>
@@ -57,7 +57,7 @@
                   </div>
                 </div>
 
-                <div class="group transition-all duration-500" [class.md:col-span-2]="invitacionForm.get('rol_id')?.value != '3'">
+                <div class="group">
                   <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Rol Administrativo</label>
                   <div class="relative">
                     <i class="pi pi-shield absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-sena z-10"></i>
@@ -70,44 +70,11 @@
                   </div>
                 </div>
 
-                @if (invitacionForm.get('rol_id')?.value == '3') {
-                  <div class="group animate-in slide-in-from-right duration-500">
-                    <div class="flex justify-between items-center mb-2 ml-1">
-                      <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Programas Vinculados
-                      </label>
-                      <span class="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-black uppercase">
-                        Requerido
-                      </span>
-                    </div>
-
-                    <div class="relative">
-                      <i class="pi pi-book absolute left-4 top-6 -translate-y-1/2 text-slate-300 group-focus-within:text-sena z-10"></i>
-                      <select formControlName="programas" multiple
-                        class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-sena/10 focus:border-sena/40 transition-all font-medium text-slate-700 cursor-pointer min-h-[120px] shadow-inner">
-                        <option *ngFor="let prog of programas" [value]="prog.id || prog.programa_id">
-                          {{ prog.nombre }}
-                        </option>
-                      </select>
-                    </div>
-                    
-                    <div class="flex justify-between mt-2 ml-1">
-                      <p class="text-[9px] text-slate-400 italic font-medium">Ctrl para selección múltiple</p>
-                      
-                      @if (invitacionForm.get('programas')?.value?.length > 0) {
-                        <p class="text-[9px] text-emerald-600 font-black uppercase">
-                          <i class="pi pi-check-circle"></i> {{ invitacionForm.get('programas')?.value?.length }} Seleccionado(s)
-                        </p>
-                      }
-                    </div>
-                  </div>
-                }
-
               </div>
 
               <div class="flex justify-end pt-4">
                 <button type="submit" 
-                  [disabled]="invitacionForm.invalid || cargando || (invitacionForm.get('rol_id')?.value == '3' && invitacionForm.get('programas')?.value?.length === 0)"
+                  [disabled]="invitacionForm.invalid || cargando"
                   class="bg-sena text-white px-10 py-4 rounded-2xl font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-40 disabled:hover:scale-100 flex items-center gap-3 shadow-lg shadow-sena/20">
                   @if (cargando) {
                     <i class="pi pi-spin pi-spinner"></i>

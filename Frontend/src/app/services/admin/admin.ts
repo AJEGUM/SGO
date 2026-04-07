@@ -6,7 +6,6 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 export interface InvitacionData {
   email: string;
   rol_id: number;
-  programas: number[];
 }
 
 export interface Competencia {
