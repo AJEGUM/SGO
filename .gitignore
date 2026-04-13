@@ -1,7 +1,7 @@
 # Dependencias
 node_modules/
 
-# Archivos de entorno
+# Archivos de entorno dadad
 .env
 .env.local
 .env.*.local
