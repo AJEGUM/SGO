@@ -10,4 +10,22 @@ import { CommonModule } from '@angular/common';
 })
 export class GestorUsuarios {
   @Input() expertos: any[] = [];
+
+  // Estado para el modal
+  isModalOpen = false;
+  selectedExp: any = null;
+
+  abrirModal(experto: any) {
+    this.selectedExp = experto;
+    this.isModalOpen = true;
+    // Bloquear scroll del body cuando el modal está abierto
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarModal() {
+    this.isModalOpen = false;
+    this.selectedExp = null;
+    // Restaurar scroll
+    document.body.style.overflow = 'auto';
+  }
 }
