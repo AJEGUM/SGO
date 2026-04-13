@@ -41,30 +41,6 @@ CREATE TABLE IF NOT EXISTS invitaciones (
     CONSTRAINT fk_inv_rol_fk FOREIGN KEY (rol_id) REFERENCES roles(rol_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS fases_proyecto (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sigla VARCHAR(5) UNIQUE NOT NULL, 
-    nombre_fase VARCHAR(50) NOT NULL
-) ENGINE=InnoDB;
-
--- 2. PROGRAMAS Y COMPETENCIAS (ESTÁTICO)
-CREATE TABLE IF NOT EXISTS programas (
-    programa_id INT AUTO_INCREMENT PRIMARY KEY,
-    codigo VARCHAR(20) NOT NULL, 
-    nombre VARCHAR(255) NOT NULL, 
-    version VARCHAR(10) NOT NULL, 
-    UNIQUE(codigo, version) 
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS competencias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    programa_id INT NOT NULL, 
-    codigo_norma VARCHAR(50) NOT NULL, 
-    nombre TEXT NOT NULL,
-    CONSTRAINT fk_comp_programa FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- 3. SEMILLAS Y CICLOS (EL "MOLDE" O PLANTILLA)
 CREATE TABLE IF NOT EXISTS semillas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     programa_id INT NOT NULL,
@@ -83,17 +59,22 @@ CREATE TABLE IF NOT EXISTS expertos_semillas (
     UNIQUE(experto_id, semilla_id) -- Evita que asignes al mismo experto dos veces a la misma semilla
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS ciclos_didacticos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    semilla_id INT NOT NULL,
-    fase_proyecto_id INT NOT NULL,
-    titulo VARCHAR(255),
-    descripcion_general TEXT,
-    CONSTRAINT fk_cd_semilla FOREIGN KEY (semilla_id) REFERENCES semillas(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cd_fase_proy FOREIGN KEY (fase_proyecto_id) REFERENCES fases_proyecto(id)
+CREATE TABLE IF NOT EXISTS programas (
+    programa_id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(20) NOT NULL, 
+    nombre VARCHAR(255) NOT NULL, 
+    version VARCHAR(10) NOT NULL, 
+    UNIQUE(codigo, version) 
 ) ENGINE=InnoDB;
 
--- EL RAP apunta al ciclo de la semilla
+CREATE TABLE IF NOT EXISTS competencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    programa_id INT NOT NULL, 
+    codigo_norma VARCHAR(50) NOT NULL, 
+    nombre TEXT NOT NULL,
+    CONSTRAINT fk_comp_programa FOREIGN KEY (programa_id) REFERENCES programas(programa_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS resultados_aprendizaje (
     id INT AUTO_INCREMENT PRIMARY KEY,
     competencia_id INT NOT NULL, 
@@ -125,7 +106,22 @@ CREATE TABLE criterios_evaluacion (
     CONSTRAINT fk_crit_rap FOREIGN KEY (rap_id) REFERENCES resultados_aprendizaje(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Aquí ocurre la "Duplicación": Una ficha nace y se le asigna una semilla aprobada.
+CREATE TABLE IF NOT EXISTS ciclos_didacticos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    semilla_id INT NOT NULL,
+    fase_proyecto_id INT NOT NULL,
+    titulo VARCHAR(255),
+    descripcion_general TEXT,
+    CONSTRAINT fk_cd_semilla FOREIGN KEY (semilla_id) REFERENCES semillas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cd_fase_proy FOREIGN KEY (fase_proyecto_id) REFERENCES fases_proyecto(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS fases_proyecto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sigla VARCHAR(5) UNIQUE NOT NULL, 
+    nombre_fase VARCHAR(50) NOT NULL
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS fichas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     codigo_ficha VARCHAR(20) UNIQUE NOT NULL,
@@ -137,7 +133,15 @@ CREATE TABLE IF NOT EXISTS fichas (
     CONSTRAINT fk_ficha_semilla FOREIGN KEY (semilla_id) REFERENCES semillas(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- 5. VINCULACIONES (LO QUE CAMBIA EN CADA DUPLICACIÓN)
+CREATE TABLE IF NOT EXISTS matriculas_aprendices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    aprendiz_id INT NOT NULL,
+    ficha_id INT NOT NULL,
+    CONSTRAINT fk_mat_user FOREIGN KEY (aprendiz_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_mat_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE,
+    UNIQUE(aprendiz_id, ficha_id)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS vinculacion_instructores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     instructor_id INT NOT NULL,
@@ -146,15 +150,6 @@ CREATE TABLE IF NOT EXISTS vinculacion_instructores (
     CONSTRAINT fk_vinc_inst FOREIGN KEY (instructor_id) REFERENCES usuarios(id),
     CONSTRAINT fk_vinc_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE,
     CONSTRAINT fk_vinc_comp FOREIGN KEY (competencia_id) REFERENCES competencias(id)
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS matriculas_aprendices (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    aprendiz_id INT NOT NULL,
-    ficha_id INT NOT NULL,
-    CONSTRAINT fk_mat_user FOREIGN KEY (aprendiz_id) REFERENCES usuarios(id),
-    CONSTRAINT fk_mat_ficha FOREIGN KEY (ficha_id) REFERENCES fichas(id) ON DELETE CASCADE,
-    UNIQUE(aprendiz_id, ficha_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS recursos_r2 (
@@ -186,8 +181,3 @@ CREATE TABLE IF NOT EXISTS tests_ia (
     preguntas_json JSON, -- Las preguntas generadas por la IA
     CONSTRAINT fk_test_seccion FOREIGN KEY (seccion_id) REFERENCES ciclo_secciones(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
-INSERT INTO roles (nombre_rol) VALUES ('Administrador'), ('Instructor'), ('Aprendiz'), ('Rector'), ('Coordinador');
-INSERT INTO fases_proyecto (sigla, nombre_fase) VALUES ('AN', 'Análisis'), ('PL', 'Planeación'), ('EJ', 'Ejecución'), ('EV', 'Evaluación');
-
-SET FOREIGN_KEY_CHECKS = 1;
