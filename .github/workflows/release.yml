@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   release:
-    name: "Generar Nueva Versión"
+    name: "Release"
     runs-on: ubuntu-latest
     steps:
       - name: "Clonando el Repositorio"
