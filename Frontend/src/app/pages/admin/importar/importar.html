@@ -4,77 +4,7 @@
     <p class="mt-2 text-gray-600">Sube el archivo de caracterización del SENA para actualizar programas, centros y fichas automáticamente.</p>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="p-8">
-      
-      <div 
-        (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave($event)"
-        (drop)="onDrop($event)"
-        [ngClass]="{
-          'border-sena bg-sena-alpha': isDragging || selectedFile,
-          'border-gray-300 bg-gray-50': !isDragging && !selectedFile
-        }"
-        class="relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 text-center">
-        
-        <input 
-          type="file" 
-          (change)="onFileSelected($event)" 
-          accept=".xlsx, .xls" 
-          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          [disabled]="loading" />
-
-        <div class="space-y-4">
-          <div class="flex justify-center">
-            <div class="p-4 rounded-full bg-white shadow-sm flex items-center justify-center">
-              <i *ngIf="!selectedFile" class="pi pi-file-excel text-gray-400" style="font-size: 2.5rem"></i>
-              <i *ngIf="selectedFile" class="pi pi-check-circle text-sena" style="font-size: 2.5rem"></i>
-            </div>
-          </div>
-
-          <div *ngIf="!selectedFile">
-            <p class="text-lg font-medium text-gray-700">Arrastra tu Excel aquí</p>
-            <p class="text-sm text-gray-500">o haz clic para buscar en tu ordenador</p>
-          </div>
-
-          <div *ngIf="selectedFile">
-            <p class="text-lg font-bold text-gray-800">{{ selectedFile.name }}</p>
-            <p class="text-sm text-sena font-medium">Archivo listo para procesar</p>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="status !== 'idle'" class="mt-6">
-        <div [ngClass]="status === 'success' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'" 
-             class="flex items-center gap-3 p-4 border rounded-lg">
-          <i [class]="status === 'success' ? 'pi pi-check' : 'pi pi-exclamation-triangle'"></i>
-          <span class="text-sm font-medium">{{ message }}</span>
-        </div>
-      </div>
-
-      <div class="mt-8 flex items-center justify-end gap-x-4">
-        <button 
-          (click)="selectedFile = null; status = 'idle'"
-          [disabled]="!selectedFile || loading"
-          class="text-sm font-semibold leading-6 text-gray-900 disabled:opacity-30 flex items-center gap-2 hover:text-red-600 transition-colors">
-          <i class="pi pi-trash"></i>
-          Descartar
-        </button>
-        
-        <button 
-          (click)="subirReporte()"
-          [disabled]="!selectedFile || loading"
-          class="btn-sena disabled:bg-gray-400 disabled:cursor-not-allowed">
-          
-          <i *ngIf="loading" class="pi pi-spin pi-spinner text-white"></i>
-          <i *ngIf="!loading" class="pi pi-upload"></i>
-          
-          {{ loading ? 'Importando datos...' : 'Procesar Reporte' }}
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <app-carga-masiva></app-carga-masiva>
 
   <div class="mt-6 flex items-start gap-3 p-4 bg-sena-alpha rounded-lg border border-sena/10">
     <i class="pi pi-info-circle text-sena mt-1" style="font-size: 1.2rem"></i>

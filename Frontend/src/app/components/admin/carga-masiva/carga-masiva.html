@@ -1,0 +1,89 @@
+<div class="bg-white rounded-[var(--radius-sena)] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+
+  <div class="h-1.5 w-full bg-gradient-to-r from-sena to-sena-light"></div>
+
+  <div class="p-8 md:p-12">
+    
+    <div 
+      (dragover)="alArrastrarSobre($event)"
+      (dragleave)="alSalir($event)"
+      (drop)="alSoltar($event)"
+      [ngClass]="{
+          'border-sena bg-sena-alpha/30': estaArrastrando || archivoSeleccionado,
+          'border-gray-300 bg-gray-50': !estaArrastrando && !archivoSeleccionado
+      }"
+      class="relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 text-center group">
+      
+      <input 
+        type="file" 
+        (change)="alSeleccionarArchivo($event)" 
+        accept=".xlsx, .xls" 
+        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        [disabled]="cargando" />
+
+      <div class="space-y-4">
+        <div class="flex justify-center">
+          <div class="w-20 h-20 rounded-full bg-white shadow-md flex items-center justify-center transition-transform group-hover:scale-110">
+            <i *ngIf="!archivoSeleccionado" class="pi pi-file-excel text-gray-400" style="font-size: 2.5rem"></i>
+            <i *ngIf="archivoSeleccionado" class="pi pi-check-circle text-sena" style="font-size: 2.5rem"></i>
+          </div>
+        </div>
+
+        <div *ngIf="!archivoSeleccionado">
+          <p class="text-lg font-bold text-gray-700">Arrastra tu archivo Excel aquí</p>
+          <p class="text-sm text-gray-500 font-medium">o haz clic para explorar tus archivos</p>
+        </div>
+
+        <div *ngIf="archivoSeleccionado" class="animate-in fade-in zoom-in-95">
+          <p class="text-lg font-black text-sena-black">{{ archivoSeleccionado.name }}</p>
+          <p class="text-xs text-sena font-bold uppercase tracking-widest mt-1">Archivo detectado correctamente</p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="estado !== 'espera'" class="mt-8 animate-in slide-in-from-top-4 duration-300">
+      <div [ngClass]="estado === 'exito' ? 'bg-sena-alpha border-sena/20 text-sena' : 'bg-red-50 border-red-100 text-red-700'" 
+           class="flex items-center gap-4 p-5 border rounded-[var(--radius-sena)]">
+        <i [class]="estado === 'exito' ? 'pi pi-verified text-2xl' : 'pi pi-exclamation-circle text-2xl'"></i>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest mb-0.5">
+            {{ estado === 'exito' ? 'Proceso Completado' : 'Atención' }}
+          </p>
+          <p class="text-sm font-medium">{{ mensaje }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-col sm:flex-row items-center justify-end gap-6 border-t border-gray-50 pt-8">
+      
+      <div class="hidden md:flex items-center gap-2 text-gray-400 mr-auto">
+        <i class="pi pi-info-circle"></i>
+        <span class="text-[10px] font-bold uppercase tracking-tight">Formato admitido: .xlsx o .xls</span>
+      </div>
+
+      <div class="flex items-center gap-6 w-full sm:w-auto justify-end">
+        <button 
+          type="button"
+          (click)="descartar()"
+          [disabled]="!archivoSeleccionado || cargando"
+          class="text-sm font-bold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest disabled:opacity-0">
+          Descartar
+        </button>
+        
+        <button 
+          (click)="procesarReporte()"
+          [disabled]="!archivoSeleccionado || cargando"
+          class="btn-sena w-full sm:w-auto justify-center group shadow-xl shadow-sena/10 min-w-[220px]">
+          
+          <i *ngIf="cargando" class="pi pi-spin pi-spinner text-lg"></i>
+          <i *ngIf="!cargando" class="pi pi-upload text-lg transition-transform group-hover:-translate-y-1"></i>
+          
+          <span class="ml-2 uppercase tracking-widest text-sm font-bold">
+            {{ cargando ? 'Importando...' : 'Procesar Reporte' }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
