@@ -1,4 +1,48 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import "tailwindcss";
 @import 'primeicons/primeicons.css';
                 
+@theme {
+    
+    --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --color-sena: #39A900;
+  --color-sena-light: #4cc900;
+  --color-sena-dark: #2d8200;
+  --color-sena-alpha: rgba(57, 169, 0, 0.1);
+  
+  --color-sena-black: #323232;
+  --color-sena-gray-light: #f4f4f4;
+  --color-sena-white: #ffffff;
+
+  /* Variables Semánticas */
+  --radius-sena: 1rem;
+  --animate-fast: 200ms ease-in-out;
+}
+
+:root {
+  /* Mantenemos estas para compatibilidad con PrimeReact/Icons */
+  --primary-color: #39A900;
+  --primary-color-text: #ffffff;
+  font-family: var(--font-sans);
+}
+
+/* Componentes personalizados usando @apply */
+@layer components {
+  .btn-sena {
+    @apply bg-sena text-sena-white px-6 py-2.5 rounded-md font-semibold 
+           transition-colors duration-200 flex items-center gap-2;
+  }
+
+  .btn-sena:hover {
+    @apply bg-sena-light;
+  }
+
+  .btn-sena:active {
+    @apply bg-sena-dark;
+  }
+
+  .drop-zone-sena {
+    @apply relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 text-center;
+  }
+}
