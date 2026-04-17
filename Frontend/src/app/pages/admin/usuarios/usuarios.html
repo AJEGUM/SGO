@@ -1,70 +1,131 @@
-<form (ngSubmit)="enviar()" #invForm="ngForm" class="p-8 space-y-6">
+<div class="p-6 max-w-4xl mx-auto font-sans">
   
-  <div class="space-y-2">
-    <label class="text-sm font-semibold text-gray-700">Correo Electrónico</label>
-    <div class="relative">
-      <i class="pi pi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      <input 
-        type="email" 
-        name="correo"
-        [(ngModel)]="invitacion.correo"
-        #emailModel="ngModel"
-        required
-        email
-        placeholder="ejemplo@sena.edu.co"
-        [class.border-red-500]="emailModel.invalid && emailModel.touched"
-        class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sena/20 focus:border-sena outline-none transition-all font-sans" />
+  <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-100 pb-6">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-sena-alpha text-sena text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
+          Administración
+        </span>
+      </div>
+      <h1 class="text-4xl font-black text-sena-black tracking-tight">
+        Gestión de Usuarios
+      </h1>
+      <p class="mt-3 text-gray-500 max-w-lg leading-relaxed text-sm">
+        Desde este panel puedes autorizar el ingreso de nuevos colaboradores. Al enviar una invitación, el sistema les enviará un acceso seguro para que puedan crear su propia cuenta con el rol que tú definas.
+      </p>
+    </div>
+
+    <div class="hidden md:flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100">
+      <div class="w-2 h-2 rounded-full bg-sena animate-pulse"></div>
+      <span class="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Sistema de Invitación Activo</span>
     </div>
   </div>
 
-  <div class="space-y-2">
-    <label class="text-sm font-semibold text-gray-700">Confirmar Correo</label>
-    <div class="relative">
-      <i class="pi pi-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      <input 
-        type="email" 
-        name="confirmarCorreo"
-        [(ngModel)]="invitacion.confirmarCorreo"
-        required
-        placeholder="Repite el correo"
-        [class.border-red-500]="correosNoCoinciden"
-        class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sena/20 focus:border-sena outline-none transition-all font-sans" />
-    </div>
-    <p *ngIf="correosNoCoinciden" class="text-xs text-red-500 animate-pulse">Los correos no coinciden</p>
-  </div>
-
-  <div class="space-y-2">
-    <label class="text-sm font-semibold text-gray-700">Rol Institucional</label>
-    <div class="relative">
-      <i class="pi pi-users absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      <select 
-        name="rol_id"
-        [(ngModel)]="invitacion.rol_id"
-        required
-        class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 appearance-none focus:ring-2 focus:ring-sena/20 focus:border-sena outline-none transition-all bg-white font-sans">
-        <option [ngValue]="null" disabled>Selecciona un rol</option>
-        <option *ngFor="let rol of roles" [value]="rol.rol_id">
-          {{ rol.nombre_rol | uppercase }}
-        </option>
-      </select>
-    </div>
-  </div>
-
-  <div class="pt-4 flex items-center justify-end gap-4">
-    <button 
-      type="button"
-      (click)="resetForm()"
-      class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
-      Limpiar
-    </button>
+  <div class="bg-white rounded-[var(--radius-sena)] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
     
-    <button 
-      type="submit"
-      [disabled]="invForm.invalid || loading || correosNoCoinciden"
-      class="btn-sena flex items-center gap-2 shadow-md shadow-sena/20 disabled:bg-gray-400 disabled:shadow-none">
-      <i *ngIf="loading" class="pi pi-spin pi-spinner"></i>
-      <i *ngIf="!loading" class="pi pi-send"></i>
-      {{ loading ? 'Enviando...' : 'Enviar Invitación' }}
-    </button>
+    <div class="h-1.5 w-full bg-gradient-to-r from-sena to-sena-light"></div>
+
+    <form (ngSubmit)="enviar()" #invForm="ngForm" class="p-8 md:p-12 space-y-8">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="space-y-3 group">
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-widest group-focus-within:text-sena transition-colors">
+            Correo del Invitado
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="pi pi-envelope text-gray-300 group-focus-within:text-sena transition-colors"></i>
+            </div>
+            <input 
+              type="email" 
+              name="correo"
+              [(ngModel)]="invitacion.correo"
+              #emailModel="ngModel"
+              required
+              email
+              placeholder="nombre@sena.edu.co"
+              class="input-sena" />
+          </div>
+        </div>
+
+        <div class="space-y-3 group">
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-widest group-focus-within:text-sena transition-colors">
+            Verificar Correo
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="pi pi-lock text-gray-300 group-focus-within:text-sena transition-colors"></i>
+            </div>
+            <input 
+              type="email" 
+              name="confirmarCorreo"
+              [(ngModel)]="invitacion.confirmarCorreo"
+              required
+              placeholder="Repite el correo anterior"
+              [class.border-red-500]="correosNoCoinciden"
+              class="input-sena" />
+          </div>
+          <p *ngIf="correosNoCoinciden" class="text-[10px] text-red-500 font-bold uppercase tracking-wider animate-bounce">
+            Los correos no coinciden
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-3 group">
+        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest group-focus-within:text-sena transition-colors">
+          Asignar Permisos (Rol)
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="pi pi-shield text-gray-300 group-focus-within:text-sena transition-colors"></i>
+          </div>
+          <select 
+            name="rol_id"
+            [(ngModel)]="invitacion.rol_id"
+            required
+            class="input-sena appearance-none bg-no-repeat bg-[right_1.5rem_center]"
+            style="background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 20 20%22><path stroke=%22%2339A900%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22m6 8 4 4 4-4%22/></svg>')">
+            <option [ngValue]="null" disabled>Selecciona el cargo del usuario...</option>
+            <option *ngFor="let rol of roles" [value]="rol.rol_id">
+              {{ rol.nombre_rol | uppercase }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="status !== 'idle'" 
+           class="p-4 rounded-[var(--radius-sena)] border flex items-center gap-4 transition-all"
+           [ngClass]="status === 'success' ? 'bg-sena-alpha border-sena/20 text-sena' : 'bg-red-50 border-red-100 text-red-700'">
+        <i [class]="status === 'success' ? 'pi pi-verified text-xl' : 'pi pi-times-circle text-xl'"></i>
+        <p class="text-sm font-semibold">{{ message }}</p>
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-gray-50">
+        
+        <div class="flex items-center gap-2 text-gray-400">
+          <i class="pi pi-info-circle text-lg"></i>
+          <span class="text-[10px] font-bold uppercase tracking-tight">Acceso válido por 24 horas</span>
+        </div>
+
+        <div class="flex items-center gap-6 w-full sm:w-auto">
+          <button 
+            type="button"
+            (click)="resetForm()"
+            class="text-sm font-bold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest">
+            Cancelar
+          </button>
+          
+          <button 
+            type="submit"
+            [disabled]="invForm.invalid || loading || correosNoCoinciden"
+            class="btn-sena w-full sm:w-auto justify-center group shadow-xl shadow-sena/10">
+            <i *ngIf="loading" class="pi pi-spin pi-spinner text-lg"></i>
+            <i *ngIf="!loading" class="pi pi-send text-lg transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"></i>
+            <span class="uppercase tracking-widest text-sm">{{ loading ? 'Procesando...' : 'Enviar Invitación' }}</span>
+          </button>
+        </div>
+      </div>
+
+    </form>
   </div>
-</form>
+</div>
