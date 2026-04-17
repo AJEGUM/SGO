@@ -58,7 +58,58 @@ export const importService = {
       estado_caracterizacion: dataSGO.estado_caracterizacion
     });
 
-    return { ficha: dataSGO.ficha_caracterizacion, status: 'ok' };
+    const competenciasRaw = parser.getColumnaDesde('competencia');
+
+    // 2. Procesar y guardar cada competencia
+    for (const compRaw of competenciasRaw) {
+      // El formato suele ser "CÓDIGO - NOMBRE"
+      // Ejemplo: "220501046 - DISEÑAR LA ESTRUCTURA DE DATOS..."
+      let [codigo_norma, ...restoNombre] = compRaw.includes(' - ') 
+        ? compRaw.split(' - ') 
+        : [compRaw, 'COMPETENCIA SIN NOMBRE'];
+      
+      const nombreComp = Array.isArray(restoNombre) ? restoNombre.join(' - ') : restoNombre;
+
+      // Persistencia de la competencia vinculada al programaId
+      await programModel.upsertCompetencia({
+        programa_id: programaId, // El ID que obtuviste arriba
+        codigo_norma: codigo_norma.trim(),
+        nombre: nombreComp.trim()
+      });
+    }
+
+    const estructura = parser.getEstructuraCurricular();
+
+    for (const item of estructura) {
+      // 1. Procesar Competencia (Código - Nombre)
+      let [c_codigo, ...c_nombrePartes] = item.competencia.includes(' - ') 
+          ? item.competencia.split(' - ') 
+          : [item.competencia, 'COMPETENCIA SIN NOMBRE'];
+      
+      const compId = await programModel.upsertCompetencia({
+        programa_id: programaId,
+        codigo_norma: c_codigo.trim(),
+        nombre: c_nombrePartes.join(' - ').trim()
+      });
+
+      // 2. Procesar RAP (Código - Denominación)
+      // Nota: El RAP suele venir como "590803 - APLICAR EN LA RESOLUCIÓN..."
+      let [r_codigo, ...r_denominacionPartes] = item.rap.includes(' - ')
+          ? item.rap.split(' - ')
+          : [null, item.rap];
+
+      await programModel.upsertRAP({
+        competencia_id: compId,
+        codigo_rap: r_codigo ? r_codigo.trim() : null,
+        denominacion: r_denominacionPartes.join(' - ').trim()
+      });
+    }
+
+    return { 
+      ficha: dataSGO.ficha_caracterizacion, 
+      competencias_procesadas: competenciasRaw.length,
+      status: 'ok' 
+    };
   },
 
   formatearFecha(fecha) {

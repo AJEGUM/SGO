@@ -38,6 +38,41 @@ export const programModel = {
     ]);
   },
 
+  async upsertCompetencia({ programa_id, codigo_norma, nombre }) {
+    // Buscamos si ya existe esa competencia para ese programa
+    const [existente] = await db.execute(
+      'SELECT id FROM competencias WHERE programa_id = ? AND codigo_norma = ?',
+      [programa_id, codigo_norma]
+    );
+
+    if (existente.length > 0) return existente[0].id;
+
+    // Si no existe, la creamos
+    const [resultado] = await db.execute(
+      'INSERT INTO competencias (programa_id, codigo_norma, nombre) VALUES (?, ?, ?)',
+      [programa_id, codigo_norma, nombre]
+    );
+    return resultado.insertId;
+  },
+
+  async upsertRAP({ competencia_id, codigo_rap, denominacion }) {
+    // Verificar si existe el RAP en esa competencia
+    const [existente] = await db.execute(
+      'SELECT id FROM resultados_aprendizaje WHERE competencia_id = ? AND (codigo_rap = ? OR denominacion = ?)',
+      [competencia_id, codigo_rap, denominacion]
+    );
+
+    if (existente.length > 0) return existente[0].id;
+
+    // Insertar si no existe
+    const [resultado] = await db.execute(
+      'INSERT INTO resultados_aprendizaje (competencia_id, codigo_rap, denominacion) VALUES (?, ?, ?)',
+      [competencia_id, codigo_rap, denominacion]
+    );
+    
+    return resultado.insertId;
+  },
+
   async listarProgramas() {
     const consulta = `SELECT * FROM programas ORDER BY nombre ASC`;
     const [filas] = await db.execute(consulta);
