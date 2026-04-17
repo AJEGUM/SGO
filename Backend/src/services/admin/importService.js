@@ -58,7 +58,58 @@ export const importService = {
       estado_caracterizacion: dataSGO.estado_caracterizacion
     });
 
-    return { ficha: dataSGO.ficha_caracterizacion, status: 'ok' };
+    const competenciasRaw = parser.getColumnaDesde('competencia');
+
+    // 2. Procesar y guardar cada competencia
+    for (const compRaw of competenciasRaw) {
+      // El formato suele ser "CÓDIGO - NOMBRE"
+      // Ejemplo: "220501046 - DISEÑAR LA ESTRUCTURA DE DATOS..."
+      let [codigo_norma, ...restoNombre] = compRaw.includes(' - ') 
+        ? compRaw.split(' - ') 
+        : [compRaw, 'COMPETENCIA SIN NOMBRE'];
+      
+      const nombreComp = Array.isArray(restoNombre) ? restoNombre.join(' - ') : restoNombre;
+
+      // Persistencia de la competencia vinculada al programaId
+      await programModel.upsertCompetencia({
+        programa_id: programaId, // El ID que obtuviste arriba
+        codigo_norma: codigo_norma.trim(),
+        nombre: nombreComp.trim()
+      });
+    }
+
+    const estructura = parser.getEstructuraCurricular();
+
+    for (const item of estructura) {
+      // 1. Procesar Competencia (Código - Nombre)
+      let [c_codigo, ...c_nombrePartes] = item.competencia.includes(' - ') 
+          ? item.competencia.split(' - ') 
+          : [item.competencia, 'COMPETENCIA SIN NOMBRE'];
+      
+      const compId = await programModel.upsertCompetencia({
+        programa_id: programaId,
+        codigo_norma: c_codigo.trim(),
+        nombre: c_nombrePartes.join(' - ').trim()
+      });
+
+      // 2. Procesar RAP (Código - Denominación)
+      // Nota: El RAP suele venir como "590803 - APLICAR EN LA RESOLUCIÓN..."
+      let [r_codigo, ...r_denominacionPartes] = item.rap.includes(' - ')
+          ? item.rap.split(' - ')
+          : [null, item.rap];
+
+      await programModel.upsertRAP({
+        competencia_id: compId,
+        codigo_rap: r_codigo ? r_codigo.trim() : null,
+        denominacion: r_denominacionPartes.join(' - ').trim()
+      });
+    }
+
+    return { 
+      ficha: dataSGO.ficha_caracterizacion, 
+      competencias_procesadas: competenciasRaw.length,
+      status: 'ok' 
+    };
   },
 
   formatearFecha(fecha) {
@@ -73,5 +124,68 @@ export const importService = {
       return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
     }
     return null;
+  },
+
+  async obtenerProgramas() {
+    return await programModel.listarProgramas();
+  },
+
+  async obtenerEstructuraPrograma(id) {
+    const datos = await programModel.obtenerDetalleCompleto(id);
+    if (!datos.length) return null;
+
+    // Lógica para formatear el árbol del programa
+    const programa = {
+      id,
+      nombre: datos[0].programa_nombre,
+      codigo: datos[0].programa_codigo,
+      nivel: datos[0].nivel_formacion,
+      competencias: []
+    };
+
+    // Mapeo para evitar duplicados al agrupar
+    const compsMap = {};
+
+    datos.forEach(fila => {
+      if (!fila.comp_id) return;
+      
+      if (!compsMap[fila.comp_id]) {
+        compsMap[fila.comp_id] = {
+          id: fila.comp_id,
+          codigo: fila.codigo_norma,
+          nombre: fila.comp_nombre,
+          raps: {}
+        };
+        programa.competencias.push(compsMap[fila.comp_id]);
+      }
+
+      if (fila.rap_id) {
+        if (!compsMap[fila.comp_id].raps[fila.rap_id]) {
+          compsMap[fila.comp_id].raps[fila.rap_id] = {
+            id: fila.rap_id,
+            codigo: fila.codigo_rap,
+            nombre: fila.rap_nombre,
+            criterios: new Set(),
+            saberes: new Set(),
+            procesos: new Set()
+          };
+        }
+        if (fila.criterio) compsMap[fila.comp_id].raps[fila.rap_id].criterios.add(fila.criterio);
+        if (fila.saber) compsMap[fila.comp_id].raps[fila.rap_id].saberes.add(fila.saber);
+        if (fila.proceso) compsMap[fila.comp_id].raps[fila.rap_id].procesos.add(fila.proceso);
+      }
+    });
+
+    // Convertir Sets a Arrays para el JSON final
+    programa.competencias.forEach(c => {
+      c.raps = Object.values(c.raps).map(r => ({
+        ...r,
+        criterios: Array.from(r.criterios),
+        saberes: Array.from(r.saberes),
+        procesos: Array.from(r.procesos)
+      }));
+    });
+
+    return programa;
   }
 };

@@ -1,0 +1,65 @@
+
+  
+  <div class="mb-8 border-l-4 border-sena pl-4">
+    <h2 class="text-2xl font-black text-sena-black uppercase tracking-tight">Programas de Formación</h2>
+    <p class="text-gray-500 text-sm">Consulta la oferta académica y la estructura curricular cargada en el SGO.</p>
+  </div>
+
+  <div *ngIf="cargando" class="flex flex-col items-center justify-center py-20">
+    <i class="pi pi-spin pi-spinner text-4xl text-sena mb-4"></i>
+    <p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Consultando base de datos...</p>
+  </div>
+
+  <div *ngIf="error" class="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl flex items-center gap-3">
+    <i class="pi pi-exclamation-circle text-xl"></i>
+    <span class="font-medium">{{ error }}</span>
+  </div>
+
+  <div *ngIf="!cargando && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    <div *ngFor="let programa of programas" 
+         class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-sena/20 transition-all duration-300 overflow-hidden group">
+      
+      <div class="bg-gray-50 px-4 py-2 border-b border-gray-50 flex justify-between items-center">
+        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Versión {{ programa.version }}</span>
+        <span class="bg-sena-alpha text-sena text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+          {{ programa.nivel_formacion }}
+        </span>
+      </div>
+
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div class="p-3 bg-gray-50 rounded-xl group-hover:bg-sena-alpha transition-colors">
+            <i class="pi pi-book text-gray-400 group-hover:text-sena text-xl"></i>
+          </div>
+          <span class="text-xs font-mono font-bold text-gray-300">#{{ programa.codigo }}</span>
+        </div>
+
+        <h3 class="text-lg font-bold text-sena-black leading-tight mb-2 line-clamp-2 uppercase">
+          {{ programa.nombre }}
+        </h3>
+        
+        <p class="text-gray-500 text-xs line-clamp-3 mb-6">
+          {{ programa.denominacion }}
+        </p>
+
+        <button (click)="verEstructura(programa.programa_id)" 
+          class="w-full py-3 bg-gray-50 hover:bg-sena text-gray-600 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+          Ver Estructura Curricular
+          <i class="pi pi-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="!cargando && programas.length === 0" class="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+    <i class="pi pi-folder-open text-gray-300 text-5xl mb-4"></i>
+    <p class="text-gray-500 font-medium">No hay programas registrados en el sistema.</p>
+  </div>
+
+<app-detalle-curricular-programas 
+  *ngIf="mostrarModal" 
+  [programa]="programaSeleccionado" 
+  (alCerrar)="mostrarModal = false">
+</app-detalle-curricular-programas>

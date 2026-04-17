@@ -19,5 +19,31 @@ export const importController = {
       const status = error.message.includes("Estructura") ? 400 : 500;
       return res.status(status).json({ message: error.message });
     }
+  },
+
+  async listar(req, res) {
+    try {
+      const programas = await importService.obtenerProgramas();
+      return res.status(200).json(programas);
+    } catch (error) {
+      console.error("Error en programaController.listar:", error);
+      return res.status(500).json({ mensaje: "Error al obtener programas" });
+    }
+  },
+
+  async detalle(req, res) {
+    try {
+      const { id } = req.params;
+      const programa = await importService.obtenerEstructuraPrograma(id);
+      
+      if (!programa) {
+        return res.status(404).json({ mensaje: "Programa no encontrado" });
+      }
+      
+      return res.status(200).json(programa);
+    } catch (error) {
+      console.error("Error en programaController.detalle:", error);
+      return res.status(500).json({ mensaje: "Error al obtener el detalle" });
+    }
   }
 };
