@@ -6,5 +6,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/public/inicio/inicio').then(m => m.Inicio),
     title: 'S.G.O'
   },
+    {
+    path: 'importar',
+    loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
+    title: 'Importar excel'
+  },
 
 ]

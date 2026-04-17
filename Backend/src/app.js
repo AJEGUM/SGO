@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 
+import adminRoutes from './routes/admin.routes.js';
+
 const app = express();
 
 // 1. Configuración de Proxy (Vital para Digital Ocean/Cloudflare Tunnels)
@@ -43,8 +45,7 @@ app.use(session({
 // app.use(passport.session());
 
 // 5. Rutas
-// app.use('/api/auth', authRoutes);
-// app.use('/api/mascotas', mascotas);
+app.use('/api/admin', adminRoutes);
 
 // Exportamos solo app para el server.js o index.js
 export { app };
