@@ -16,7 +16,6 @@ export const importController = {
 
     } catch (error) {
       console.error("Error en importController:", error);
-      // Como DevOps, aquí podrías diferenciar errores de cliente vs servidor
       const status = error.message.includes("Estructura") ? 400 : 500;
       return res.status(status).json({ message: error.message });
     }
