@@ -43,7 +43,7 @@
           {{ programa.denominacion }}
         </p>
 
-        <button 
+        <button (click)="verEstructura(programa.programa_id)" 
           class="w-full py-3 bg-gray-50 hover:bg-sena text-gray-600 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
           Ver Estructura Curricular
           <i class="pi pi-arrow-right text-[10px]"></i>
@@ -57,3 +57,9 @@
     <i class="pi pi-folder-open text-gray-300 text-5xl mb-4"></i>
     <p class="text-gray-500 font-medium">No hay programas registrados en el sistema.</p>
   </div>
+
+<app-detalle-curricular-programas 
+  *ngIf="mostrarModal" 
+  [programa]="programaSeleccionado" 
+  (alCerrar)="mostrarModal = false">
+</app-detalle-curricular-programas>
