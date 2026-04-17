@@ -11,5 +11,7 @@ router.post('/importar', upload.single('archivo'), importController.importarRepo
 router.post('/invitar', invitacionController.invitarUsuario);
 router.get('/roles', invitacionController.obtenerRoles);
 router.get('/', usuarioController.listarUsuarios);
+router.get('/listarProgramas', importController.listar);
+router.get('/:id/detalle', importController.detalle);
 
 export default router;

@@ -73,5 +73,68 @@ export const importService = {
       return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
     }
     return null;
+  },
+
+  async obtenerProgramas() {
+    return await programModel.listarProgramas();
+  },
+
+  async obtenerEstructuraPrograma(id) {
+    const datos = await programModel.obtenerDetalleCompleto(id);
+    if (!datos.length) return null;
+
+    // Lógica para formatear el árbol del programa
+    const programa = {
+      id,
+      nombre: datos[0].programa_nombre,
+      codigo: datos[0].programa_codigo,
+      nivel: datos[0].nivel_formacion,
+      competencias: []
+    };
+
+    // Mapeo para evitar duplicados al agrupar
+    const compsMap = {};
+
+    datos.forEach(fila => {
+      if (!fila.comp_id) return;
+      
+      if (!compsMap[fila.comp_id]) {
+        compsMap[fila.comp_id] = {
+          id: fila.comp_id,
+          codigo: fila.codigo_norma,
+          nombre: fila.comp_nombre,
+          raps: {}
+        };
+        programa.competencias.push(compsMap[fila.comp_id]);
+      }
+
+      if (fila.rap_id) {
+        if (!compsMap[fila.comp_id].raps[fila.rap_id]) {
+          compsMap[fila.comp_id].raps[fila.rap_id] = {
+            id: fila.rap_id,
+            codigo: fila.codigo_rap,
+            nombre: fila.rap_nombre,
+            criterios: new Set(),
+            saberes: new Set(),
+            procesos: new Set()
+          };
+        }
+        if (fila.criterio) compsMap[fila.comp_id].raps[fila.rap_id].criterios.add(fila.criterio);
+        if (fila.saber) compsMap[fila.comp_id].raps[fila.rap_id].saberes.add(fila.saber);
+        if (fila.proceso) compsMap[fila.comp_id].raps[fila.rap_id].procesos.add(fila.proceso);
+      }
+    });
+
+    // Convertir Sets a Arrays para el JSON final
+    programa.competencias.forEach(c => {
+      c.raps = Object.values(c.raps).map(r => ({
+        ...r,
+        criterios: Array.from(r.criterios),
+        saberes: Array.from(r.saberes),
+        procesos: Array.from(r.procesos)
+      }));
+    });
+
+    return programa;
   }
 };

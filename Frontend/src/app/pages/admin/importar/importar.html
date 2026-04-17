@@ -4,13 +4,15 @@
     <p class="mt-2 text-gray-600">Sube el archivo de caracterización del SENA para actualizar programas, centros y fichas automáticamente.</p>
   </div>
 
-  <app-carga-masiva></app-carga-masiva>
+  <app-carga-masiva (archivoSubido)="lista.cargarProgramas()"></app-carga-masiva>
 
-  <div class="mt-6 flex items-start gap-3 p-4 bg-sena-alpha rounded-lg border border-sena/10">
+  <div class="mt-6 mb-5 flex items-start gap-3 p-4 bg-sena-alpha rounded-lg border border-sena/10">
     <i class="pi pi-info-circle text-sena mt-1" style="font-size: 1.2rem"></i>
     <div class="text-sm text-sena-black">
       <p class="font-bold">Información de Seguridad SGO</p>
       <p>El sistema verificará automáticamente si el programa o la ficha ya existen antes de crearlos para evitar duplicados en la base de datos.</p>
     </div>
   </div>
+
+  <app-listar-programas #lista></app-listar-programas>
 </div>

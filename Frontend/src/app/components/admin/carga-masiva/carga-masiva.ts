@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { ImportService } from '../../../services/admin/import';
 import { CommonModule } from '@angular/common';
 
@@ -17,6 +17,7 @@ private importService = inject(ImportService);
   cargando = false;
   estado: 'espera' | 'exito' | 'error' = 'espera';
   mensaje = '';
+  @Output() archivoSubido = new EventEmitter<void>();
 
   // --- Manejo de Arrastre y Soltar (Drag & Drop) ---
   alArrastrarSobre(evento: DragEvent): void {
@@ -71,6 +72,7 @@ private importService = inject(ImportService);
       next: (respuesta) => {
         this.estado = 'exito';
         this.mensaje = respuesta.message || 'Reporte procesado y base de datos actualizada.';
+        this.archivoSubido.emit();
         this.archivoSeleccionado = null; // Limpiar para evitar duplicados
       },
       error: (error) => {

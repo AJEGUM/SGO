@@ -3,17 +3,36 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 
+export interface Programa {
+  programa_id: number;
+  codigo: string;
+  nombre: string;
+  denominacion: string;
+  version: string;
+  nivel_formacion: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ImportService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/admin/importar`;
+  private apiUrl = `${environment.apiUrl}/admin`;
 
-  subirExcel(file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('archivo', file);
+  subirExcel(archivo: File): Observable<any> {
+    const datosFormulario = new FormData();
+    datosFormulario.append('archivo', archivo);
 
-    return this.http.post(this.apiUrl, formData);
+    // Aquí usamos la ruta de importación específica
+    return this.http.post(`${this.apiUrl}/importar`, datosFormulario);
+  }
+
+  obtenerProgramas(): Observable<Programa[]> {
+    return this.http.get<Programa[]>(`${this.apiUrl}/listarProgramas`);
+  }
+
+  // GET /api/admin/:id/detalle
+  obtenerDetalle(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}/detalle`);
   }
 }
