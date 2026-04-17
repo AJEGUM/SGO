@@ -29,6 +29,14 @@
 
 /* Componentes personalizados usando @apply */
 @layer components {
+
+  .input-sena {
+    @apply w-full pl-10 pr-4 py-3 rounded-[var(--radius-sena)] border border-gray-200 
+           bg-gray-50/50 text-sena-black font-sans outline-none
+           transition-all duration-[var(--animate-fast)]
+           focus:bg-white focus:border-sena focus:ring-4 focus:ring-sena-alpha;
+  }
+  
   .btn-sena {
     @apply bg-sena text-sena-white px-6 py-2.5 rounded-md font-semibold 
            transition-colors duration-200 flex items-center gap-2;
@@ -45,4 +53,8 @@
   .drop-zone-sena {
     @apply relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 text-center;
   }
+}
+
+a, button, select{
+  cursor: pointer;
 }
