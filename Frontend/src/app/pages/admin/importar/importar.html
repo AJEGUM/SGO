@@ -1,0 +1,93 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Carga Masiva de Reportes</h1>
+    <p class="mt-2 text-gray-600">Sube el archivo de caracterización del SENA para actualizar programas, centros y fichas automáticamente.</p>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-8">
+      
+      <div 
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        [ngClass]="{
+          'border-blue-500 bg-blue-50': isDragging,
+          'border-gray-300 bg-gray-50': !isDragging && !selectedFile,
+          'border-green-500 bg-green-50': selectedFile
+        }"
+        class="relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 text-center">
+        
+        <input 
+          type="file" 
+          (change)="onFileSelected($event)" 
+          accept=".xlsx, .xls" 
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          [disabled]="loading" />
+
+        <div class="space-y-4">
+          <div class="flex justify-center">
+            <div class="p-4 rounded-full bg-white shadow-sm">
+              <svg *ngIf="!selectedFile" class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <svg *ngIf="selectedFile" class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+
+          <div *ngIf="!selectedFile">
+            <p class="text-lg font-medium text-gray-700">Arrastra tu Excel aquí</p>
+            <p class="text-sm text-gray-500">o haz clic para buscar en tu ordenador</p>
+          </div>
+
+          <div *ngIf="selectedFile">
+            <p class="text-lg font-bold text-gray-800">{{ selectedFile.name }}</p>
+            <p class="text-sm text-green-600 font-medium">Archivo listo para procesar</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="status !== 'idle'" class="mt-6">
+        <div [ngClass]="status === 'success' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'" 
+             class="flex items-center p-4 border rounded-lg">
+          <span class="text-sm font-medium">{{ message }}</span>
+        </div>
+      </div>
+
+      <div class="mt-8 flex items-center justify-end gap-x-4">
+        <button 
+          (click)="selectedFile = null; status = 'idle'"
+          [disabled]="!selectedFile || loading"
+          class="text-sm font-semibold leading-6 text-gray-900 disabled:opacity-30">
+          Descartar
+        </button>
+        
+        <button 
+          (click)="subirReporte()"
+          [disabled]="!selectedFile || loading"
+          class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-gray-400 flex items-center gap-2">
+          
+          <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          
+          {{ loading ? 'Importando datos...' : 'Procesar Reporte' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
+    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <div class="text-sm text-blue-700">
+      <p class="font-bold">Información de Seguridad</p>
+      <p>El sistema verificará automáticamente si el programa o la ficha ya existen antes de crearlos para evitar duplicados en la base de datos de SGO.</p>
+    </div>
+  </div>
+</div>
