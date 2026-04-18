@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common'; // Necesario para standalone
 import { LoginService } from '../../../services/public/login-service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

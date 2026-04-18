@@ -59,7 +59,7 @@
 html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Scrollbar estética para el área de contenido */
