@@ -11,17 +11,16 @@ export const invitacionService = {
     const expiracion = new Date();
     expiracion.setHours(expiracion.getHours() + 24);
 
-    // Guardar en DB
+    // Guardar en DB (El token servirá para validar la invitación al momento del login)
     await invitacionModel.guardarInvitacion({ correo, rol_id, token, expiracion });
 
-    const urlRegistro = `${process.env.FRONTEND_URL}/registro?token=${token}`;
+    const urlAterrizaje = `${process.env.FRONTEND_URL}/login?invitation=true`;
     
-    // Obtenemos la configuración del rol específico
     const templateConfig = emailTemplates.templates[rol_id] || emailTemplates.templates[1];
-    const htmlContent = emailTemplates.getHtml(rol_id, urlRegistro);
+    const htmlContent = emailTemplates.getHtml(rol_id, urlAterrizaje);
 
     const { data, error } = await resend.emails.send({
-      from: 'SGO SENA <soporte@solodeploy.com>',
+      from: 'SGO SENA <soporte@solodeploy.com>', // Excelente dominio para un DevOps
       to: correo,
       subject: templateConfig.subject,
       html: htmlContent
