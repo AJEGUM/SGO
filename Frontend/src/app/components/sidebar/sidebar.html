@@ -1,0 +1,40 @@
+<nav class="flex flex-col h-screen w-64 bg-sena-black text-sena-white shadow-xl transition-all duration-300">
+  <div class="p-6 border-b border-gray-700">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-sena rounded-lg flex items-center justify-center font-bold text-xl">
+        S
+      </div>
+      <h3 class="text-xl font-bold tracking-tight text-sena-white">S.G.O</h3>
+    </div>
+    <div class="flex flex-col">
+      <p class="text-sm font-medium text-gray-100 truncate">
+        {{ authService.currentUser()?.nombre }}
+      </p>
+      <span class="text-[10px] uppercase tracking-wider text-sena font-bold">
+        ID Rol: {{ authService.currentUser()?.rol_id }}
+      </span>
+    </div>
+  </div>
+
+  <ul class="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+    <li *ngFor="let option of menuFiltrado">
+      <a [routerLink]="option.route" 
+         routerLinkActive="bg-sena text-white shadow-lg shadow-sena-alpha"
+         [routerLinkActiveOptions]="{exact: true}"
+         class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-gray-800 hover:text-sena text-gray-400">
+        <span class="material-icons text-xl group-hover:scale-110 transition-transform">
+          {{ option.icon }}
+        </span>
+        <span class="font-medium">{{ option.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="p-4 mt-auto border-t border-gray-700">
+    <button (click)="logout()" 
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 font-semibold group">
+      <span class="material-icons group-hover:rotate-180 transition-transform duration-500">logout</span>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</nav>

@@ -1,34 +1,52 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './auth/guards/auth-guard'; // Ajusta la ruta a tu guard
+import { authGuard } from './auth/guards/auth-guard';
 import { AuthCallback } from './pages/public/auth-callback/auth-callback';
+import { DashboardLayout } from './shared/dashboard-layout/dashboard-layout';
+
 
 export const routes: Routes = [
+  // --- RUTAS PÚBLICAS (Sin Sidebar) ---
   {
     path: '',
     loadComponent: () => import('./pages/public/inicio/inicio').then(m => m.Inicio),
-    title: 'S.G.O'
+    title: 'S.G.O - Inicio'
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/public/login/login').then(m => m.Login),
+    title: 'S.G.O - Iniciar Sesión'
   },
   {
     path: 'auth-callback',
     component: AuthCallback
   },
-  {
-    path: 'login',
-    loadComponent: () => import('./pages/public/login/login').then(m => m.Login),
-    title: 'Iniciar Sesion'
-  },
-  {
-    path: 'importar',
-    loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
-    title: 'Importar excel',
-    canActivate: [authGuard],
-    data: { roles: [5] }
-  },
-  {
-    path: 'usuarios',
-    loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
-    title: 'Gestion de usuarios'
-  },
-  
 
-]
+  // --- RUTAS PRIVADAS (Con Sidebar y Layout Dinámico) ---
+  {
+    path: '',
+    component: DashboardLayout,
+    canActivate: [authGuard], // Protege todo el grupo
+    children: [
+      // Admin (Rol 5)
+      {
+        path: 'importar',
+        loadComponent: () => import('./pages/admin/importar/importar').then(m => m.Importar),
+        title: 'S.G.O - Importar Excel',
+        data: { roles: [5] }
+      },
+      {
+        path: 'usuarios',
+        loadComponent: () => import('./pages/admin/usuarios/usuarios').then(m => m.Usuarios),
+        title: 'S.G.O - Gestión de Usuarios',
+        data: { roles: [5] }
+      },
+
+    ]
+  },
+
+  // --- MANEJO DE ERRORES ---
+  {
+    path: '**',
+    redirectTo: 'login'
+  }
+];
