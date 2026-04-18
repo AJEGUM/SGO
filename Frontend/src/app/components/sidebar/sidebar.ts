@@ -21,13 +21,24 @@ authService = inject(LoginService);
   
   // Lista maestra de navegación basada en tus roles de la DB
   readonly menuOptions: MenuOption[] = [
-    { label: 'Inicio', icon: 'home', route: '/', roles: [1,2,3,4,5,6] },
-    { label: 'Importar Excel', icon: 'upload', route: '/importar', roles: [5] },
-    { label: 'Gestión Usuarios', icon: 'users', route: '/usuarios', roles: [5] },
-    { label: 'Mi Perfil', icon: 'user', route: '/perfil', roles: [1,2,3,4,6] },
-    { label: 'Panel Instructor', icon: 'school', route: '/dashboard/instructor', roles: [2] },
+    // --- ROL: ADMIN (5) ---
+    { label: 'Importar Excel', icon: 'upload', route: '/dashboard/importar', roles: [5] },
+    { label: 'Gestión Usuarios', icon: 'users', route: '/dashboard/usuarios', roles: [5] },
+
+    // --- ROL: INSTRUCTOR (2) ---
+    { label: 'Panel Instructor', icon: 'briefcase', route: '/dashboard/instructor', roles: [2] },
+
+    // --- ROL: APRENDIZ (1) ---
     { label: 'Panel Aprendiz', icon: 'book', route: '/dashboard/aprendiz', roles: [1] },
-    { label: 'Coordinación', icon: 'admin_panel_settings', route: '/dashboard/coordinador', roles: [4] }
+
+    // --- ROL: COORDINADOR (4) ---
+    { label: 'Coordinación', icon: 'shield', route: '/dashboard/coordinador', roles: [4] },
+    
+    // --- ROL: EXPERTO TEMÁTICO (3) ---
+    { label: 'Experto Temático', icon: 'star', route: '/dashboard/experto', roles: [3] },
+
+    // --- ROL: RECTOR (6) ---
+    { label: 'Panel Rectoría', icon: 'chart-bar', route: '/dashboard/rector', roles: [6] }
   ];
 
   // Filtramos las opciones según el rol del usuario actual

@@ -15,7 +15,7 @@ export class AuthCallback implements OnInit {
     2: '/dashboard/instructor',
     3: '/dashboard/experto',
     4: '/dashboard/coordinador',
-    5: '/importar',
+    5: '/dashboard/importar',
     6: '/dashboard/rector'
   };
 

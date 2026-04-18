@@ -23,7 +23,7 @@ export const routes: Routes = [
 
   // --- RUTAS PRIVADAS (Con Sidebar y Layout Dinámico) ---
   {
-    path: '',
+    path: 'dashboard',
     component: DashboardLayout,
     canActivate: [authGuard], // Protege todo el grupo
     children: [
