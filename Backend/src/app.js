@@ -2,13 +2,12 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import passport from './config/login.js';
 
 import adminRoutes from './routes/admin.routes.js';
+import loginRoutes from './routes/login.routes.js';
 
 const app = express();
-
-// 1. Configuración de Proxy (Vital para Digital Ocean/Cloudflare Tunnels)
-app.set('trust proxy', 1);
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
@@ -27,25 +26,24 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'scooby_secret_999',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: isProduction, 
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 
-  },
-  proxy: true 
+    secret: process.env.SESSION_SECRET || 'scooby_secret_999',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, // false porque es localhost sin HTTPS
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 
+    }
 }));
 
-// 4. INICIALIZACIÓN DE PASSPORT (ESTO FALTABA)
-// // Debe ir después de express-session para que passport pueda usar la sesión
-// app.use(passport.initialize());
-// app.use(passport.session());
+// 4. INICIALIZACIÓN DE PASSPORT
+// Siempre debe ir después del middleware de session
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 5. Rutas
+app.use('/api/auth', loginRoutes); // Prefijo para autenticación
 app.use('/api/admin', adminRoutes);
 
-// Exportamos solo app para el server.js o index.js
 export { app };
