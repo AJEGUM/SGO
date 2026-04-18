@@ -1,11 +1,16 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/guards/auth-guard'; // Ajusta la ruta a tu guard
+import { AuthCallback } from './pages/public/auth-callback/auth-callback';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/public/inicio/inicio').then(m => m.Inicio),
     title: 'S.G.O'
+  },
+  {
+    path: 'auth-callback',
+    component: AuthCallback
   },
   {
     path: 'login',

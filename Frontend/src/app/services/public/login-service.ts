@@ -1,48 +1,54 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoginService {
-  private readonly AUTH_URL = `${environment.apiUrl}/auth/google`;
+  private http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-  private readonly PERFIL_URL = `${environment.apiUrl}/auth/perfil`;
-  
-  private usuarioSignal = signal<any>(null);
+  // Signal para que cualquier componente (Navbar, Profile) sepa quién está logueado
+  currentUser = signal<any>(null);
 
-  constructor(private http: HttpClient) { }
-
-  redirectToGoogle(): void {
-    window.location.href = this.AUTH_URL;
+  loginWithGoogle() {
+    window.location.href = `${this.apiUrl}/google`;
   }
 
-  async verificarPerfil(): Promise<any> {
-    try {
-      const res = await firstValueFrom(this.http.get<any>(this.PERFIL_URL));
-      
-      if (res && res.ok) {
-        this.usuarioSignal.set(res.usuario);
-        return res.usuario;
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/perfil`, { withCredentials: true }).pipe(
+      tap((res: any) => {
+        if (res.autenticado) {
+          this.currentUser.set(res.usuario);
+        }
+      })
+    );
+  }
+
+  completarRegistro(id: string, telefono: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/completar-registro`, { 
+      id, 
+      telefono_principal: telefono 
+    }, { withCredentials: true });
+  }
+
+  logout() {
+    // 1. Avisamos al backend para que destruya la sesión
+    this.http.get(`${this.apiUrl}/logout`, { withCredentials: true }).subscribe({
+      next: () => {
+        // 2. Limpiamos el estado local (Signal)
+        this.currentUser.set(null);
+        // 3. Redirigimos al usuario
+        window.location.href = '/';
+      },
+      error: (err) => {
+        console.error('Error al cerrar sesión:', err);
+        // Aun si falla el servidor, limpiamos localmente por seguridad
+        this.currentUser.set(null);
+        window.location.href = '/';
       }
-      return null;
-    } catch (error) {
-      this.limpiarSesion();
-      return null;
-    }
-  }
-
-  establecerUsuario(usuario: any) {
-    this.usuarioSignal.set(usuario);
-  }
-
-  obtenerUsuarioActual() {
-    return this.usuarioSignal();
-  }
-
-  limpiarSesion() {
-    this.usuarioSignal.set(null);
+    });
   }
 }
