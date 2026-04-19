@@ -1,0 +1,35 @@
+<div class="p-8">
+  <div class="flex items-center gap-4 mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-sena-black font-sans">Configurar Nueva Semilla</h2>
+      <p class="text-gray-500 text-sm font-sans">Selecciona un programa para heredar su estructura pedagógica.</p>
+    </div>
+  </div>
+
+  <form class="space-y-6">
+    <div class="space-y-2">
+      <label class="text-sm font-semibold text-sena-black">Programa de Formación</label>
+      <div class="relative">
+        <select (change)="onProgramaChange($event)" class="input-sena appearance-none">
+          <option value="" disabled selected>Seleccione un programa...</option>
+          <option *ngFor="let p of programas()" [value]="p.programa_id">
+            {{p.nombre}} ({{p.codigo}}) - V{{p.version}}
+          </option>
+        </select>
+        <i class="pi pi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+    </div>
+
+    <div *ngIf="estructuraSeleccionada()" class="bg-sena-alpha/20 border border-sena/10 rounded-xl p-4 animate-in slide-in-from-top-2 duration-300">
+       </div>
+
+    <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
+      <button type="button" (click)="cancelar()" class="px-6 py-2 text-gray-500 font-medium hover:text-sena-black transition-colors">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-sena">
+        Confirmar y Continuar
+      </button>
+    </div>
+  </form>
+</div>

@@ -6,10 +6,25 @@
       <p class="text-gray-500 mt-1">Visualiza, crea y administra las plantillas pedagógicas del centro.</p>
     </div>
     
-    <button class="btn-sena shadow-lg shadow-sena-alpha group">
+    <button (click)="showModal.set(true)" class="btn-sena shadow-lg shadow-sena-alpha group cursor-pointer">
       <i class="pi pi-plus-circle transition-transform group-hover:rotate-90"></i>
       <span>Crear Nueva Semilla</span>
     </button>
   </header>
+
+  <div *ngIf="showModal()" 
+       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-sena-black/20 backdrop-blur-sm animate-in fade-in duration-200">
+    
+    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-[var(--radius-sena)] shadow-2xl shadow-sena-black/10">
+      
+      <button (click)="showModal.set(false)" 
+              class="absolute top-4 right-4 text-gray-400 hover:text-sena-black transition-colors z-10">
+        <i class="pi pi-times text-xl"></i>
+      </button>
+
+      <app-crear-semilla-component (close)="showModal.set(false)"></app-crear-semilla-component>
+      
+    </div>
+  </div>
 
 </div>
