@@ -72,7 +72,7 @@ export const routes: Routes = [
         path: 'panel',
         loadComponent: () => import('./pages/expertoTematico/experto-tematico/experto-tematico').then(m => m.ExpertoTematico),
         title: 'S.G.O - Panel',
-        data: { roles: [4] }
+        data: { roles: [3] }
       },
     ]
   },
