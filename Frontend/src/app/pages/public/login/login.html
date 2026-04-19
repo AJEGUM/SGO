@@ -32,12 +32,16 @@
       </div>
 
       <div *ngIf="errorLogin" 
-           class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
-        <div class="flex items-center gap-3">
-          <i class="pi pi-exclamation-circle text-red-500 text-xl"></i>
+          class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl animate-fade-in">
+        <div class="flex items-start gap-3">
+          <div class="mt-0.5 flex-shrink-0">
+            <i class="pi pi-lock text-red-500 text-lg"></i>
+          </div>
           <div>
-            <p class="text-[10px] font-black text-red-800 uppercase tracking-wider">Error de Acceso</p>
-            <p class="text-xs text-red-700 font-medium">{{ errorLogin }}</p>
+            <p class="text-[10px] font-black text-red-800 uppercase tracking-wider">Acceso Restringido</p>
+            <p class="text-xs text-red-700 font-medium leading-relaxed mt-1">
+              {{ errorLogin }}
+            </p>
           </div>
         </div>
       </div>

@@ -1,0 +1,80 @@
+<div class="w-full bg-sena-white rounded-[var(--radius-sena)] border border-gray-100 shadow-sm overflow-hidden">
+  
+  <div class="px-6 py-5 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+    <div>
+      <h3 class="text-xl font-black text-sena-black tracking-tight">Colaboradores</h3>
+      <p class="text-xs text-gray-400 font-medium">Listado oficial de usuarios vinculados al programa</p>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1.5 bg-sena-alpha rounded-full">
+      <span class="w-2 h-2 rounded-full bg-sena animate-pulse"></span>
+      <span class="text-[10px] font-bold text-sena-dark uppercase tracking-widest">
+        {{ usuarios().length }} Registrados
+      </span>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto custom-scrollbar">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="bg-sena-gray-light/50 border-b border-gray-100">
+          <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Usuario</th>
+          <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Rol Asignado</th>
+          <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Estado</th>
+          <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Acceso</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr *ngFor="let user of usuarios()" class="hover:bg-sena-alpha/10 transition-colors duration-[var(--animate-fast)] group">
+          
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div>
+                <p class="text-sm font-bold text-sena-black">{{ user.nombre }}</p>
+                <p class="text-xs text-gray-400 font-medium">{{ user.correo }}</p>
+              </div>
+            </div>
+          </td>
+
+          <td class="px-6 py-4">
+            <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+              {{ user.rol_nombre }}
+            </span>
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <span [ngClass]="user.activo ? 'bg-sena text-white' : 'bg-red-500 text-white'"
+                    class="w-2 h-2 rounded-full"></span>
+              <span class="text-[10px] font-black uppercase tracking-wider"
+                    [ngClass]="user.activo ? 'text-sena-dark' : 'text-red-600'">
+                {{ user.activo ? 'Activo' : 'Suspendido' }}
+              </span>
+            </div>
+          </td>
+
+          <td class="px-6 py-4 text-right">
+            <button (click)="toggleEstado(user)" 
+                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none shadow-inner"
+                    [ngClass]="user.activo ? 'bg-sena' : 'bg-gray-200'">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300"
+                    [ngClass]="user.activo ? 'translate-x-6' : 'translate-x-1'">
+              </span>
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="cargando()" class="p-20 text-center">
+    <i class="pi pi-spin pi-spinner text-sena text-3xl"></i>
+    <p class="mt-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Sincronizando con la base de datos...</p>
+  </div>
+
+  <div *ngIf="!cargando() && usuarios().length === 0" class="p-20 text-center">
+    <i class="pi pi-users text-gray-200 text-5xl mb-4"></i>
+    <p class="text-sm text-gray-400 font-medium">No se encontraron colaboradores en este programa.</p>
+  </div>
+
+</div>

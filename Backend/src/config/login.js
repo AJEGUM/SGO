@@ -26,6 +26,12 @@ passport.use(new GoogleStrategy({
       if (userRows.length > 0) {
         const user = userRows[0];
 
+        // --- VALIDACIÓN DE ESTADO ACTIVO ---
+        if (!user.activo) {
+          // Si el usuario está desactivado, no lo dejamos pasar
+          return done(null, false, { message: 'Tu cuenta ha sido desactivada. Contacta al administrador.' });
+        }
+
         // Si el usuario existe por correo pero no tiene vinculado el Google ID, lo vinculamos
         if (!user.google_id) {
           await pool.query(
@@ -76,7 +82,6 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-// Serialización (Misma lógica de Scooby, eficiente con ID)
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });

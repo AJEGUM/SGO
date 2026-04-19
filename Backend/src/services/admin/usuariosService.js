@@ -8,5 +8,9 @@ export const usuarioService = {
   async alternarEstadoUsuario(id, estadoActual) {
     const nuevoEstado = !estadoActual;
     return await usuarioModel.cambiarEstado(id, nuevoEstado);
+  },
+
+  async actualizarEstadoDirecto(id, nuevoEstado) {
+    return await usuarioModel.cambiarEstado(id, nuevoEstado);
   }
 };
