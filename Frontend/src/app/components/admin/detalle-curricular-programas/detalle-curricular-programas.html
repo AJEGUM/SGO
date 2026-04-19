@@ -73,6 +73,14 @@
     </div>
 
     <div class="p-6 bg-gray-50 border-t flex justify-end gap-3">
+      <div>
+        <button *ngIf="idRapSeleccionado" 
+                (click)="eliminarDatosRap()" 
+                class="px-4 py-2 text-xs font-black text-red-500 uppercase tracking-widest hover:bg-red-50 rounded-xl transition-all flex items-center gap-2">
+          <i class="pi pi-trash"></i>
+          Limpiar RAP
+        </button>
+      </div>
       <button (click)="alCerrar.emit()" class="px-6 py-2 text-xs font-bold text-gray-400 uppercase">Cerrar</button>
       <button [disabled]="!idRapSeleccionado" (click)="guardar()" 
               class="px-8 py-3 bg-sena text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-sena/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100">

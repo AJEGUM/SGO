@@ -70,16 +70,51 @@ onRapChange() {
   }
 }
 
+// En tu componente de Angular
   guardar() {
     if (!this.idRapSeleccionado) return;
 
-    const data = {
-      rap_id: this.idRapSeleccionado,
-      ...this.form
+    const payload = {
+      proceso: this.form.proceso,
+      saber: this.form.saber,
+      criterio: this.form.criterio
     };
 
-    console.log('Enviando datos al servidor:', data);
-    // Aquí invocarías tu servicio para persistir en SQL
-    // this.importService.guardarDetalle(data).subscribe(...);
+    this.importService.guardarDetallesRap(this.idRapSeleccionado, payload).subscribe({
+      next: (res) => {
+        // Usar SweetAlert2 o similar para el feedback
+        console.log('Guardado exitoso');
+        this.alCerrar.emit(); // Cerramos el modal
+      },
+      error: (err) => {
+        console.error('Error al guardar:', err);
+      }
+    });
   }
+
+  eliminarDatosRap() {
+  if (!this.idRapSeleccionado) return;
+
+  // Feedback visual antes de proceder
+  const confirmacion = confirm("¿Estás seguro de limpiar la información pedagógica? Se borrarán conocimientos y criterios.");
+  
+  if (confirmacion) {
+    this.importService.eliminarDetallesRap(this.idRapSeleccionado).subscribe({
+      next: (res) => {
+        // Limpiamos el objeto form que está bindeado al HTML
+        this.form = {
+          proceso: '',
+          saber: '',
+          criterio: ''
+        };
+        // Opcional: Notificar al usuario (puedes usar un Toast o alert)
+        alert(res.message);
+      },
+      error: (err) => {
+        console.error("Error al resetear el RAP:", err);
+        alert("No se pudo eliminar la información. Intenta de nuevo.");
+      }
+    });
+  }
+}
 }

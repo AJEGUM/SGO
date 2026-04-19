@@ -187,5 +187,29 @@ export const importService = {
     });
 
     return programa;
+  },
+
+  async actualizarEstructuraRap(rapId, payload) {
+      if (!rapId) throw new Error("El ID del RAP es obligatorio");
+      
+      // Limpiamos los strings de espacios innecesarios
+      const datosLimpios = {
+          proceso: payload.proceso?.trim() || '',
+          saber: payload.saber?.trim() || '',
+          criterio: payload.criterio?.trim() || ''
+      };
+
+      return await programModel.guardarDetallesCurriculares(rapId, datosLimpios);
+  },
+
+  async borrarEstructuraEspecificaRap(rapId) {
+    if (!rapId) {
+        throw new Error("El ID del RAP es necesario para realizar la limpieza.");
+    }
+
+    // Aquí podrías añadir lógica extra, como verificar si el RAP 
+    // ya está vinculado a una semilla activa para bloquear el borrado.
+    
+    return await programModel.eliminarDetallesEspecificos(rapId);
   }
 };
