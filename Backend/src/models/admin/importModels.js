@@ -102,34 +102,20 @@ export const programModel = {
 
   async guardarDetallesCurriculares(rapId, datos) {
     const { proceso, saber, criterio } = datos;
-    const connection = await db.getConnection(); // Usamos conexión para transacciones
+    const connection = await db.getConnection();
     
     try {
         await connection.beginTransaction();
 
-        // 1. Upsert Conocimientos de Proceso
-        await connection.execute(`
-            INSERT INTO conocimientos_proceso (rap_id, descripcion) 
-            VALUES (?, ?) 
-            ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)`, 
-            [rapId, proceso]
-        );
+        // Limpiamos lo anterior para evitar duplicidad de registros viejos
+        await connection.execute(`DELETE FROM conocimientos_proceso WHERE rap_id = ?`, [rapId]);
+        await connection.execute(`DELETE FROM conocimientos_saber WHERE rap_id = ?`, [rapId]);
+        await connection.execute(`DELETE FROM criterios_evaluacion WHERE rap_id = ?`, [rapId]);
 
-        // 2. Upsert Conocimientos del Saber
-        await connection.execute(`
-            INSERT INTO conocimientos_saber (rap_id, descripcion) 
-            VALUES (?, ?) 
-            ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)`, 
-            [rapId, saber]
-        );
-
-        // 3. Upsert Criterios de Evaluación
-        await connection.execute(`
-            INSERT INTO criterios_evaluacion (rap_id, descripcion) 
-            VALUES (?, ?) 
-            ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)`, 
-            [rapId, criterio]
-        );
+        // Insertamos los bloques nuevos (asumiendo que guardas el bloque de texto)
+        if (proceso) await connection.execute(`INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)`, [rapId, proceso]);
+        if (saber) await connection.execute(`INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)`, [rapId, saber]);
+        if (criterio) await connection.execute(`INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)`, [rapId, criterio]);
 
         await connection.commit();
         return { success: true };
@@ -139,25 +125,5 @@ export const programModel = {
     } finally {
         connection.release();
     }
-  },
-
-  async eliminarDetallesEspecificos(rapId) {
-      const connection = await db.getConnection();
-      try {
-          await connection.beginTransaction();
-
-          // Borrado específico de los conocimientos y criterios vinculados al RAP
-          await connection.execute(`DELETE FROM conocimientos_proceso WHERE rap_id = ?`, [rapId]);
-          await connection.execute(`DELETE FROM conocimientos_saber WHERE rap_id = ?`, [rapId]);
-          await connection.execute(`DELETE FROM criterios_evaluacion WHERE rap_id = ?`, [rapId]);
-
-          await connection.commit();
-          return { success: true };
-      } catch (error) {
-          await connection.rollback();
-          throw error;
-      } finally {
-          connection.release();
-      }
   }
 };

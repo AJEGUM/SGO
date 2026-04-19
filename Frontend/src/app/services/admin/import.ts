@@ -42,14 +42,8 @@ export class ImportService {
     return this.http.get<any>(`${this.apiUrl}/${id}/detalle`);
   }
 
-  guardarDetallesRap(rapId: number, datos: EstructuraRapPayload): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/rap/${rapId}/estructura`, datos, {
-      withCredentials: true // Importante si manejas sesiones con cookies/passport
-    });
-  }
-
-  eliminarDetallesRap(rapId: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/rap/${rapId}/detalles`, {
+  gestionarEstructuraRap(rapId: number, datos: EstructuraRapPayload): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/rap/${rapId}/estructura`, datos, {
       withCredentials: true
     });
   }

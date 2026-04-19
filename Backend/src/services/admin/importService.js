@@ -189,27 +189,26 @@ export const importService = {
     return programa;
   },
 
-  async actualizarEstructuraRap(rapId, payload) {
-      if (!rapId) throw new Error("El ID del RAP es obligatorio");
-      
-      // Limpiamos los strings de espacios innecesarios
-      const datosLimpios = {
-          proceso: payload.proceso?.trim() || '',
-          saber: payload.saber?.trim() || '',
-          criterio: payload.criterio?.trim() || ''
-      };
+  async procesarActualizacionRap(rapId, payload) {
+    if (!rapId) throw new Error("El ID del RAP es obligatorio");
 
-      return await programModel.guardarDetallesCurriculares(rapId, datosLimpios);
-  },
+    // Verificamos si los campos del payload son nulos o vacíos para determinar la acción
+    const tieneContenido = payload.proceso?.trim() || payload.saber?.trim() || payload.criterio?.trim();
 
-  async borrarEstructuraEspecificaRap(rapId) {
-    if (!rapId) {
-        throw new Error("El ID del RAP es necesario para realizar la limpieza.");
+    if (!tieneContenido) {
+        // Acción: Limpieza profunda (Nivel 4)
+        await programModel.eliminarDetallesEspecificos(rapId);
+        return { action: 'deleted' };
     }
 
-    // Aquí podrías añadir lógica extra, como verificar si el RAP 
-    // ya está vinculado a una semilla activa para bloquear el borrado.
-    
-    return await programModel.eliminarDetallesEspecificos(rapId);
+    // Acción: Guardado/Upsert
+    const datosLimpios = {
+        proceso: payload.proceso?.trim() || '',
+        saber: payload.saber?.trim() || '',
+        criterio: payload.criterio?.trim() || ''
+    };
+
+    await programModel.guardarDetallesCurriculares(rapId, datosLimpios);
+    return { action: 'updated' };
   }
 };
