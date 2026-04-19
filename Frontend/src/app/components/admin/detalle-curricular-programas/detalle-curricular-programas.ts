@@ -35,7 +35,7 @@ export class DetalleCurricularProgramas implements OnChanges, OnDestroy {
       debounceTime(800), // Espera 800ms después de que el usuario deja de escribir
       takeUntil(this.destroy$)
     ).subscribe(() => {
-      this.autoGuardar();
+      this.guardarManual();
     });
   }
 
@@ -81,7 +81,7 @@ export class DetalleCurricularProgramas implements OnChanges, OnDestroy {
     setTimeout(() => this.showToast.set(false), 2000);
   }
 
-  autoGuardar(silent: boolean = false) {
+  guardarManual(silent: boolean = false) {
     if (!this.idRapSeleccionado) return;
 
     const payload: EstructuraRapPayload = {
@@ -103,7 +103,7 @@ export class DetalleCurricularProgramas implements OnChanges, OnDestroy {
   finalizarEdicion() {
     if (this.idRapSeleccionado) {
       // Guardado final forzado antes de salir
-      this.autoGuardar(true);
+      this.guardarManual(true);
       setTimeout(() => this.alCerrar.emit(), 100);
     } else {
       this.alCerrar.emit();

@@ -68,9 +68,10 @@
     </div>
 
     <div class="p-6 bg-gray-50 border-t flex justify-end items-center">
-      <button [disabled]="!idRapSeleccionado" (click)="finalizarEdicion()" 
-              class="px-8 py-3 bg-sena text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-sena/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100">
-        Listo
+      <button [disabled]="!idRapSeleccionado" 
+              (click)="guardarManual()" 
+              class="px-8 py-3 bg-sena text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-sena/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
+        Guardar Cambios
       </button>
     </div>
   </div>
