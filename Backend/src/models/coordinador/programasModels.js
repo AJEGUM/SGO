@@ -2,8 +2,36 @@ import db from '../../config/dbConfig.js';
 
 export const programaModel = {
     // Obtener lista simple para el selector del Coordinador
-    async listarProgramas() {
-        const query = `SELECT programa_id, codigo, nombre, version FROM programas ORDER BY nombre ASC`;
+async listarProgramas() {
+        // Esta consulta verifica que existan: Competencias -> RAPs -> (Proceso Y Saber Y Criterios)
+        const query = `
+            SELECT 
+                p.programa_id, p.codigo, p.nombre, p.version,
+                (SELECT COUNT(*) FROM competencias WHERE programa_id = p.programa_id) as total_competencias,
+                (
+                    SELECT COUNT(*) 
+                    FROM competencias c
+                    JOIN resultados_aprendizaje r ON c.id = r.competencia_id
+                    WHERE c.programa_id = p.programa_id
+                ) as total_raps,
+                -- Validación de integridad profunda
+                CASE 
+                    WHEN NOT EXISTS (SELECT 1 FROM competencias WHERE programa_id = p.programa_id) THEN 0
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM competencias c
+                        JOIN resultados_aprendizaje r ON c.id = r.competencia_id
+                        WHERE c.programa_id = p.programa_id
+                        -- Verificamos que al menos existan hijos en las tablas de nivel 4
+                        AND EXISTS (SELECT 1 FROM conocimientos_proceso WHERE rap_id = r.id)
+                        AND EXISTS (SELECT 1 FROM conocimientos_saber WHERE rap_id = r.id)
+                        AND EXISTS (SELECT 1 FROM criterios_evaluacion WHERE rap_id = r.id)
+                    ) THEN 1
+                    ELSE 0
+                END as integridad_completa
+            FROM programas p
+            ORDER BY p.nombre ASC
+        `;
         const [rows] = await db.execute(query);
         return rows;
     },

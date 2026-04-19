@@ -46,6 +46,10 @@ export class CrearSemillaComponent {
     });
   }
 
+  getTotalRaps(): number {
+    return this.estructuraSeleccionada().reduce((acc: number, comp: any) => acc + (comp.raps?.length || 0), 0);
+  }
+
   cancelar() {
     this.close.emit();
   }
