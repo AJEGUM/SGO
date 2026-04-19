@@ -18,4 +18,12 @@ export class UsuariosService {
   enviarInvitacion(datos: { correo: string, confirmarCorreo: string, rol_id: number }): Observable<any> {
     return this.http.post(`${this.apiUrl}/invitar`, datos);
   }
+
+  obtenerUsuarios(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/usuarios`);
+  }
+
+  actualizarEstado(id: number, activo: boolean): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/usuarios/${id}/estado`, { activo });
+  }
 }

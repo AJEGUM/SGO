@@ -10,7 +10,8 @@ const router = Router();
 router.post('/importar', upload.single('archivo'), importController.importarReporte);
 router.post('/invitar', invitacionController.invitarUsuario);
 router.get('/roles', invitacionController.obtenerRoles);
-router.get('/', usuarioController.listarUsuarios);
+router.get('/usuarios', usuarioController.listarUsuarios);
+router.patch('/usuarios/:id/estado', usuarioController.cambiarEstado);
 router.get('/listarProgramas', importController.listar);
 router.get('/:id/detalle', importController.detalle);
 
