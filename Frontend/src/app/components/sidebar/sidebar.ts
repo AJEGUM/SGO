@@ -38,7 +38,7 @@ authService = inject(LoginService);
     { label: 'Semillas', icon: 'file', route: '/dashboard/semillas', roles: [4] },
     
     // --- ROL: EXPERTO TEMÁTICO (3) ---
-    { label: 'Experto Temático', icon: 'star', route: '/dashboard/experto', roles: [3] },
+    { label: 'Experto Temático', icon: 'star', route: '/dashboard/panel', roles: [3] },
 
     // --- ROL: RECTOR (6) ---
     { label: 'Panel Rectoría', icon: 'chart-bar', route: '/dashboard/rector', roles: [6] }

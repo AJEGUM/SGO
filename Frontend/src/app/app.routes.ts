@@ -67,6 +67,13 @@ export const routes: Routes = [
         data: { roles: [4] }
       },
 
+      // Experto tematico
+      {
+        path: 'panel',
+        loadComponent: () => import('./pages/expertoTematico/experto-tematico/experto-tematico').then(m => m.ExpertoTematico),
+        title: 'S.G.O - Panel',
+        data: { roles: [3] }
+      },
     ]
   },
 

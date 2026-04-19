@@ -5,6 +5,7 @@ import session from 'express-session';
 import passport from './config/login.js';
 
 import adminRoutes from './routes/admin.routes.js';
+import expertoTematico from './routes/expertoTematico.routes.js';
 import loginRoutes from './routes/login.routes.js';
 
 const app = express();
@@ -45,5 +46,6 @@ app.use(passport.session());
 // 5. Rutas
 app.use('/api/auth', loginRoutes); // Prefijo para autenticación
 app.use('/api/admin', adminRoutes);
+app.use('/api/expertoTematico', expertoTematico);
 
 export { app };

@@ -13,7 +13,7 @@ export class AuthCallback implements OnInit {
   private readonly ROLE_ROUTES: Record<number, string> = {
     1: '/dashboard/aprendiz',
     2: '/dashboard/instructor',
-    3: '/dashboard/experto',
+    3: '/dashboard/panel',
     4: '/dashboard/coordinador',
     5: '/dashboard/importar',
     6: '/dashboard/rector'
