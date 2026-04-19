@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/AJEGUM/SGO/compare/v0.9.0...v0.10.0) (2026-04-19)
+
+
+### Features
+
+* Merge pull request [#21](https://github.com/AJEGUM/SGO/issues/21) from AJEGUM/usuarios ([ae06fdb](https://github.com/AJEGUM/SGO/commit/ae06fdb75ed70fa6a962c8e7971e69343997336b))
+
 # [0.9.0](https://github.com/AJEGUM/SGO/compare/v0.8.0...v0.9.0) (2026-04-18)
 
 
