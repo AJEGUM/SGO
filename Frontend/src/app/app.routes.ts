@@ -55,6 +55,12 @@ export const routes: Routes = [
         data: { roles: [4] }
       },
       {
+        path: 'instructores',
+        loadComponent: () => import('./pages/coordinador/instructores/instructores').then(m => m.Instructores),
+        title: 'S.G.O - Instructores',
+        data: { roles: [4] }
+      },
+      {
         path: 'semillas',
         loadComponent: () => import('./pages/coordinador/semillas/semillas').then(m => m.Semillas),
         title: 'S.G.O - Semillas',
