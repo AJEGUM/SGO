@@ -41,6 +41,32 @@ export const routes: Routes = [
         data: { roles: [5] }
       },
 
+      // Coordinador
+      {
+        path: 'coordinador',
+        loadComponent: () => import('./pages/coordinador/coordinador/coordinador').then(m => m.Coordinador),
+        title: 'S.G.O - Panel',
+        data: { roles: [4] }
+      },
+      {
+        path: 'expertos',
+        loadComponent: () => import('./pages/coordinador/expertos/expertos').then(m => m.Expertos),
+        title: 'S.G.O - Expertos tematicos',
+        data: { roles: [4] }
+      },
+      {
+        path: 'instructores',
+        loadComponent: () => import('./pages/coordinador/instructores/instructores').then(m => m.Instructores),
+        title: 'S.G.O - Instructores',
+        data: { roles: [4] }
+      },
+      {
+        path: 'semillas',
+        loadComponent: () => import('./pages/coordinador/semillas/semillas').then(m => m.Semillas),
+        title: 'S.G.O - Semillas',
+        data: { roles: [4] }
+      },
+
     ]
   },
 
