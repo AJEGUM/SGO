@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[var(--color-sena-gray-light)] p-6 font-sans">
+<div class="min-h-screen  p-6 font-sans">
   <header class="max-w-4xl mx-auto mb-8">
     <h1 class="text-3xl font-bold text-[var(--color-sena-black)] flex items-center gap-3">
       <i class="pi pi-cog text-[var(--color-sena)]"></i>
@@ -18,6 +18,14 @@
       </div>
 
       <div class="p-6 space-y-4">
+        <div class="bg-blue-50 border-l-4 border-[var(--color-sena)] p-4 mb-4">
+          <p class="text-sm text-gray-700">
+            <strong>Tenga en cuenta que:</strong> Este prompt define el comportamiento de la IA al generar 
+            los <strong>tests iniciales de cada competencia</strong>. 
+            Asegúrate de que las instrucciones sean genéricas para que la IA pueda adaptarse a cualquier 
+            contexto de una competencia, manteniendo siempre un enfoque pedagógico y técnico.
+          </p>
+        </div>
         <div class="relative">
           <textarea 
             [(ngModel)]="config.prompt_sistema_ova"
