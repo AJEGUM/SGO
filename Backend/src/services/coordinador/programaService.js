@@ -2,7 +2,14 @@ import { programaModel } from '../../models/coordinador/programasModels.js';
 
 export const programaService = {
     async getSelectorProgramas() {
-        return await programaModel.listarProgramas();
+        const programas = await programaModel.listarProgramas();
+        
+        return programas.map(p => ({
+            ...p,
+            // Lógica: Debe tener RAPs y el conteo debe coincidir
+            es_completo: p.total_raps_esperados > 0 && 
+                         p.total_raps_esperados === p.raps_completados
+        }));
     },
 
     async getDetallePedagogico(programaId) {

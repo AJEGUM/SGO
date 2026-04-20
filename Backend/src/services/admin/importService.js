@@ -187,5 +187,28 @@ export const importService = {
     });
 
     return programa;
+  },
+
+  async procesarActualizacionRap(rapId, payload) {
+    if (!rapId) throw new Error("El ID del RAP es obligatorio");
+
+    // Verificamos si los campos del payload son nulos o vacíos para determinar la acción
+    const tieneContenido = payload.proceso?.trim() || payload.saber?.trim() || payload.criterio?.trim();
+
+    if (!tieneContenido) {
+        // Acción: Limpieza profunda (Nivel 4)
+        await programModel.eliminarDetallesEspecificos(rapId);
+        return { action: 'deleted' };
+    }
+
+    // Acción: Guardado/Upsert
+    const datosLimpios = {
+        proceso: payload.proceso?.trim() || '',
+        saber: payload.saber?.trim() || '',
+        criterio: payload.criterio?.trim() || ''
+    };
+
+    await programModel.guardarDetallesCurriculares(rapId, datosLimpios);
+    return { action: 'updated' };
   }
 };

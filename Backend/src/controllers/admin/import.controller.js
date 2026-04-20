@@ -1,3 +1,4 @@
+import { programModel } from '../../models/admin/importModels.js';
 import { importService } from '../../services/admin/importService.js';
 
 export const importController = {
@@ -44,6 +45,31 @@ export const importController = {
     } catch (error) {
       console.error("Error en programaController.detalle:", error);
       return res.status(500).json({ mensaje: "Error al obtener el detalle" });
+    }
+  },
+
+  async gestionarEstructuraRap(req, res) {
+    try {
+        const { rapId } = req.params;
+        const payload = req.body;
+
+        // Si el payload viene vacío o con una bandera de limpieza, delegamos al borrado
+        // de lo contrario, procedemos a la actualización/guardado.
+        const resultado = await importService.procesarActualizacionRap(rapId, payload);
+        
+        return res.status(200).json({
+            message: resultado.action === 'deleted' 
+                ? "Información curricular limpiada correctamente" 
+                : "Estructura curricular actualizada correctamente",
+            data: resultado
+        });
+    } catch (error) {
+        console.error("Error en gestionarEstructuraRap:", error);
+        const status = error.message.includes("obligatorio") ? 400 : 500;
+        return res.status(status).json({ 
+            message: "Error al gestionar la estructura del RAP", 
+            error: error.message 
+        });
     }
   }
 };

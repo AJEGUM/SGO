@@ -1,85 +1,117 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, OnChanges, SimpleChanges, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ImportService } from '../../../services/admin/import';
+import { EstructuraRapPayload, ImportService } from '../../../services/admin/import';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-detalle-curricular-programas',
-  standalone: true, // No olvides el standalone si usas Angular 17+
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './detalle-curricular-programas.html',
   styleUrl: './detalle-curricular-programas.css',
 })
-export class DetalleCurricularProgramas implements OnChanges {
-  // 1. Debe llamarse exactamente 'programa' para coincidir con el [programa] del padre
-  @Input() programa: any = null; 
+export class DetalleCurricularProgramas implements OnChanges, OnDestroy {
+  @Input() programa: any = null;
   @Output() alCerrar = new EventEmitter<void>();
 
   private importService = inject(ImportService);
+  private destroy$ = new Subject<void>();
+  private debouncer = new Subject<void>();
+
+  showToast = signal(false);
+  toastMsg = signal('');
 
   programaNombre: string = '';
   competencias: any[] = [];
   rapsFiltrados: any[] = [];
-
   idCompSeleccionada: number | null = null;
   idRapSeleccionado: number | null = null;
-
   form = { proceso: '', saber: '', criterio: '' };
 
+  constructor() {
+    // Configuración del guardado automático (Debounce)
+    this.debouncer.pipe(
+      debounceTime(800), // Espera 800ms después de que el usuario deja de escribir
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.guardarManual();
+    });
+  }
+
   ngOnChanges(changes: SimpleChanges) {
-    // 2. Aquí verificamos que el cambio sea en la propiedad 'programa'
     if (changes['programa'] && this.programa) {
-      console.log('Datos recibidos en el hijo:', this.programa); // Debug para DevOps
       this.estructurarDatos();
     }
   }
 
-estructurarDatos() {
-  if (!this.programa) return;
-
-  // Tu back ya envía el nombre, código y el array de competencias listo
-  this.programaNombre = this.programa.nombre;
-  
-  // Asignamos las competencias directamente
-  this.competencias = this.programa.competencias || [];
-
-  console.log('Competencias listas para el select:', this.competencias);
-}
-
-onCompetenciaChange() {
-  this.idRapSeleccionado = null;
-  this.form = { proceso: '', saber: '', criterio: '' };
-
-  // Buscamos la competencia seleccionada
-  const comp = this.competencias.find(c => c.id == this.idCompSeleccionada);
-  
-  // IMPORTANTE: En tu back 'raps' ya es un Array, no necesitas Object.values
-  this.rapsFiltrados = comp ? comp.raps : [];
-  
-  console.log('RAPs cargados:', this.rapsFiltrados);
-}
-
-onRapChange() {
-  const rap = this.rapsFiltrados.find(r => r.id == this.idRapSeleccionado);
-  if (rap) {
-    // Como tu back envía Arrays (criterios, saberes, procesos), 
-    // los unimos con un salto de línea para mostrarlos en el textarea
-    this.form.proceso = rap.procesos.join('\n');
-    this.form.saber = rap.saberes.join('\n');
-    this.form.criterio = rap.criterios.join('\n');
+  estructurarDatos() {
+    if (!this.programa) return;
+    this.programaNombre = this.programa.nombre;
+    this.competencias = this.programa.competencias || [];
   }
-}
 
-  guardar() {
+  onCompetenciaChange() {
+    this.idRapSeleccionado = null;
+    this.form = { proceso: '', saber: '', criterio: '' };
+    const comp = this.competencias.find(c => c.id == this.idCompSeleccionada);
+    this.rapsFiltrados = comp ? comp.raps : [];
+  }
+
+  onRapChange() {
+    const rap = this.rapsFiltrados.find(r => r.id == this.idRapSeleccionado);
+    if (rap) {
+      this.form.proceso = (rap.procesos || []).join('\n');
+      this.form.saber = (rap.saberes || []).join('\n');
+      this.form.criterio = (rap.criterios || []).join('\n');
+    }
+  }
+
+  // Se dispara cada vez que el usuario escribe algo
+  notificarCambio() {
+    if (this.idRapSeleccionado) {
+      this.debouncer.next();
+    }
+  }
+
+  lanzarToast(mensaje: string) {
+    this.toastMsg.set(mensaje);
+    this.showToast.set(true);
+    // Timeout para ocultarlo
+    setTimeout(() => this.showToast.set(false), 2000);
+  }
+
+  guardarManual(silent: boolean = false) {
     if (!this.idRapSeleccionado) return;
 
-    const data = {
-      rap_id: this.idRapSeleccionado,
-      ...this.form
+    const payload: EstructuraRapPayload = {
+      proceso: this.form.proceso.trim(),
+      saber: this.form.saber.trim(),
+      criterio: this.form.criterio.trim()
     };
 
-    console.log('Enviando datos al servidor:', data);
-    // Aquí invocarías tu servicio para persistir en SQL
-    // this.importService.guardarDetalle(data).subscribe(...);
+    this.importService.gestionarEstructuraRap(this.idRapSeleccionado, payload).subscribe({
+      next: () => {
+        if (!silent) this.lanzarToast("Sincronizado con éxito");
+      },
+      error: () => {
+        if (!silent) this.lanzarToast("Error de conexión");
+      }
+    });
+  }
+
+  finalizarEdicion() {
+    if (this.idRapSeleccionado) {
+      // Guardado final forzado antes de salir
+      this.guardarManual(true);
+      setTimeout(() => this.alCerrar.emit(), 100);
+    } else {
+      this.alCerrar.emit();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -3,81 +3,85 @@
     
     <div class="p-6 bg-gray-50 border-b flex justify-between items-center">
       <h2 class="text-xl font-black text-gray-800 uppercase tracking-tight">Configurar Estructura</h2>
-      <button (click)="alCerrar.emit()" class="text-gray-400 hover:text-red-500"><i class="pi pi-times"></i></button>
+      <button (click)="finalizarEdicion()" class="text-gray-400 hover:text-red-500 transition-colors">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
 
     <div class="p-8 space-y-8 overflow-y-auto max-h-[75vh]">
       
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  
-  <div class="flex flex-col gap-1.5 min-w-0"> <label class="text-[10px] font-black text-sena uppercase tracking-widest ml-1">
-      1. Seleccione Competencia
-    </label>
-    <select 
-      [(ngModel)]="idCompSeleccionada" 
-      (change)="onCompetenciaChange()"
-      class="w-full max-w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none 
-             focus:ring-2 focus:ring-sena/20 focus:border-sena transition-all 
-             cursor-pointer truncate overflow-hidden">
-      <option [ngValue]="null" disabled>Seleccione una opción...</option>
-      <option *ngFor="let c of competencias" [ngValue]="c.id" class="text-gray-700">
-        {{ c.codigo }} - {{ (c.nombre.length > 60) ? (c.nombre | slice:0:60) + '...' : c.nombre }}
-      </option>
-    </select>
-  </div>
-
-  <div class="flex flex-col gap-1.5 min-w-0">
-    <label class="text-[10px] font-black text-sena uppercase tracking-widest ml-1">
-      2. Seleccione Resultado (RAP)
-    </label>
-    <select 
-      [(ngModel)]="idRapSeleccionado" 
-      (change)="onRapChange()" 
-      [disabled]="!idCompSeleccionada"
-      class="w-full max-w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none 
-             focus:ring-2 focus:ring-sena/20 focus:border-sena transition-all 
-             cursor-pointer truncate overflow-hidden disabled:opacity-50">
-      <option [ngValue]="null" disabled>Esperando...</option>
-      <option *ngFor="let r of rapsFiltrados" [ngValue]="r.id" class="text-gray-700">
-        {{ (r.nombre.length > 80) ? (r.nombre | slice:0:80) + '...' : r.nombre }}
-      </option>
-    </select>
-  </div>
-
-</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5 min-w-0">
+          <label class="text-[10px] font-black text-sena uppercase tracking-widest ml-1">1. Seleccione Competencia</label>
+          <select [(ngModel)]="idCompSeleccionada" (change)="onCompetenciaChange()" 
+                  class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-sena/20 transition-all cursor-pointer">
+            <option [ngValue]="null" disabled>Seleccione una opción...</option>
+            <option *ngFor="let c of competencias" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre | slice:0:60 }}...</option>
+          </select>
+        </div>
+        
+        <div class="flex flex-col gap-1.5 min-w-0">
+          <label class="text-[10px] font-black text-sena uppercase tracking-widest ml-1">2. Seleccione Resultado (RAP)</label>
+          <select [(ngModel)]="idRapSeleccionado" (change)="onRapChange()" [disabled]="!idCompSeleccionada" 
+                  class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-sena/20 transition-all cursor-pointer disabled:opacity-50">
+            <option [ngValue]="null" disabled>Esperando...</option>
+            <option *ngFor="let r of rapsFiltrados" [ngValue]="r.id">{{ r.nombre | slice:0:80 }}...</option>
+          </select>
+        </div>
+      </div>
 
       <div *ngIf="idRapSeleccionado" class="grid grid-cols-1 gap-6 animate-in fade-in zoom-in-95 duration-300">
         <hr class="border-gray-100">
         
         <div class="flex flex-col gap-2">
-          <label class="text-[10px] font-black text-gray-400 uppercase">Conocimientos de Proceso</label>
-          <textarea [(ngModel)]="form.proceso" rows="3" class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner" placeholder="Ej: Realizar el levantamiento de requisitos..."></textarea>
+          <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Conocimientos de Proceso</label>
+          <textarea id="input-proceso" 
+                    [(ngModel)]="form.proceso" 
+                    (ngModelChange)="notificarCambio()" 
+                    rows="3" 
+                    class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner resize-none"
+                    placeholder="Escriba los conocimientos..."></textarea>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-[10px] font-black text-gray-400 uppercase">Conocimientos del Saber</label>
-          <textarea [(ngModel)]="form.saber" rows="3" class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner" placeholder="Ej: Conceptos de bases de datos relacionales..."></textarea>
+          <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Conocimientos del Saber</label>
+          <textarea id="input-saber" 
+                    [(ngModel)]="form.saber" 
+                    (ngModelChange)="notificarCambio()"
+                    rows="3" 
+                    class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner resize-none"></textarea>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-[10px] font-black text-gray-400 uppercase">Criterios de Evaluación</label>
-          <textarea [(ngModel)]="form.criterio" rows="3" class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner" placeholder="Ej: Identifica correctamente las entidades del sistema..."></textarea>
+          <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Criterios de Evaluación</label>
+          <textarea id="input-criterio" 
+                    [(ngModel)]="form.criterio" 
+                    (ngModelChange)="notificarCambio()"
+                    rows="3" 
+                    class="p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-sena outline-none shadow-inner resize-none"></textarea>
         </div>
       </div>
 
       <div *ngIf="!idRapSeleccionado" class="py-10 text-center border-2 border-dashed border-gray-100 rounded-3xl">
-        <i class="pi pi-arrow-up text-gray-200 text-4xl mb-2"></i>
-        <p class="text-gray-400 text-sm">Seleccione la competencia y el RAP para editar la información curricular.</p>
+        <p class="text-gray-400 text-sm italic">Seleccione la competencia y el RAP para comenzar la edición.</p>
       </div>
-
     </div>
 
-    <div class="p-6 bg-gray-50 border-t flex justify-end gap-3">
-      <button (click)="alCerrar.emit()" class="px-6 py-2 text-xs font-bold text-gray-400 uppercase">Cerrar</button>
-      <button [disabled]="!idRapSeleccionado" (click)="guardar()" 
-              class="px-8 py-3 bg-sena text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-sena/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100">
+    <div class="p-6 bg-gray-50 border-t flex justify-end items-center">
+      <button [disabled]="!idRapSeleccionado" 
+              (click)="guardarManual()" 
+              class="px-8 py-3 bg-sena text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-sena/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
         Guardar Cambios
       </button>
     </div>
+  </div>
+</div>
+
+<div *ngIf="showToast()" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
+  <div class="bg-gray-900/95 backdrop-blur-md text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10">
+    <div class="bg-sena p-1 rounded-full flex items-center justify-center shadow-sm">
+      <i class="pi pi-check text-[10px] text-white"></i>
+    </div>
+    <p class="text-[10px] font-black uppercase tracking-widest">{{ toastMsg() }}</p>
   </div>
 </div>

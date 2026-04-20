@@ -4,9 +4,13 @@ export const programaController = {
     async listar(req, res) {
         try {
             const programas = await programaService.getSelectorProgramas();
+            // Retorna los programas con la propiedad 'es_completo' ya calculada
             return res.status(200).json(programas);
         } catch (error) {
-            return res.status(500).json({ message: "Error al listar programas", error: error.message });
+            return res.status(500).json({ 
+                message: "Error al listar programas", 
+                error: error.message 
+            });
         }
     },
 

@@ -98,5 +98,32 @@ export const programModel = {
     `;
     const [filas] = await db.execute(consulta, [programaId]);
     return filas;
+  },
+
+  async guardarDetallesCurriculares(rapId, datos) {
+    const { proceso, saber, criterio } = datos;
+    const connection = await db.getConnection();
+    
+    try {
+        await connection.beginTransaction();
+
+        // Limpiamos lo anterior para evitar duplicidad de registros viejos
+        await connection.execute(`DELETE FROM conocimientos_proceso WHERE rap_id = ?`, [rapId]);
+        await connection.execute(`DELETE FROM conocimientos_saber WHERE rap_id = ?`, [rapId]);
+        await connection.execute(`DELETE FROM criterios_evaluacion WHERE rap_id = ?`, [rapId]);
+
+        // Insertamos los bloques nuevos (asumiendo que guardas el bloque de texto)
+        if (proceso) await connection.execute(`INSERT INTO conocimientos_proceso (rap_id, descripcion) VALUES (?, ?)`, [rapId, proceso]);
+        if (saber) await connection.execute(`INSERT INTO conocimientos_saber (rap_id, descripcion) VALUES (?, ?)`, [rapId, saber]);
+        if (criterio) await connection.execute(`INSERT INTO criterios_evaluacion (rap_id, descripcion) VALUES (?, ?)`, [rapId, criterio]);
+
+        await connection.commit();
+        return { success: true };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
   }
 };

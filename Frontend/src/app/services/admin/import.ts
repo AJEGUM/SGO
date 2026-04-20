@@ -12,6 +12,12 @@ export interface Programa {
   nivel_formacion: string;
 }
 
+export interface EstructuraRapPayload {
+  proceso: string;
+  saber: string;
+  criterio: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,5 +40,11 @@ export class ImportService {
   // GET /api/admin/:id/detalle
   obtenerDetalle(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}/detalle`);
+  }
+
+  gestionarEstructuraRap(rapId: number, datos: EstructuraRapPayload): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/rap/${rapId}/estructura`, datos, {
+      withCredentials: true
+    });
   }
 }
