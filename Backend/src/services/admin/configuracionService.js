@@ -10,7 +10,7 @@ export const configuracionService = {
     if (!registro) return null;
 
     // Opcional: Si la clave es de intentos, asegúrate de devolver un número
-    if (clave === CONFIG_KEYS.IntentosTest) {
+  if (clave === CONFIG_KEYS.IntentosTest || clave === CONFIG_KEYS.UmbralTest) {
       return Number(registro.valor);
     }
 
@@ -27,6 +27,18 @@ export const configuracionService = {
     if (clave === CONFIG_KEYS.IntentosTest) {
       const n = Number(valor);
       if (n < 1 || n > 10) throw new Error("Los intentos deben estar entre 1 y 10.");
+    }
+
+    if (clave === CONFIG_KEYS.UmbralTest) {
+      const u = Number(valor);
+
+      // Validamos que sea un número válido (por si mandan letras)
+      if (isNaN(u)) throw new Error("El umbral debe ser un valor numérico.");
+
+      // Ajustamos el rango: Mínimo 70, Máximo 100
+      if (u < 50 || u > 100) {
+        throw new Error("El umbral de aprobación debe estar entre 70 y 100.");
+      }
     }
 
     return await configuracionModel.guardarOActualizarConfig(clave, valor, adminId);

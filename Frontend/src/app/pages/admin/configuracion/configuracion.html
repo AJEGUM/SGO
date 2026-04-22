@@ -9,55 +9,13 @@
 
   <main class="max-w-4xl mx-auto space-y-6">
     
-    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
-          <i class="pi pi-sparkles text-[var(--color-sena)]"></i>
-          Contexto de Inteligencia Artificial
-        </h2>
-      </div>
-
-      <div class="p-6 space-y-4">
-        <div class="bg-blue-50 border-l-4 border-[var(--color-sena)] p-4 mb-4">
-          <p class="text-sm text-gray-700">
-            <strong>Tenga en cuenta que:</strong> Este prompt define el comportamiento de la IA al generar 
-            los <strong>tests iniciales de cada competencia</strong>. 
-            Asegúrate de que las instrucciones sean genéricas para que la IA pueda adaptarse a cualquier 
-            contexto de una competencia, manteniendo siempre un enfoque pedagógico y técnico.
-          </p>
-        </div>
-        <div class="relative">
-          <textarea 
-            [(ngModel)]="config.prompt_sistema_ova"
-            [disabled]="cargando"
-            class="input-sena min-h-[250px] resize-y pt-4 pl-4 disabled:bg-gray-50" 
-            placeholder="Escribe el prompt del sistema aquí...">
-          </textarea>
-          
-          <div *ngIf="cargando" class="absolute inset-0 bg-white/60 flex items-center justify-center">
-            <i class="pi pi-spin pi-spinner text-2xl text-[var(--color-sena)]"></i>
-          </div>
-        </div>
-
-        <div class="flex justify-between items-center">
-          <span [ngClass]="config.prompt_sistema_ova.length < 50 ? 'text-red-500' : 'text-green-600'" class="text-xs font-medium">
-            Caracteres: {{ config.prompt_sistema_ova.length }} / Mínimo 50
-          </span>
-
-          <div *ngIf="exito['prompt_sistema_ova']" class="text-[var(--color-sena)] text-sm font-bold animate-bounce">
-            <i class="pi pi-check-circle"></i> Prompt actualizado
-          </div>
-
-          <button 
-            (click)="guardar('prompt_sistema_ova')"
-            [disabled]="guardando['prompt_sistema_ova'] || config.prompt_sistema_ova.length < 50"
-            class="btn-sena flex items-center gap-2">
-            <i class="pi" [ngClass]="guardando['prompt_sistema_ova'] ? 'pi-spin pi-spinner' : 'pi-save'"></i>
-            {{ guardando['prompt_sistema_ova'] ? 'Guardando...' : 'Guardar Prompt' }}
-          </button>
-        </div>
-      </div>
-    </section>
+    <app-config-prompt 
+      [(prompt)]="config.prompt_sistema_ova"
+      [cargando]="cargando"
+      [guardando]="guardando['prompt_sistema_ova']"
+      [exito]="exito['prompt_sistema_ova']"
+      (onGuardar)="guardar('prompt_sistema_ova')">
+    </app-config-prompt>
 
     <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -93,6 +51,67 @@
                <i class="pi pi-check"></i> Sincronizado
             </span>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
+          <i class="pi pi-check-square text-[var(--color-sena)]"></i>
+          Umbral de Calificación
+        </h2>
+      </div>
+
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="max-w-md">
+            <label class="font-bold text-[var(--color-sena-black)] block text-lg flex items-center gap-2">
+              Porcentaje de aprobación (%)
+              <span *ngIf="config.umbral_min_ova < 70 && config.umbral_min_ova >= 50" 
+                    class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+                Flexibilizado
+              </span>
+            </label>
+            <p class="text-sm text-gray-500">Nota mínima requerida para considerar la competencia como superada.</p>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <input 
+                type="number" 
+                [(ngModel)]="config.umbral_min_ova" 
+                min="50" max="100"
+                class="w-24 p-2.5 border-2 rounded-lg text-center font-bold focus:border-[var(--color-sena)] outline-none transition-all"
+                [ngClass]="{
+                  'border-red-400 bg-red-50 text-red-700': config.umbral_min_ova < 50 || config.umbral_min_ova > 100,
+                  'border-orange-300 bg-orange-50': config.umbral_min_ova < 70 && config.umbral_min_ova >= 50,
+                  'border-gray-200': config.umbral_min_ova >= 70
+                }">
+            </div>
+            
+            <div class="flex flex-col items-end gap-2">
+              <button 
+                (click)="guardar('umbral_min_ova')"
+                [disabled]="guardando['umbral_min_ova'] || config.umbral_min_ova < 50 || config.umbral_min_ova > 100"
+                class="btn-sena px-8 py-2.5 flex items-center gap-2 shadow-sm">
+                <i class="pi" [ngClass]="guardando['umbral_min_ova'] ? 'pi-spin pi-spinner' : 'pi-percentage'"></i>
+                {{ guardando['umbral_min_ova'] ? '...' : 'Fijar Meta' }}
+              </button>
+              <span *ngIf="exito['umbral_min_ova']" class="text-[var(--color-sena)] text-xs font-bold animate-fade-in flex items-center gap-1">
+                <i class="pi pi-check"></i> Umbral guardado
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 h-4"> 
+          <p *ngIf="config.umbral_min_ova < 50" class="text-red-500 text-xs flex items-center gap-1 animate-pulse font-medium">
+            <i class="pi pi-exclamation-triangle"></i> Error: El estándar mínimo de calidad debe ser del 50%.
+          </p>
+          <p *ngIf="config.umbral_min_ova >= 50 && config.umbral_min_ova < 70" class="text-orange-500 text-xs flex items-center gap-1 font-medium">
+            <i class="pi pi-info-circle"></i> Nota: Se recomienda un umbral del 70% para asegurar la competencia.
+          </p>
         </div>
       </div>
     </section>
