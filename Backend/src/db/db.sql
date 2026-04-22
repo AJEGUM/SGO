@@ -10,6 +10,14 @@ CREATE TABLE IF NOT EXISTS roles (
     nombre_rol VARCHAR(50) UNIQUE NOT NULL 
 ) ENGINE=InnoDB;
 
+INSERT INTO roles (nombre_rol) VALUES 
+('aprendiz'),
+('instructor'),
+('experto tematico'),
+('coordinador academico'),
+('admin'),
+('rector');
+
 CREATE TABLE IF NOT EXISTS centros_formacion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     codigo_centro VARCHAR(10) UNIQUE NOT NULL, 
@@ -93,13 +101,27 @@ CREATE TABLE IF NOT EXISTS semillas (
 -- 4. CICLOS Y RESULTADOS (Nivel 3)
 -- ==========================================
 
-CREATE TABLE IF NOT EXISTS ciclos_didacticos (
+CREATE TABLE IF NOT EXISTS ovas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     semilla_id INT NOT NULL,
+    competencia_id INT NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Un OVA pertenece a una semilla y cubre una competencia específica
+    CONSTRAINT fk_ova_semilla FOREIGN KEY (semilla_id) REFERENCES semillas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ova_competencia FOREIGN KEY (competencia_id) REFERENCES competencias(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS ciclos_didacticos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ova_id INT NOT NULL, -- Ahora depende del OVA
     fase_proyecto_id INT NOT NULL,
     titulo VARCHAR(255),
     descripcion_general TEXT,
-    CONSTRAINT fk_cd_semilla FOREIGN KEY (semilla_id) REFERENCES semillas(id) ON DELETE CASCADE,
+    orden INT DEFAULT 1, -- Para saber en qué orden se ven los ciclos dentro del OVA
+    CONSTRAINT fk_cd_ova FOREIGN KEY (ova_id) REFERENCES ovas(id) ON DELETE CASCADE,
     CONSTRAINT fk_cd_fase_proy FOREIGN KEY (fase_proyecto_id) REFERENCES fases_proyecto(id)
 ) ENGINE=InnoDB;
 
