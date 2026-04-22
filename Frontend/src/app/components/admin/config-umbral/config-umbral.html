@@ -1,0 +1,61 @@
+<section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
+  <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+    <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
+      <i class="pi pi-check-square text-[var(--color-sena)]"></i>
+      Umbral de Calificación
+    </h2>
+  </div>
+
+  <div class="p-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="max-w-md">
+        <label class="font-bold text-[var(--color-sena-black)] block text-lg flex items-center gap-2">
+          Porcentaje de aprobación (%)
+          <span *ngIf="umbral < 70 && umbral >= 50" 
+                class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+            Flexibilizado
+          </span>
+        </label>
+        <p class="text-sm text-gray-500">Nota mínima requerida para considerar la competencia como superada.</p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <input 
+            type="number" 
+            [ngModel]="umbral" 
+            (ngModelChange)="onModelChange($event)"
+            min="50" max="100"
+            class="w-24 p-2.5 border-2 rounded-lg text-center font-bold focus:border-[var(--color-sena)] outline-none transition-all"
+            [ngClass]="{
+              'border-red-400 bg-red-50 text-red-700': umbral < 50 || umbral > 100,
+              'border-orange-300 bg-orange-50': umbral < 70 && umbral >= 50,
+              'border-gray-200': umbral >= 70
+            }">
+        </div>
+        
+        <div class="flex flex-col items-end gap-2">
+          <button 
+            (click)="onGuardar.emit()"
+            [disabled]="guardando || umbral < 50 || umbral > 100"
+            class="btn-sena px-8 py-2.5 flex items-center gap-2 shadow-sm">
+            <i class="pi" [ngClass]="guardando ? 'pi-spin pi-spinner' : 'pi-percentage'"></i>
+            {{ guardando ? '...' : 'Fijar Meta' }}
+          </button>
+          <span *ngIf="exito" class="text-[var(--color-sena)] text-xs font-bold animate-fade-in flex items-center gap-1">
+            <i class="pi pi-check"></i> Umbral guardado
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 h-4"> 
+      <p *ngIf="umbral < 50" class="text-red-500 text-xs flex items-center gap-1 animate-pulse font-medium">
+        <i class="pi pi-exclamation-triangle"></i> Error: El estándar mínimo de calidad debe ser del 50%.
+      </p>
+      <p *ngIf="umbral >= 50 && umbral < 70" class="text-orange-500 text-xs flex items-center gap-1 font-medium">
+        <i class="pi pi-info-circle"></i> Nota: Se recomienda un umbral del 70% para asegurar la competencia.
+      </p>
+    </div>
+  </div>
+</section>

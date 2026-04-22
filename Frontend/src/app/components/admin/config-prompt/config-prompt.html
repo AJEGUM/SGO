@@ -1,0 +1,51 @@
+<section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
+  <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+    <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
+      <i class="pi pi-sparkles text-[var(--color-sena)]"></i>
+      Contexto de Inteligencia Artificial
+    </h2>
+  </div>
+
+  <div class="p-6 space-y-4">
+    <div class="bg-blue-50 border-l-4 border-[var(--color-sena)] p-4 mb-4">
+        <p class="text-sm text-gray-700">
+        <strong>Tenga en cuenta que:</strong> Este prompt define el comportamiento de la IA al generar 
+        los <strong>tests iniciales de cada competencia</strong>. 
+        Asegúrate de que las instrucciones sean genéricas para que la IA pueda adaptarse a cualquier 
+        contexto de una competencia, manteniendo siempre un enfoque pedagógico y técnico.
+        </p>
+    </div>
+    
+    <div class="relative">
+      <textarea 
+        [ngModel]="prompt"
+        (ngModelChange)="onInputChange($event)"
+        [disabled]="cargando"
+        class="input-sena min-h-[250px] resize-y pt-4 pl-4 disabled:bg-gray-50" 
+        placeholder="Escribe el prompt del sistema aquí...">
+      </textarea>
+      
+      <div *ngIf="cargando" class="absolute inset-0 bg-white/60 flex items-center justify-center">
+        <i class="pi pi-spin pi-spinner text-2xl text-[var(--color-sena)]"></i>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span [ngClass]="prompt.length < 50 ? 'text-red-500' : 'text-green-600'" class="text-xs font-medium">
+        Caracteres: {{ prompt.length }} / Mínimo 50
+      </span>
+
+      <div *ngIf="exito" class="text-[var(--color-sena)] text-sm font-bold animate-bounce">
+        <i class="pi pi-check-circle"></i> Prompt actualizado
+      </div>
+
+      <button 
+        (click)="onGuardar.emit()"
+        [disabled]="guardando || prompt.length < 50"
+        class="btn-sena flex items-center gap-2">
+        <i class="pi" [ngClass]="guardando ? 'pi-spin pi-spinner' : 'pi-save'"></i>
+        {{ guardando ? 'Guardando...' : 'Guardar Prompt' }}
+      </button>
+    </div>
+  </div>
+</section>

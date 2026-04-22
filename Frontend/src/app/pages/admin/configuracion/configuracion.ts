@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfiguracionService } from '../../../services/admin/configuracion';
 import { LoginService } from '../../../services/public/login-service';
+import { ConfigPrompt } from '../../../components/admin/config-prompt/config-prompt';
+import { ConfigIntentosTest } from '../../../components/admin/config-intentos-test/config-intentos-test';
+import { ConfigUmbral } from '../../../components/admin/config-umbral/config-umbral';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfigPrompt, ConfigIntentosTest, ConfigUmbral],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })
@@ -15,7 +18,8 @@ export class Configuracion implements OnInit {
   // 1. Fuente de verdad única. Las llaves coinciden con CONFIG_KEYS del Back.
   config: any = {
     prompt_sistema_ova: '',
-    intentos_test_ova: 3
+    intentos_test_ova: 3,
+    umbral_min_ova: 70
   };
 
   cargando: boolean = false;
@@ -46,11 +50,11 @@ export class Configuracion implements OnInit {
         const valorRecibido = resultados[index].data;
         
         // Lógica de conversión: Si es la clave de intentos, forzamos Number
-        if (clave === 'intentos_test_ova') {
-          this.config[clave] = Number(valorRecibido) || 3;
-        } else {
-          this.config[clave] = valorRecibido || '';
-        }
+      if (clave === 'intentos_test_ova' || clave === 'umbral_min_ova') {
+        this.config[clave] = Number(valorRecibido) || (clave === 'umbral_min_ova' ? 70 : 3);
+      } else {
+        this.config[clave] = valorRecibido || '';
+      }
       });
     } catch (error) {
       console.error('Error cargando configuraciones:', error);
