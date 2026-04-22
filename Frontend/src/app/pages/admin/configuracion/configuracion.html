@@ -10,6 +10,7 @@
   <main class="max-w-4xl mx-auto space-y-6">
     
     <app-config-prompt 
+      class="block mb-5"
       [(prompt)]="config.prompt_sistema_ova"
       [cargando]="cargando"
       [guardando]="guardando['prompt_sistema_ova']"
@@ -18,6 +19,7 @@
     </app-config-prompt>
 
     <app-config-intentos-test
+      class="block mb-5"
       [(intentos)]="config.intentos_test_ova"
       [guardando]="guardando['intentos_test_ova']"
       [exito]="exito['intentos_test_ova']"
@@ -25,6 +27,7 @@
     </app-config-intentos-test>
 
     <app-config-umbral
+      class="block mb-5"
       [(umbral)]="config.umbral_min_ova"
       [guardando]="guardando['umbral_min_ova']"
       [exito]="exito['umbral_min_ova']"
