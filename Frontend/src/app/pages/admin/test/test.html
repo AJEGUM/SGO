@@ -1,0 +1,37 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+  
+  <div class="space-y-2">
+    <label class="block text-sm font-bold text-gray-700 ml-1">Programa Académico</label>
+    <div class="relative">
+      <i class="pi pi-bookmark absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <select 
+        [(ngModel)]="programaSeleccionado" 
+        (change)="onProgramaChange()"
+        class="input-sena appearance-none cursor-pointer">
+        <option [value]="null" disabled selected>Seleccione el programa...</option>
+        <option *ngFor="let p of programas" [value]="p.programa_id">
+          {{ p.programa_codigo }} - {{ p.programa_nombre }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-bold text-gray-700 ml-1">Competencia a Evaluar</label>
+    <div class="relative">
+      <i class="pi pi-shield absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <select 
+        [(ngModel)]="competenciaSeleccionada"
+        [disabled]="!programaSeleccionado"
+        class="input-sena appearance-none cursor-pointer disabled:opacity-50 disabled:bg-gray-100">
+        <option [value]="null" disabled selected>
+          {{ !programaSeleccionado ? 'Primero elija un programa' : 'Seleccione la competencia...' }}
+        </option>
+        <option *ngFor="let c of competenciasFiltradas" [value]="c.id">
+          {{ c.codigo_norma }} - {{ c.nombre }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+</div>
