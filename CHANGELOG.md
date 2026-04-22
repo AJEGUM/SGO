@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/AJEGUM/SGO/compare/v0.14.0...v0.15.0) (2026-04-22)
+
+
+### Features
+
+* Merge pull request [#26](https://github.com/AJEGUM/SGO/issues/26) from AJEGUM/admin_config ([5a1baa2](https://github.com/AJEGUM/SGO/commit/5a1baa233be402adaca2357d014bf6c5720e0b49))
+
 # [0.14.0](https://github.com/AJEGUM/SGO/compare/v0.13.0...v0.14.0) (2026-04-20)
 
 
