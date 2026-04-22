@@ -40,6 +40,12 @@ export const routes: Routes = [
         title: 'S.G.O - Gestión de Usuarios',
         data: { roles: [5] }
       },
+      {
+        path: 'configuracion',
+        loadComponent: () => import('./pages/admin/configuracion/configuracion').then(m => m.Configuracion),
+        title: 'S.G.O - Configuracion',
+        data: { roles: [5] }
+      },
 
       // Coordinador
       {

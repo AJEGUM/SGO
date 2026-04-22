@@ -24,6 +24,7 @@ authService = inject(LoginService);
     // --- ROL: ADMIN (5) ---
     { label: 'Importar Excel', icon: 'upload', route: '/dashboard/importar', roles: [5] },
     { label: 'Gestión Usuarios', icon: 'users', route: '/dashboard/usuarios', roles: [5] },
+    { label: 'Configuracion', icon: 'cog', route: '/dashboard/configuracion', roles: [5] },
 
     // --- ROL: INSTRUCTOR (2) ---
     { label: 'Panel Instructor', icon: 'briefcase', route: '/dashboard/instructor', roles: [2] },

@@ -1,0 +1,100 @@
+<div class="min-h-screen  p-6 font-sans">
+  <header class="max-w-4xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-[var(--color-sena-black)] flex items-center gap-3">
+      <i class="pi pi-cog text-[var(--color-sena)]"></i>
+      Configuración del Sistema
+    </h1>
+    <p class="text-gray-600 mt-2">Gestiona el comportamiento de la IA y parámetros globales del OVA.</p>
+  </header>
+
+  <main class="max-w-4xl mx-auto space-y-6">
+    
+    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
+          <i class="pi pi-sparkles text-[var(--color-sena)]"></i>
+          Contexto de Inteligencia Artificial
+        </h2>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="bg-blue-50 border-l-4 border-[var(--color-sena)] p-4 mb-4">
+          <p class="text-sm text-gray-700">
+            <strong>Tenga en cuenta que:</strong> Este prompt define el comportamiento de la IA al generar 
+            los <strong>tests iniciales de cada competencia</strong>. 
+            Asegúrate de que las instrucciones sean genéricas para que la IA pueda adaptarse a cualquier 
+            contexto de una competencia, manteniendo siempre un enfoque pedagógico y técnico.
+          </p>
+        </div>
+        <div class="relative">
+          <textarea 
+            [(ngModel)]="config.prompt_sistema_ova"
+            [disabled]="cargando"
+            class="input-sena min-h-[250px] resize-y pt-4 pl-4 disabled:bg-gray-50" 
+            placeholder="Escribe el prompt del sistema aquí...">
+          </textarea>
+          
+          <div *ngIf="cargando" class="absolute inset-0 bg-white/60 flex items-center justify-center">
+            <i class="pi pi-spin pi-spinner text-2xl text-[var(--color-sena)]"></i>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span [ngClass]="config.prompt_sistema_ova.length < 50 ? 'text-red-500' : 'text-green-600'" class="text-xs font-medium">
+            Caracteres: {{ config.prompt_sistema_ova.length }} / Mínimo 50
+          </span>
+
+          <div *ngIf="exito['prompt_sistema_ova']" class="text-[var(--color-sena)] text-sm font-bold animate-bounce">
+            <i class="pi pi-check-circle"></i> Prompt actualizado
+          </div>
+
+          <button 
+            (click)="guardar('prompt_sistema_ova')"
+            [disabled]="guardando['prompt_sistema_ova'] || config.prompt_sistema_ova.length < 50"
+            class="btn-sena flex items-center gap-2">
+            <i class="pi" [ngClass]="guardando['prompt_sistema_ova'] ? 'pi-spin pi-spinner' : 'pi-save'"></i>
+            {{ guardando['prompt_sistema_ova'] ? 'Guardando...' : 'Guardar Prompt' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
+          <i class="pi pi-check-square text-[var(--color-sena)]"></i>
+          Parámetros de Evaluación
+        </h2>
+      </div>
+
+      <div class="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="max-w-md">
+          <label class="font-bold text-[var(--color-sena-black)] block">Intentos permitidos</label>
+          <p class="text-sm text-gray-500">Número de veces que el aprendiz puede repetir un test antes de que se bloquee.</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <input 
+            type="number" 
+            [(ngModel)]="config.intentos_test_ova" 
+            min="1" max="10"
+            class="w-20 p-2.5 border-2 border-gray-200 rounded-lg text-center font-bold focus:border-[var(--color-sena)] outline-none">
+          
+          <div class="flex flex-col items-end gap-2">
+            <button 
+              (click)="guardar('intentos_test_ova')"
+              [disabled]="guardando['intentos_test_ova'] || config.intentos_test_ova < 1"
+              class="btn-sena px-8 py-2.5 flex items-center gap-2">
+              <i class="pi" [ngClass]="guardando['intentos_test_ova'] ? 'pi-spin pi-spinner' : 'pi-sync'"></i>
+              {{ guardando['intentos_test_ova'] ? '...' : 'Actualizar' }}
+            </button>
+            
+            <span *ngIf="exito['intentos_test_ova']" class="text-[var(--color-sena)] text-xs font-bold animate-fade-in">
+               <i class="pi pi-check"></i> Sincronizado
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
