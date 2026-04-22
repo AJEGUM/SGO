@@ -17,103 +17,18 @@
       (onGuardar)="guardar('prompt_sistema_ova')">
     </app-config-prompt>
 
-    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
-          <i class="pi pi-check-square text-[var(--color-sena)]"></i>
-          Parámetros de Evaluación
-        </h2>
-      </div>
+    <app-config-intentos-test
+      [(intentos)]="config.intentos_test_ova"
+      [guardando]="guardando['intentos_test_ova']"
+      [exito]="exito['intentos_test_ova']"
+      (onActualizar)="guardar('intentos_test_ova')">
+    </app-config-intentos-test>
 
-      <div class="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="max-w-md">
-          <label class="font-bold text-[var(--color-sena-black)] block">Intentos permitidos</label>
-          <p class="text-sm text-gray-500">Número de veces que el aprendiz puede repetir un test antes de que se bloquee.</p>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <input 
-            type="number" 
-            [(ngModel)]="config.intentos_test_ova" 
-            min="1" max="10"
-            class="w-20 p-2.5 border-2 border-gray-200 rounded-lg text-center font-bold focus:border-[var(--color-sena)] outline-none">
-          
-          <div class="flex flex-col items-end gap-2">
-            <button 
-              (click)="guardar('intentos_test_ova')"
-              [disabled]="guardando['intentos_test_ova'] || config.intentos_test_ova < 1"
-              class="btn-sena px-8 py-2.5 flex items-center gap-2">
-              <i class="pi" [ngClass]="guardando['intentos_test_ova'] ? 'pi-spin pi-spinner' : 'pi-sync'"></i>
-              {{ guardando['intentos_test_ova'] ? '...' : 'Actualizar' }}
-            </button>
-            
-            <span *ngIf="exito['intentos_test_ova']" class="text-[var(--color-sena)] text-xs font-bold animate-fade-in">
-               <i class="pi pi-check"></i> Sincronizado
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-white rounded-[var(--radius-sena)] shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-xl font-semibold text-[var(--color-sena-black)] flex items-center gap-2">
-          <i class="pi pi-check-square text-[var(--color-sena)]"></i>
-          Umbral de Calificación
-        </h2>
-      </div>
-
-      <div class="p-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div class="max-w-md">
-            <label class="font-bold text-[var(--color-sena-black)] block text-lg flex items-center gap-2">
-              Porcentaje de aprobación (%)
-              <span *ngIf="config.umbral_min_ova < 70 && config.umbral_min_ova >= 50" 
-                    class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
-                Flexibilizado
-              </span>
-            </label>
-            <p class="text-sm text-gray-500">Nota mínima requerida para considerar la competencia como superada.</p>
-          </div>
-
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <input 
-                type="number" 
-                [(ngModel)]="config.umbral_min_ova" 
-                min="50" max="100"
-                class="w-24 p-2.5 border-2 rounded-lg text-center font-bold focus:border-[var(--color-sena)] outline-none transition-all"
-                [ngClass]="{
-                  'border-red-400 bg-red-50 text-red-700': config.umbral_min_ova < 50 || config.umbral_min_ova > 100,
-                  'border-orange-300 bg-orange-50': config.umbral_min_ova < 70 && config.umbral_min_ova >= 50,
-                  'border-gray-200': config.umbral_min_ova >= 70
-                }">
-            </div>
-            
-            <div class="flex flex-col items-end gap-2">
-              <button 
-                (click)="guardar('umbral_min_ova')"
-                [disabled]="guardando['umbral_min_ova'] || config.umbral_min_ova < 50 || config.umbral_min_ova > 100"
-                class="btn-sena px-8 py-2.5 flex items-center gap-2 shadow-sm">
-                <i class="pi" [ngClass]="guardando['umbral_min_ova'] ? 'pi-spin pi-spinner' : 'pi-percentage'"></i>
-                {{ guardando['umbral_min_ova'] ? '...' : 'Fijar Meta' }}
-              </button>
-              <span *ngIf="exito['umbral_min_ova']" class="text-[var(--color-sena)] text-xs font-bold animate-fade-in flex items-center gap-1">
-                <i class="pi pi-check"></i> Umbral guardado
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-4 h-4"> 
-          <p *ngIf="config.umbral_min_ova < 50" class="text-red-500 text-xs flex items-center gap-1 animate-pulse font-medium">
-            <i class="pi pi-exclamation-triangle"></i> Error: El estándar mínimo de calidad debe ser del 50%.
-          </p>
-          <p *ngIf="config.umbral_min_ova >= 50 && config.umbral_min_ova < 70" class="text-orange-500 text-xs flex items-center gap-1 font-medium">
-            <i class="pi pi-info-circle"></i> Nota: Se recomienda un umbral del 70% para asegurar la competencia.
-          </p>
-        </div>
-      </div>
-    </section>
+    <app-config-umbral
+      [(umbral)]="config.umbral_min_ova"
+      [guardando]="guardando['umbral_min_ova']"
+      [exito]="exito['umbral_min_ova']"
+      (onGuardar)="guardar('umbral_min_ova')">
+    </app-config-umbral>
   </main>
 </div>

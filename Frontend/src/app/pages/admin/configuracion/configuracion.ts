@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ConfiguracionService } from '../../../services/admin/configuracion';
 import { LoginService } from '../../../services/public/login-service';
 import { ConfigPrompt } from '../../../components/admin/config-prompt/config-prompt';
+import { ConfigIntentosTest } from '../../../components/admin/config-intentos-test/config-intentos-test';
+import { ConfigUmbral } from '../../../components/admin/config-umbral/config-umbral';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfigPrompt],
+  imports: [CommonModule, FormsModule, ConfigPrompt, ConfigIntentosTest, ConfigUmbral],
   templateUrl: './configuracion.html',
   styleUrl: './configuracion.css',
 })
