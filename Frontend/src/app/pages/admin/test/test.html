@@ -1,37 +1,42 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
-  
-  <div class="space-y-2">
-    <label class="block text-sm font-bold text-gray-700 ml-1">Programa Académico</label>
-    <div class="relative">
-      <i class="pi pi-bookmark absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      <select 
-        [(ngModel)]="programaSeleccionado" 
-        (change)="onProgramaChange()"
-        class="input-sena appearance-none cursor-pointer">
-        <option [value]="null" disabled selected>Seleccione el programa...</option>
-        <option *ngFor="let p of programas" [value]="p.programa_id">
-          {{ p.programa_codigo }} - {{ p.programa_nombre }}
-        </option>
-      </select>
+<header class="mb-10 space-y-2">
+  <div class="flex items-center gap-3">
+    <div class="bg-sena-alpha p-2 rounded-lg">
+      <i class="pi pi-cog text-sena text-2xl"></i>
     </div>
+    <h1 class="text-3xl font-black text-sena-black tracking-tight">
+      Gestión de <span class="text-sena">Tests</span>
+    </h1>
   </div>
+  <p class="text-gray-500 font-medium ml-1">
+    Aquí puedes gestionar, crear y configurar los tests técnicos por programa académico.
+  </p>
+</header>
 
-  <div class="space-y-2">
-    <label class="block text-sm font-bold text-gray-700 ml-1">Competencia a Evaluar</label>
-    <div class="relative">
-      <i class="pi pi-shield absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      <select 
-        [(ngModel)]="competenciaSeleccionada"
-        [disabled]="!programaSeleccionado"
-        class="input-sena appearance-none cursor-pointer disabled:opacity-50 disabled:bg-gray-100">
-        <option [value]="null" disabled selected>
-          {{ !programaSeleccionado ? 'Primero elija un programa' : 'Seleccione la competencia...' }}
-        </option>
-        <option *ngFor="let c of competenciasFiltradas" [value]="c.id">
-          {{ c.codigo_norma }} - {{ c.nombre }}
-        </option>
-      </select>
-    </div>
-  </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end bg-white p-6 rounded-[var(--radius-sena)] shadow-sm border border-gray-100">
+  
+  <app-seleccionar-crear-test
+    label="Programa Académico"
+    iconClass="pi pi-bookmark"
+    [options]="programas"
+    [modelValue]="programaSeleccionado"
+    bindValue="programa_id"
+    bindLabel="programa_nombre"
+    bindSecondaryLabel="programa_codigo"
+    placeholder="Seleccione el programa..."
+    (valueChange)="onProgramaChange($event)">
+  </app-seleccionar-crear-test>
+
+  <app-seleccionar-crear-test
+    label="Competencia a Evaluar"
+    iconClass="pi pi-shield"
+    [options]="competenciasFiltradas"
+    [modelValue]="competenciaSeleccionada"
+    [disabled]="!programaSeleccionado"
+    bindValue="id"
+    bindLabel="nombre"
+    bindSecondaryLabel="codigo_norma"
+    [placeholder]="!programaSeleccionado ? 'Primero elija un programa' : 'Seleccione la competencia...'"
+    (valueChange)="competenciaSeleccionada = $event">
+  </app-seleccionar-crear-test>
 
 </div>
