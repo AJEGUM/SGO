@@ -16,5 +16,19 @@ export const iaService = {
             totalRaps: raps.length,
             estructura: raps
         };
+    },
+
+    verificarExistenciaTest: async (competenciaId) => {
+        const test = await iaModel.obtenerTestPorCompetencia(competenciaId);
+        
+        if (!test) return null;
+
+        // Parseo de JSON si la DB lo devuelve como string
+        return {
+            ...test,
+            preguntas_json: typeof test.preguntas_json === 'string' 
+                ? JSON.parse(test.preguntas_json) 
+                : test.preguntas_json
+        };
     }
 };

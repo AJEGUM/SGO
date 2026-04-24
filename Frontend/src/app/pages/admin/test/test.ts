@@ -3,11 +3,12 @@ import { CompetenciaResumen, EstructuraCompetencia, ProgramaFull, TestInicialSer
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeleccionarCrearTest } from "../../../components/admin/seleccionar-crear-test/seleccionar-crear-test";
+import { GenerartestModal } from "../../../components/admin/generartest-modal/generartest-modal";
 
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [CommonModule, FormsModule, SeleccionarCrearTest],
+  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })
@@ -21,6 +22,12 @@ export class Test {
   estructura: EstructuraCompetencia | null = null;
   cargando: boolean = false;
   analizandoCompetencia: boolean = false;
+
+  testActual: any = null;
+  buscandoTest: boolean = false;
+
+  mostrarModalGenerar: boolean = false;
+  nombreCompetenciaElegida: string = '';
 
   constructor(private iaService: TestInicialService) {}
 
@@ -51,13 +58,40 @@ export class Test {
   prepararContexto() {
     if (!this.competenciaSeleccionada) return;
     
-    this.analizandoCompetencia = true;
-    this.iaService.obtenerEstructuraCompetencia(this.competenciaSeleccionada).subscribe({
-      next: (data) => {
-        this.estructura = data;
-        this.analizandoCompetencia = false;
-      },
-      error: () => this.analizandoCompetencia = false
-    });
+    // Buscamos el nombre de la competencia para pasarlo al modal
+    const comp = this.competenciasFiltradas.find(c => c.id === this.competenciaSeleccionada);
+    this.nombreCompetenciaElegida = comp ? comp.nombre : '';
+
+    // Abrimos el modal directamente
+    this.mostrarModalGenerar = true;
+
+    // La lógica de iaService.obtenerEstructuraCompetencia la moveremos 
+    // dentro del modal más adelante para que el modal gestione su propia carga.
   }
+
+  onCompetenciaChange(id: any) {
+  this.competenciaSeleccionada = id;
+  this.testActual = null; // Limpiar test anterior
+  this.estructura = null;
+
+  if (!id) return;
+
+  this.buscandoTest = true;
+
+  this.iaService.consultarTestPorCompetencia(id).subscribe({
+    next: (res) => {
+      this.buscandoTest = false;
+      if (res.existe) {
+        this.testActual = res.data;
+      } else {
+        // Si no existe, procedemos a cargar la estructura para la IA
+        this.prepararContexto();
+      }
+    },
+    error: () => {
+      this.buscandoTest = false;
+      console.error('Error al verificar el test');
+    }
+  });
+}
 }

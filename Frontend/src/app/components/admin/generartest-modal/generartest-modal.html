@@ -1,0 +1,36 @@
+<div *ngIf="visible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white w-full max-w-2xl rounded-[var(--radius-sena)] shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+    
+    <div class="bg-sena p-6 flex justify-between items-center text-white">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-sparkles text-2xl"></i>
+        <h2 class="text-xl font-bold">Generar Evaluación con IA</h2>
+      </div>
+      <button (click)="cerrar()" class="hover:bg-white/20 p-2 rounded-full transition-colors">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="p-8">
+      <div class="mb-6">
+        <span class="text-xs font-bold uppercase text-sena tracking-widest">Competencia Seleccionada</span>
+        <h3 class="text-lg font-semibold text-sena-black">{{ competenciaNombre }}</h3>
+      </div>
+
+      <div class="py-10 border-2 border-dashed border-gray-100 rounded-xl flex flex-col items-center justify-center text-gray-400">
+        <i class="pi pi-database text-4xl mb-2"></i>
+        <p>Configuración del Test (Próximamente)</p>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 p-4 flex justify-end gap-3">
+      <button (click)="cerrar()" class="px-6 py-2 text-gray-600 font-semibold hover:text-gray-800">
+        Cancelar
+      </button>
+      <button class="btn-sena shadow-lg shadow-sena-alpha">
+        <i class="pi pi-cog"></i> Configurar Parámetros
+      </button>
+    </div>
+
+  </div>
+</div>

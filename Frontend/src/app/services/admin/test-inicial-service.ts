@@ -29,6 +29,19 @@ export interface EstructuraCompetencia {
   }[];
 }
 
+export interface ResultadoTest {
+  existe: boolean;
+  data?: {
+    test_id: number;
+    nombre_test: string;
+    preguntas_json: any;
+    ponderacion: number;
+    tipo_seccion: string;
+    ciclo_nombre: string;
+  };
+  mensaje?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -43,6 +56,10 @@ export class TestInicialService {
 
   obtenerEstructuraCompetencia(competenciaId: number): Observable<EstructuraCompetencia> {
     return this.http.get<EstructuraCompetencia>(`${this.apiUrl}/competencias/${competenciaId}/estructura`);
+  }
+
+  consultarTestPorCompetencia(competenciaId: number): Observable<ResultadoTest> {
+    return this.http.get<ResultadoTest>(`${this.apiUrl}/test-competencia/${competenciaId}`);
   }
 
   generarTestConIA(payload: any): Observable<any> {
