@@ -4,10 +4,20 @@ export const IA_PROMPTS = {
         
         user: (estructura, config) => {
             const datosCurriculares = estructura.estructura;
+            
+            // Convertimos el array de preguntas previas en un texto para el prompt
+            const historialExclusiones = config.excluded_questions && config.excluded_questions.length > 0 
+                ? config.excluded_questions.join('\n- ') 
+                : 'None';
 
             return `
             CURRICULAR STRUCTURE (REAL DATA):
             ${JSON.stringify(datosCurriculares)}
+
+            ❌ STRICT EXCLUSION RULE (DO NOT REPEAT THESE QUESTIONS):
+            The following questions (or very similar ones) have already been asked. 
+            YOU ARE FORBIDDEN from generating them again:
+            - ${historialExclusiones}
 
             VARIABILITY INSTRUCTIONS:
             1. RANDOMNESS RULE: Do not focus only on the first topics. Randomly select from technical knowledge points (e.g., W3C, JS Frameworks, Testing Tools, Coding Standards, NoSQL, etc.).
