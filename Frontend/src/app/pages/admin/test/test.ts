@@ -29,6 +29,8 @@ export class Test {
   mostrarModalGenerar: boolean = false;
   nombreCompetenciaElegida: string = '';
 
+  dataIA_ParaModal: any = null;
+
   constructor(private iaService: TestInicialService) {}
 
   ngOnInit(): void {
@@ -91,6 +93,42 @@ export class Test {
     error: () => {
       this.buscandoTest = false;
       console.error('Error al verificar el test');
+    }
+  });
+}
+
+procesarGeneracion(configuracionIA: any) {
+  if (!this.competenciaSeleccionada) return;
+
+  this.analizandoCompetencia = true; 
+  this.dataIA_ParaModal = null; // Limpiar previo
+
+  const payload = {
+    competenciaId: this.competenciaSeleccionada,
+    ...configuracionIA
+  };
+
+  this.iaService.generarTestConIA(payload).subscribe({
+    next: (res) => {
+      this.analizandoCompetencia = false;
+      
+      try {
+        // 1. Limpieza de posibles tags de markdown que Claude a veces añade
+        const cleanJson = res.data.replace(/```json|```/g, '').trim();
+        const testGenerado = JSON.parse(cleanJson);
+        
+        // 2. IMPORTANTE: En lugar de cerrar el modal, le pasamos la data
+        // Esto hará que el modal cambie su vista automáticamente
+        this.dataIA_ParaModal = testGenerado; 
+        
+        console.log('✅ Data enviada al modal para revisión');
+      } catch (e) {
+        console.error('Error parseando JSON de Claude:', e);
+      }
+    },
+    error: (err) => {
+      this.analizandoCompetencia = false;
+      console.error('Error en la generación de IA:', err);
     }
   });
 }

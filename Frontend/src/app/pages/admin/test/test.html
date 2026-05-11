@@ -83,5 +83,8 @@
 <app-generartest-modal
   [visible]="mostrarModalGenerar"
   [competenciaNombre]="nombreCompetenciaElegida"
-  (alCerrar)="mostrarModalGenerar = false">
+  [cargando]="analizandoCompetencia" 
+  [testGenerado]="dataIA_ParaModal" 
+  (alCerrar)="mostrarModalGenerar = false; dataIA_ParaModal = null"
+  (alGenerar)="procesarGeneracion($event)">
 </app-generartest-modal>
