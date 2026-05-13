@@ -40,13 +40,19 @@ export class GenerartestModal {
   }
 
   confirmarGuardado() {
-    this.alConfirmar.emit(this.testGenerado);
+    // Emitimos un objeto que contenga AMBAS partes de la información
+    this.alConfirmar.emit({
+      config: this.configuracion, // Aquí van nombre_test, descripcion, etc.
+      preguntas: this.testGenerado  // Aquí va el JSON de la IA
+    });
   }
 
   marcarComoCorrecta(pregunta: any, opcionSeleccionada: any) {
     pregunta.opciones.forEach((opt: any) => opt.es_correcta = false);
     opcionSeleccionada.es_correcta = true;
   }
+
+  
 }
 
 

@@ -1,0 +1,36 @@
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
+
+// Definimos la interfaz para el Test para mantener el tipado fuerte de TS
+export interface TestDiagnostico {
+  competencia_id: number;
+  nombre_test: string;
+  descripcion?: string;
+  preguntas: any; // Aquí va el objeto JSON generado por la IA
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class TestService {
+  private http = inject(HttpClient);
+  // La ruta base según tu configuración de app.use
+  private apiUrl = `${environment.apiUrl}/expertoTematico`;
+
+  guardarTestIA(test: TestDiagnostico): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/guardar-test`, 
+      test, 
+      { withCredentials: true }
+    );
+  }
+
+  getTestsPorCompetencia(competenciaId: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/tests/${competenciaId}`, 
+      { withCredentials: true }
+    );
+  }
+}

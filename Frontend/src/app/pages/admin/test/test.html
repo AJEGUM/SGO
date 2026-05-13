@@ -86,5 +86,6 @@
   [cargando]="analizandoCompetencia" 
   [testGenerado]="dataIA_ParaModal" 
   (alCerrar)="mostrarModalGenerar = false; dataIA_ParaModal = null"
-  (alGenerar)="procesarGeneracion($event)">
+  (alGenerar)="procesarGeneracion($event)"
+  (alConfirmar)="confirmarYGuardar($event)"> 
 </app-generartest-modal>

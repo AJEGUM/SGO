@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeleccionarCrearTest } from "../../../components/admin/seleccionar-crear-test/seleccionar-crear-test";
 import { GenerartestModal } from "../../../components/admin/generartest-modal/generartest-modal";
+import { TestService } from '../../../services/expertoTematico/test-inicial';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-test',
@@ -31,7 +33,7 @@ export class Test {
 
   dataIA_ParaModal: any = null;
 
-  constructor(private iaService: TestInicialService) {}
+  constructor(private iaService: TestInicialService, private testinicialService: TestService) {}
 
   ngOnInit(): void {
     this.cargarDatosMaestros();
@@ -85,9 +87,6 @@ export class Test {
       this.buscandoTest = false;
       if (res.existe) {
         this.testActual = res.data;
-      } else {
-        // Si no existe, procedemos a cargar la estructura para la IA
-        this.prepararContexto();
       }
     },
     error: () => {
@@ -129,6 +128,60 @@ procesarGeneracion(configuracionIA: any) {
     error: (err) => {
       this.analizandoCompetencia = false;
       console.error('Error en la generación de IA:', err);
+    }
+  });
+}
+
+confirmarYGuardar(evento: any) {
+  if (!this.competenciaSeleccionada || !evento) return;
+
+  this.analizandoCompetencia = true;
+
+  const payload = {
+    competencia_id: this.competenciaSeleccionada,
+    nombre_test: evento.config?.nombre_test || 'Sin nombre',
+    descripcion: evento.config?.descripcion || '',
+    preguntas: evento.preguntas 
+  };
+
+  this.testinicialService.guardarTestIA(payload).subscribe({
+    next: (res) => {
+      this.analizandoCompetencia = false;
+
+      Swal.fire({
+        title: '¡Test Guardado!',
+        text: 'El test diagnóstico se ha vinculado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#39A900',
+        confirmButtonText: 'Aceptar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // --- LIMPIEZA TOTAL DE MODALES Y VISTAS ---
+          
+          // 1. Cerramos el modal de la IA
+          this.mostrarModalGenerar = false;
+          this.dataIA_ParaModal = null;
+
+          // 2. IMPORTANTE: Forzamos la recarga de la competencia.
+          // Al llamar a onCompetenciaChange, el servicio buscará el test que acabamos de guardar.
+          // Como ahora 'res.existe' será TRUE, la UI ocultará automáticamente el 
+          // componente de "Crear Test" y mostrará la tabla del test guardado.
+          this.onCompetenciaChange(this.competenciaSeleccionada);
+          
+          // 3. Resetear flags de UI por si acaso
+          this.estructura = null; 
+        }
+      });
+    },
+    error: (err) => {
+      this.analizandoCompetencia = false;
+      console.error('❌ Error al persistir:', err);
+      Swal.fire({
+        title: 'Error al guardar',
+        text: 'Hubo un problema con la base de datos.',
+        icon: 'error',
+        confirmButtonColor: '#d33'
+      });
     }
   });
 }
