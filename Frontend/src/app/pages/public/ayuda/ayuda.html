@@ -1,85 +1,110 @@
-<div class="min-h-screen bg-[var(--color-sena-gray-light)] font-sans selection:bg-sena selection:text-white flex flex-col">
+<div class="min-h-screen bg-white font-sans selection:bg-[#39A900] selection:text-white flex flex-col">
   
   <app-navbar></app-navbar>
 
-  <header class="relative overflow-hidden py-20 flex flex-col items-center justify-center text-center px-6">
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sena-alpha rounded-full blur-[120px] -z-10 opacity-30"></div>
-    
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-sena text-[10px] font-black uppercase tracking-widest border border-sena/10 mb-6 shadow-sm">
-      <i class="pi pi-question-circle"></i>
-      Centro de Soporte SGO
-    </div>
-    
-    <h1 class="text-4xl md:text-6xl font-black text-sena-black tracking-tight mb-6">
-      ¿Cómo podemos <span class="text-sena">ayudarte</span> hoy?
-    </h1>
-    
-    <div class="w-full max-w-2xl relative group">
-      <i class="pi pi-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-sena transition-colors"></i>
-      <input type="text" placeholder="Busca tutoriales, guías o soluciones..." 
-        class="w-full pl-14 pr-6 py-5 rounded-3xl border border-gray-100 bg-white shadow-xl shadow-sena-alpha/5 focus:outline-none focus:ring-2 focus:ring-sena/20 transition-all font-medium text-gray-600">
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-6 pb-24 w-full">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+  <main class="flex-grow">
+    <header class="py-20 bg-gray-50 text-center px-6 relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#39A900]/10 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
       
-      <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-sena/30 hover:shadow-xl transition-all group cursor-pointer">
-        <div class="w-12 h-12 bg-sena-alpha rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="pi pi-book text-sena text-xl"></i>
+      <div class="max-w-4xl mx-auto relative z-10 flex flex-col items-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[#39A900] text-[10px] font-black uppercase tracking-widest border border-gray-100 mb-6 shadow-sm">
+          <i class="pi pi-question-circle"></i>
+          Centro de Soporte SGO
         </div>
-        <h3 class="text-xl font-black text-sena-black mb-2">Manuales de Uso</h3>
-        <p class="text-gray-400 text-sm leading-relaxed">Aprende a navegar por el sistema, desde la carga de guías hasta la gestión de remisiones.</p>
-      </div>
-
-      <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-sena/30 hover:shadow-xl transition-all group cursor-pointer">
-        <div class="w-12 h-12 bg-[#D77655]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <svg width="24" height="24" viewBox="0 0 512 509" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#D77655" d="M115 0h281c63 0 116 52 116 116v278c0 64-53 116-116 116H115C52 510 0 458 0 394V116C0 52 52 0 115 0z"/>
-          </svg>
+        <h1 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-6">
+          ¿Cómo podemos <span class="text-[#39A900]">ayudarte</span> hoy?
+        </h1>
+        
+        <div class="w-full max-w-2xl relative group">
+          <i class="pi pi-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#39A900] transition-colors"></i>
+          <input type="text" placeholder="Busca tutoriales, guías o soluciones..." 
+            class="w-full pl-14 pr-6 py-5 rounded-3xl border border-gray-100 bg-white shadow-xl shadow-gray-200/50 focus:outline-none focus:ring-2 focus:ring-[#39A900]/20 transition-all font-medium text-gray-600 text-sm">
         </div>
-        <h3 class="text-xl font-black text-sena-black mb-2">Sobre Claude IA</h3>
-        <p class="text-gray-400 text-sm leading-relaxed">Preguntas frecuentes sobre cómo la IA procesa tus datos y genera los OVAs con precisión.</p>
       </div>
+    </header>
 
-      <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-sena/30 hover:shadow-xl transition-all group cursor-pointer">
-        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-          <i class="pi pi-discord text-blue-500 text-xl"></i>
-        </div>
-        <h3 class="text-xl font-black text-sena-black mb-2">Comunidad ADSO</h3>
-        <p class="text-gray-400 text-sm leading-relaxed">Conéctate con los desarrolladores del proyecto para reportar bugs o sugerir mejoras.</p>
-      </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-2xl font-black text-sena-black mb-8 flex items-center gap-3">
-        <span class="w-8 h-1 bg-sena rounded-full"></span>
-        Preguntas Populares
-      </h2>
-
-      <div class="space-y-4">
-        <details class="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
-          <summary class="flex items-center justify-between p-6 cursor-pointer list-none outline-none">
-            <span class="font-bold text-sena-black group-open:text-sena transition-colors">¿Cómo subo una guía de aprendizaje para procesar con IA?</span>
-            <i class="pi pi-chevron-down group-open:rotate-180 transition-transform text-gray-300"></i>
-          </summary>
-          <div class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">
-            Para procesar una guía, ve al módulo "Mis OVAs", haz clic en "Nuevo" y sube tu archivo en formato PDF o Word. Claude analizará el contenido automáticamente y te sugerirá las competencias y el banco de preguntas.
+    <article class="max-w-6xl mx-auto px-6 py-20 w-full space-y-24">
+      
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-[#39A900]/30 hover:shadow-xl transition-all group cursor-pointer">
+          <div class="w-12 h-12 bg-[#39A900]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i class="pi pi-book text-[#39A900] text-xl"></i>
           </div>
-        </details>
+          <h3 class="text-xl font-black text-gray-900 mb-2">Manuales de Uso</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Instrucciones detalladas para la carga de guías y gestión de remisiones.</p>
+        </div>
 
-        <details class="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
-          <summary class="flex items-center justify-between p-6 cursor-pointer list-none outline-none">
-            <span class="font-bold text-sena-black group-open:text-sena transition-colors">¿Quién puede ver los reportes de riesgo de deserción?</span>
-            <i class="pi pi-chevron-down group-open:rotate-180 transition-transform text-gray-300"></i>
-          </summary>
-          <div class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">
-            Los reportes son confidenciales y solo son visibles para el Instructor de la ficha, el Coordinador Académico y el equipo de Bienestar al Aprendiz encargado del seguimiento.
+        <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-[#D77655]/30 hover:shadow-xl transition-all group cursor-pointer">
+          <div class="w-12 h-12 bg-[#D77655]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg width="24" height="24" viewBox="0 0 512 509" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#D77655" d="M115 0h281c63 0 116 52 116 116v278c0 64-53 116-116 116H115C52 510 0 458 0 394V116C0 52 52 0 115 0z"/>
+            </svg>
           </div>
-        </details>
-      </div>
-    </div>
-</main>
+          <h3 class="text-xl font-black text-gray-900 mb-2">Sobre Claude IA</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Conoce cómo nuestra IA procesa tus datos pedagógicos con precisión.</p>
+        </div>
+
+        <div class="p-8 rounded-[2.5rem] bg-white border border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all group cursor-pointer">
+          <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <i class="pi pi-discord text-blue-500 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-black text-gray-900 mb-2">Comunidad ADSO</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Soporte directo de los desarrolladores y reporte de errores.</p>
+        </div>
+      </section>
+
+      <section class="max-w-4xl mx-auto space-y-12">
+        <h2 class="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-4">
+          <span class="w-12 h-1 bg-[#39A900] rounded-full"></span>
+          Preguntas Populares
+        </h2>
+
+        <div class="space-y-4">
+          <details class="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden hover:border-[#39A900]/20 transition-all">
+            <summary class="flex items-center justify-between p-7 cursor-pointer list-none outline-none">
+              <span class="font-bold text-gray-800 group-open:text-[#39A900] transition-colors">¿Cómo subo una guía de aprendizaje para procesar con IA?</span>
+              <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-open:rotate-180 transition-transform">
+                <i class="pi pi-chevron-down text-[10px] text-gray-400"></i>
+              </div>
+            </summary>
+            <div class="px-7 pb-7 text-sm text-gray-500 leading-relaxed border-t border-gray-50 pt-4">
+              Para procesar una guía, ve al módulo <strong class="text-gray-700">"Mis OVAs"</strong>, haz clic en el botón de nuevo recurso y carga tu archivo. El sistema extraerá automáticamente las competencias.
+            </div>
+          </details>
+
+          <details class="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden hover:border-[#39A900]/20 transition-all">
+            <summary class="flex items-center justify-between p-7 cursor-pointer list-none outline-none">
+              <span class="font-bold text-gray-800 group-open:text-[#39A900] transition-colors">¿Quién puede ver los reportes de riesgo de deserción?</span>
+              <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-open:rotate-180 transition-transform">
+                <i class="pi pi-chevron-down text-[10px] text-gray-400"></i>
+              </div>
+            </summary>
+            <div class="px-7 pb-7 text-sm text-gray-500 leading-relaxed border-t border-gray-50 pt-4">
+              La visibilidad está restringida por roles (Instructor, Coordinador y Bienestar) según las políticas de privacidad del CBI Palmira.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="p-10 rounded-[3rem] bg-gray-900 text-center relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-[#39A900]/20 rounded-full blur-[80px]"></div>
+        <div class="relative z-10">
+          <h3 class="text-2xl font-black text-white mb-4">¿No encontraste lo que buscabas?</h3>
+          <p class="text-gray-400 text-sm mb-8 max-w-lg mx-auto">Nuestro equipo técnico está listo para ayudarte con cualquier inconveniente en la plataforma.</p>
+          <button class="px-8 py-4 bg-[#39A900] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-all shadow-lg shadow-[#39A900]/20">
+            Contactar Soporte
+          </button>
+        </div>
+      </section>
+
+    </article>
+
+    <footer class="py-12 border-t border-gray-100 text-center bg-gray-50/50">
+      <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em]">
+        Centro de Ayuda • SGO V.2.0 • CBI Palmira
+      </p>
+    </footer>
+  </main>
 
   <app-footer></app-footer>
 </div>
