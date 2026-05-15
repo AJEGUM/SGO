@@ -1,78 +1,41 @@
-<div class="min-h-screen bg-[var(--color-sena-gray-light)] font-sans">
+<div class="min-h-screen bg-[var(--color-sena-gray-light)] font-sans selection:bg-sena selection:text-white flex flex-col">
 
   <app-navbar></app-navbar>
   
-  <main>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
-        
-        <div class="space-y-8 animate-fade-in">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sena-alpha text-sena text-sm font-bold border border-sena/20">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sena opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-sena"></span>
-            </span>
-            IA Generativa en la Formación
-          </div>
-          
-          <h1 class="text-5xl lg:text-6xl font-black text-sena-black leading-[1.1]">
-            Gestión Inteligente de <span class="text-sena">OVAs</span> para el SENA
-          </h1>
-          
-          <p class="text-xl text-gray-600 leading-relaxed max-w-xl">
-            Optimiza la creación y administración de Objetos Virtuales de Aprendizaje 
-            utilizando el poder de la Inteligencia Artificial. Automatiza evaluaciones, 
-            genera contenidos dinámicos y potencia el aprendizaje.
-          </p>
+  <main class="relative overflow-hidden flex-grow flex items-center justify-center">
+    
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-sena-alpha rounded-full blur-[120px] -z-10 opacity-40"></div>
 
-          <div class="flex flex-wrap gap-4">
-            <button (click)="irAlLogin()" class="btn-sena px-10 py-4 text-lg rounded-[var(--radius-sena)]">
-              Empezar ahora
-              <i class="pi pi-arrow-right"></i>
-            </button>
-            <div class="flex items-center gap-4 px-6 py-4 rounded-[var(--radius-sena)] border border-gray-200 bg-white">
-              <i class="pi pi-check-circle text-sena text-xl"></i>
-              <span class="text-sena-black font-semibold">ADSO & DevOps Ready</span>
-            </div>
-          </div>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      
+      <div class="text-center animate-in fade-in zoom-in duration-1000 relative">
+        
+        <h2 class="text-[20vw] md:text-[15rem] font-black text-sena-black leading-none tracking-tighter opacity-[0.03] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+          SGO
+        </h2>
 
         <div class="relative">
-          <div class="absolute -top-10 -left-10 w-40 h-40 bg-sena-alpha rounded-full blur-3xl"></div>
-          <div class="relative bg-white p-8 rounded-[var(--radius-sena)] shadow-2xl border border-gray-100 drop-zone-sena">
-            <div class="flex flex-col items-center gap-6">
-              <div class="w-20 h-20 rounded-full bg-sena-alpha flex items-center justify-center">
-                <i class="pi pi-sparkles text-sena text-4xl animate-pulse"></i>
-              </div>
-              <div class="space-y-2 w-full">
-                <div class="h-4 bg-gray-100 rounded-full w-3/4 mx-auto"></div>
-                <div class="h-4 bg-gray-100 rounded-full w-1/2 mx-auto"></div>
-                <div class="h-4 bg-sena-alpha rounded-full w-2/3 mx-auto"></div>
-              </div>
-              <p class="text-sena-black font-medium">Procesando contenido con IA...</p>
-            </div>
+          <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-sena-black tracking-tight leading-[1.1]">
+            Sistema de <br class="sm:hidden"> <span class="text-sena relative inline-block">
+              Gestión de OVAs
+              <svg class="absolute -bottom-2 left-0 w-full h-3 text-sena-alpha" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <path d="M0 5 Q 25 0 50 5 T 100 5" fill="none" stroke="currentColor" stroke-width="4" />
+              </svg>
+            </span>
+          </h1>
+
+          <div class="mt-8 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+            <span class="h-[1px] w-12 bg-sena/20 hidden md:block"></span>
+            <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gray-400">
+              Inteligencia Artificial <span class="text-sena mx-2">•</span> 
+              Educación
+            </p>
+            <span class="h-[1px] w-12 bg-sena/20 hidden md:block"></span>
           </div>
         </div>
 
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8 mt-24">
-        <div class="bg-white p-8 rounded-[var(--radius-sena)] border border-gray-100 hover:shadow-xl transition-all group">
-          <i class="pi pi-bolt text-sena text-3xl mb-4 group-hover:scale-110 transition-transform block"></i>
-          <h3 class="text-xl font-bold text-sena-black mb-2">Generación Veloz</h3>
-          <p class="text-gray-500">Crea evaluaciones y guías en segundos a partir de tus documentos base.</p>
-        </div>
-        <div class="bg-white p-8 rounded-[var(--radius-sena)] border border-gray-100 hover:shadow-xl transition-all group">
-          <i class="pi pi-server text-sena text-3xl mb-4 group-hover:scale-110 transition-transform block"></i>
-          <h3 class="text-xl font-bold text-sena-black mb-2">Infraestructura DevOps</h3>
-          <p class="text-gray-500">Desplegado con Docker y automatizado para garantizar alta disponibilidad.</p>
-        </div>
-        <div class="bg-white p-8 rounded-[var(--radius-sena)] border border-gray-100 hover:shadow-xl transition-all group">
-          <i class="pi pi-users text-sena text-3xl mb-4 group-hover:scale-110 transition-transform block"></i>
-          <h3 class="text-xl font-bold text-sena-black mb-2">Acceso por Roles</h3>
-          <p class="text-gray-500">Gestión segura para Instructores, Aprendices y Expertos Temáticos.</p>
-        </div>
-      </div>
     </div>
   </main>
 
