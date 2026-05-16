@@ -1,3 +1,12 @@
+## [0.16.1](https://github.com/SGO-IA/SGO/compare/v0.16.0...v0.16.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* Merge pull request [#28](https://github.com/SGO-IA/SGO/issues/28) from SGO-IA/test ([1d87622](https://github.com/SGO-IA/SGO/commit/1d876229b9fdcdc614e67fdec2a6651d34defdf4))
+* Merge pull request [#29](https://github.com/SGO-IA/SGO/issues/29) from SGO-IA/actions ([5c08b56](https://github.com/SGO-IA/SGO/commit/5c08b565a929f8c986ec8c29278bded916a0558c))
+* Merge pull request [#30](https://github.com/SGO-IA/SGO/issues/30) from SGO-IA/actions ([29c5b20](https://github.com/SGO-IA/SGO/commit/29c5b20431b672209b0433fddb128b7002dcefdd))
+
 # [0.16.0](https://github.com/AJEGUM/SGO/compare/v0.15.0...v0.16.0) (2026-04-22)
 
 
