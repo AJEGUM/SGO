@@ -24,5 +24,6 @@ router.patch('/config/:clave', configuracionController.actualizarConfiguracion);
 router.get('/programas-full', iaController.obtenerProgramasConCompetencias);
 router.get('/competencias/:id/estructura', iaController.obtenerEstructuraCompletaCompetencia);
 router.get('/test-competencia/:competenciaId', iaController.consultarTestCompetencia);
+router.post('/generar-test', iaController.generarNuevoTest);
 
 export default router;

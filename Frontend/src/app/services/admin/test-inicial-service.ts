@@ -42,6 +42,16 @@ export interface ResultadoTest {
   mensaje?: string;
 }
 
+export interface IA_GeneracionResponse {
+  ok: boolean;
+  mensaje: string;
+  data: string;
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -62,7 +72,7 @@ export class TestInicialService {
     return this.http.get<ResultadoTest>(`${this.apiUrl}/test-competencia/${competenciaId}`);
   }
 
-  generarTestConIA(payload: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/generar-test`, payload);
+  generarTestConIA(payload: { competenciaId: number }): Observable<IA_GeneracionResponse> {
+    return this.http.post<IA_GeneracionResponse>(`${this.apiUrl}/generar-test`, payload);
   }
 }

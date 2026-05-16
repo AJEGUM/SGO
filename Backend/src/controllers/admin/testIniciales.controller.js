@@ -39,5 +39,40 @@ export const iaController = {
         } catch (error) {
             res.status(500).json({ error: 'Error al consultar el test' });
         }
+    },
+
+    generarNuevoTest: async (req, res) => {
+        try {
+            const { competenciaId } = req.body;
+            console.log("📥 Body recibido en Controller:", req.body);
+
+            if (!competenciaId) {
+                return res.status(400).json({ ok: false, mensaje: 'ID requerido' });
+            }
+
+            const resultado = await iaService.generarTestTecnico(req.body);
+
+            if (!resultado.ok) {
+                return res.status(500).json({ 
+                    ok: false, 
+                    mensaje: 'La IA no pudo generar el contenido.' 
+                });
+            }
+
+            // Devolvemos el contenido generado para que el experto lo previsualice
+            res.status(200).json({
+                ok: true,
+                mensaje: 'Test generado exitosamente por Claude',
+                data: resultado.content, // Aquí viene el JSON de las preguntas
+                usoTokens: resultado.usage
+            });
+
+        } catch (error) {
+            console.error('❌ Error en generarNuevoTest:', error);
+            res.status(500).json({ 
+                ok: false, 
+                error: 'Error crítico al procesar el test con la IA' 
+            });
+        }
     }
 };

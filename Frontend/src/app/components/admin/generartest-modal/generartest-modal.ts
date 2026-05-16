@@ -12,29 +12,47 @@ import { FormsModule } from '@angular/forms';
 export class GenerartestModal {
   @Input() visible: boolean = false;
   @Input() competenciaNombre: string = '';
+  @Input() cargando: boolean = false;
+  
+  // Agregamos esto para recibir el test generado desde el padre
+  @Input() testGenerado: any = null; 
+
   @Output() alCerrar = new EventEmitter<void>();
   @Output() alGenerar = new EventEmitter<any>();
-
-  cargando: boolean = false;
+  @Output() alConfirmar = new EventEmitter<any>(); // Nuevo evento para guardar
 
   configuracion = {
     nombre_test: '',
-    descripcion: '', // Mapea al campo 'descripcion' de tests_diagnosticos
+    descripcion: '',
     cantidad_preguntas: 5,
     dificultad: 'intermedio',
     instrucciones_adicionales: '' 
   };
-
+  
   cerrar() {
-    this.visible = false;
+    this.testGenerado = null; // Limpiar al cerrar
     this.alCerrar.emit();
   }
 
   generar() {
     if (!this.configuracion.nombre_test.trim()) return;
-    this.cargando = true;
-    
-    // Enviamos la configuración limpia para el Test de Diagnóstico
     this.alGenerar.emit(this.configuracion);
   }
+
+  confirmarGuardado() {
+    // Emitimos un objeto que contenga AMBAS partes de la información
+    this.alConfirmar.emit({
+      config: this.configuracion, // Aquí van nombre_test, descripcion, etc.
+      preguntas: this.testGenerado  // Aquí va el JSON de la IA
+    });
+  }
+
+  marcarComoCorrecta(pregunta: any, opcionSeleccionada: any) {
+    pregunta.opciones.forEach((opt: any) => opt.es_correcta = false);
+    opcionSeleccionada.es_correcta = true;
+  }
+
+  
 }
+
+

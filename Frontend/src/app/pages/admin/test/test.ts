@@ -4,11 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeleccionarCrearTest } from "../../../components/admin/seleccionar-crear-test/seleccionar-crear-test";
 import { GenerartestModal } from "../../../components/admin/generartest-modal/generartest-modal";
+import { TestService } from '../../../services/expertoTematico/test-inicial';
+import Swal from 'sweetalert2';
+import { VisualizarTest } from '../../../components/expertoTematico/visualizar-test/visualizar-test';
+import { EditarTestComponent } from '../../../components/expertoTematico/editar-test-inicial/editar-test-inicial';
 
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal],
+  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal, VisualizarTest, EditarTestComponent],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })
@@ -29,7 +33,13 @@ export class Test {
   mostrarModalGenerar: boolean = false;
   nombreCompetenciaElegida: string = '';
 
-  constructor(private iaService: TestInicialService) {}
+  dataIA_ParaModal: any = null;
+
+  verCuestionario: boolean = false;
+
+  verEditor: boolean = false;
+
+  constructor(private iaService: TestInicialService, private testinicialService: TestService) {}
 
   ngOnInit(): void {
     this.cargarDatosMaestros();
@@ -58,39 +68,225 @@ export class Test {
   prepararContexto() {
     if (!this.competenciaSeleccionada) return;
     
-    // Buscamos el nombre de la competencia para pasarlo al modal
     const comp = this.competenciasFiltradas.find(c => c.id === this.competenciaSeleccionada);
     this.nombreCompetenciaElegida = comp ? comp.nombre : '';
-
-    // Abrimos el modal directamente
     this.mostrarModalGenerar = true;
 
-    // La lógica de iaService.obtenerEstructuraCompetencia la moveremos 
-    // dentro del modal más adelante para que el modal gestione su propia carga.
   }
 
-  onCompetenciaChange(id: any) {
-  this.competenciaSeleccionada = id;
-  this.testActual = null; // Limpiar test anterior
-  this.estructura = null;
+onCompetenciaChange(id: any) {
+    this.competenciaSeleccionada = id;
+    this.testActual = null;
+    if (!id) return;
 
-  if (!id) return;
+    this.buscandoTest = true;
 
-  this.buscandoTest = true;
+    this.iaService.consultarTestPorCompetencia(id).subscribe({
+        next: (res) => {
+            this.buscandoTest = false;
+            console.log("Respuesta completa:", res); // MIRA ESTO EN LA CONSOLA
+            
+            if (res && res.existe) {
+                // Asignamos la data interna
+                this.testActual = res.data;
+            } else {
+                this.testActual = null;
+            }
+        },
+        error: (err) => {
+            this.buscandoTest = false;
+            console.error('Error:', err);
+        }
+    });
+}
 
-  this.iaService.consultarTestPorCompetencia(id).subscribe({
+procesarGeneracion(configuracionIA: any) {
+  if (!this.competenciaSeleccionada) return;
+
+  this.analizandoCompetencia = true; 
+  this.dataIA_ParaModal = null;
+
+  const payload = {
+    competenciaId: this.competenciaSeleccionada,
+    ...configuracionIA
+  };
+
+  this.iaService.generarTestConIA(payload).subscribe({
     next: (res) => {
-      this.buscandoTest = false;
-      if (res.existe) {
-        this.testActual = res.data;
-      } else {
-        // Si no existe, procedemos a cargar la estructura para la IA
-        this.prepararContexto();
+      this.analizandoCompetencia = false;
+      
+      try {
+        // 1. Limpieza de posibles tags de markdown que Claude a veces añade
+        const cleanJson = res.data.replace(/```json|```/g, '').trim();
+        const testGenerado = JSON.parse(cleanJson);
+        
+        // 2. IMPORTANTE: En lugar de cerrar el modal, le pasamos la data
+        // Esto hará que el modal cambie su vista automáticamente
+        this.dataIA_ParaModal = testGenerado; 
+        
+        console.log('✅ Data enviada al modal para revisión');
+      } catch (e) {
+        console.error('Error parseando JSON de Claude:', e);
       }
     },
-    error: () => {
+    error: (err) => {
+      this.analizandoCompetencia = false;
+      console.error('Error en la generación de IA:', err);
+    }
+  });
+}
+
+confirmarYGuardar(evento: any) {
+  if (!this.competenciaSeleccionada || !evento) return;
+
+  this.analizandoCompetencia = true;
+
+  const payload = {
+    competencia_id: this.competenciaSeleccionada,
+    nombre_test: evento.config?.nombre_test || 'Sin nombre',
+    descripcion: evento.config?.descripcion || '',
+    preguntas: evento.preguntas 
+  };
+
+  this.testinicialService.guardarTestIA(payload).subscribe({
+    next: (res) => {
+      this.analizandoCompetencia = false;
+
+      Swal.fire({
+        title: '¡Test Guardado!',
+        text: 'El test diagnóstico se ha vinculado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#39A900',
+        confirmButtonText: 'Aceptar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          this.mostrarModalGenerar = false;
+          this.dataIA_ParaModal = null;
+
+          this.onCompetenciaChange(this.competenciaSeleccionada);
+          
+          this.estructura = null; 
+        }
+      });
+    },
+    error: (err) => {
+      this.analizandoCompetencia = false;
+      console.error('❌ Error al persistir:', err);
+      Swal.fire({
+        title: 'Error al guardar',
+        text: 'Hubo un problema con la base de datos.',
+        icon: 'error',
+        confirmButtonColor: '#d33'
+      });
+    }
+  });
+}
+
+togglePrevisualizar(testId: number): void {
+  if (this.verCuestionario) {
+    this.verCuestionario = false;
+    return;
+  }
+
+  this.buscandoTest = true;
+  
+  this.testinicialService.obtenerTestPorId(testId).subscribe({
+    next: (data: any) => {
+      let contenidoClave = data;
+
+      // 🚨 AQUÍ ESTÁ EL TRUCO: Si preguntas_json es un string de texto, lo convertimos a objeto real
+      if (data.preguntas_json) {
+        if (typeof data.preguntas_json === 'string') {
+          try {
+            contenidoClave = JSON.parse(data.preguntas_json);
+          } catch (e) {
+            console.error("🚨 Error parseando preguntas_json string:", e);
+            contenidoClave = data;
+          }
+        } else {
+          contenidoClave = data.preguntas_json;
+        }
+      }
+      
+      // Armamos el objeto con la certeza de que las propiedades existen dentro del objeto ya parseado
+      this.testActual = {
+        test_id: data.test_id || testId,
+        nombre_test: data.nombre_test || contenidoClave.nombre_test || 'Test sin título',
+        descripcion: data.descripcion || contenidoClave.descripcion || 'Sin descripción',
+        ciclo_nombre: data.ciclo_nombre || 'Estructura Principal',
+        ponderacion: data.ponderacion || 100,
+        preguntas: contenidoClave.preguntas || data.preguntas || []
+      };
+      
+      console.log('🎉 Data real mapeada con éxito:', this.testActual);
+      
+      this.verCuestionario = true; 
       this.buscandoTest = false;
-      console.error('Error al verificar el test');
+    },
+    error: (err) => {
+      this.buscandoTest = false;
+      console.error('🚨 Error al recuperar el test:', err);
+    }
+  });
+}
+
+guardarCambiosTest(datosEditados: any) {
+  const id = this.testActual.test_id || this.testActual.id;
+  
+  this.testinicialService.actualizarTest(id, datosEditados).subscribe({
+    next: (res) => {
+      // Sincronizamos la vista local con los nuevos datos editados sin recargar la página
+      this.testActual = { 
+        ...this.testActual, 
+        ...datosEditados 
+      };
+      this.verEditor = false; // Cerramos el modal del editor
+      console.log('✅ Cambios guardados en la DB y refrescados en el SGO');
+    },
+    error: (err) => {
+      console.error("🚨 Error al enviar la actualización del test:", err);
+    }
+  });
+}
+
+// Crea este método en el padre para preparar la data antes de levantar el modal de edición
+abrirEditorFormulario(testId: number): void {
+  // Si ya tenemos las preguntas cargadas en memoria, abrimos el editor de una
+  if (this.testActual && this.testActual.preguntas && this.testActual.preguntas.length > 0) {
+    this.verEditor = true;
+    return;
+  }
+
+  // Si no se han cargado (el usuario no previsualizó antes), las traemos usando la misma lógica segura
+  this.buscandoTest = true;
+  this.testinicialService.obtenerTestPorId(testId).subscribe({
+    next: (data: any) => {
+      let contenidoClave = data;
+
+      if (data.preguntas_json) {
+        if (typeof data.preguntas_json === 'string') {
+          try { contenidoClave = JSON.parse(data.preguntas_json); } catch(e) {}
+        } else {
+          contenidoClave = data.preguntas_json;
+        }
+      }
+
+      this.testActual = {
+        test_id: data.test_id || testId,
+        nombre_test: data.nombre_test || contenidoClave.nombre_test || 'Test sin título',
+        descripcion: data.descripcion || contenidoClave.descripcion || 'Sin descripción',
+        ciclo_nombre: data.ciclo_nombre || 'Estructura Principal',
+        ponderacion: data.ponderacion || 100,
+        preguntas: contenidoClave.preguntas || data.preguntas || []
+      };
+
+      this.verEditor = true;
+      this.buscandoTest = false;
+    },
+    error: (err) => {
+      this.buscandoTest = false;
+      console.error('🚨 Error al cargar datos para el editor:', err);
     }
   });
 }

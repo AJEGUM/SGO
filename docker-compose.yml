@@ -1,0 +1,78 @@
+services:
+  # 1. Base de Datos Relacional (MySQL) con persistencia física
+  sgo-db:
+    image: mysql:8.0 # O la versión exacta de MySQL que estés usando
+    container_name: sgo-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD} # Usa la contraseña segura de tus Secrets de GitHub
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - mysql_production_data:/var/lib/mysql # 🚨 EL BLINDAJE: Los datos se guardan en el disco real del servidor
+
+  # 2. Base de datos en caché para sesiones (Redis)
+  sgo-redis:
+    image: redis:7-alpine
+    container_name: sgo-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # 3. Servidor de la lógica de negocio (Express)
+  sgo-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sgo-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - sgo-db
+      - sgo-redis
+    # 🚀 Aquí Docker Compose toma las variables del sistema del servidor (inyectadas por GitHub) y se las mete al proceso de Node
+    environment:
+      NODE_ENV: production
+      DB_HOST: sgo-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      REDIS_HOST: sgo-redis
+      REDIS_PORT: 6379
+      
+      # Variables de Autenticación y Seguridad
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      
+      # Integraciones (OAuth, Emails e IA)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
+      ANTHROPIC_MAX_TOKENS: ${ANTHROPIC_MAX_TOKENS}
+      
+      # URLs de Redirección
+      FRONTEND_URL: ${FRONTEND_URL}
+
+  # 4. Interfaz del usuario (Angular + Nginx)
+  sgo-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sgo-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - sgo-backend
+
+# Definición de volúmenes para que Docker sepa que son persistentes en el disco del servidor
+volumes:
+  mysql_production_data:
+  redis_data:

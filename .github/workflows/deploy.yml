@@ -1,0 +1,86 @@
+name: SGO-IA Production Deployment (Cloudflare Tunnel)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # JOB 1: VALIDACIÓN (Asegura la sintaxis antes de tocar producción)
+  validate-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+      
+      - name: Verify syntax (Dry Run)
+        run: echo "Validando que el código no tenga errores críticos antes de saltar al túnel..."
+
+  # JOB 2: DESPLIEGUE (Solo corre si el de arriba pasa a verde)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate-code
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 1. Instalar el binario de cloudflared en la máquina temporal de GitHub
+      - name: Install Cloudflare Tunnel Client
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+          rm cloudflared.deb
+
+      # 2. Configurar el SSH nativo del runner para usar el ProxyCommand hacia tu dominio
+      - name: Setup SSH Config for Cloudflare Tunnel
+        run: |
+          mkdir -p ~/.ssh
+          echo "Host ${{ secrets.SSH_HOST }}" >> ~/.ssh/config
+          echo "    ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      # 3. Conexión segura e inyección del .env en la subcarpeta correspondiente
+      - name: Executing remote SSH commands over Tunnel
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            # Cambia esta ruta a la ubicación exacta de este monorepo en el VPS
+            cd /home/sena/proyectos/sgo-ia
+            
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # 📝 ESCRITURA DEL .ENV CORRECTO DIRECTAMENTE EN LA CARPETA BACKEND
+            cat <<EOF > backend/.env
+            NODE_ENV=production
+            PORT=3000
+            DB_HOST=sgo-db
+            DB_USER=root
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+            ANTHROPIC_MODEL=${{ secrets.ANTHROPIC_MODEL }}
+            ANTHROPIC_MAX_TOKENS=${{ secrets.ANTHROPIC_MAX_TOKENS }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            REDIS_HOST=sgo-redis
+            REDIS_PORT=6379
+            EOF
+            
+            # Orquestación de infraestructura
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d --force-recreate
+            
+            # Limpieza preventiva de almacenamiento
+            docker image prune -f

@@ -1,14 +1,18 @@
 <div *ngIf="visible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-  <div class="bg-white w-full max-w-2xl rounded-[var(--radius-sena)] shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+  <div class="bg-white w-full max-w-6xl rounded-[var(--radius-sena)] shadow-2xl overflow-hidden animate-in zoom-in duration-200">
     
     <div class="bg-sena p-6 flex justify-between items-center text-white">
       <div class="flex items-center gap-3">
         <div class="bg-white/20 p-2 rounded-lg">
-          <i class="pi pi-sparkles text-xl"></i>
+          <i [class]="testGenerado ? 'pi pi-eye' : 'pi pi-sparkles'" class="text-xl"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold leading-none">Prueba de Diagnóstico IA</h2>
-          <p class="text-[10px] text-white/80 mt-1 uppercase tracking-tighter">Evaluación de nivelación inicial</p>
+          <h2 class="text-xl font-bold leading-none">
+            {{ testGenerado ? 'Previsualizar Test' : 'Prueba de Diagnóstico IA' }}
+          </h2>
+          <p class="text-[10px] text-white/80 mt-1 uppercase tracking-tighter">
+            {{ competenciaNombre || 'Evaluación de nivelación inicial' }}
+          </p>
         </div>
       </div>
       <button (click)="cerrar()" class="hover:bg-white/20 p-2 rounded-full transition-colors">
@@ -16,36 +20,33 @@
       </button>
     </div>
 
-    <div class="p-8 max-h-[75vh] overflow-y-auto">
+    <div class="p-8 max-h-[75vh] overflow-y-auto relative">
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div *ngIf="cargando" class="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+        <i class="pi pi-spin pi-spinner text-sena text-5xl mb-4"></i>
+        <p class="text-sena font-bold animate-pulse">Analizando RAPs y generando preguntas...</p>
+      </div>
+
+      <div *ngIf="!testGenerado" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <div class="space-y-2 md:col-span-2">
           <label class="block text-sm font-bold text-gray-700 ml-1">Título del Diagnóstico</label>
           <div class="relative">
             <i class="pi pi-tag absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="text" 
-                   [(ngModel)]="configuracion.nombre_test"
-                   placeholder="Ej: Diagnóstico de Conocimientos Previos"
-                   class="input-sena">
+            <input type="text" [(ngModel)]="configuracion.nombre_test" placeholder="Ej: Diagnóstico de Conocimientos Previos" class="input-sena pl-10 w-full p-3 rounded-xl border border-gray-200 outline-none">
           </div>
         </div>
 
         <div class="space-y-2 md:col-span-2">
           <label class="block text-sm font-bold text-gray-700 ml-1">Breve Descripción</label>
-          <textarea 
-            [(ngModel)]="configuracion.descripcion"
-            rows="2"
-            placeholder="Describe el propósito de este test"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sena outline-none transition-all text-sm resize-none"
-          ></textarea>
+          <textarea [(ngModel)]="configuracion.descripcion" rows="2" placeholder="Describe el propósito de este test" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sena outline-none transition-all text-sm resize-none"></textarea>
         </div>
 
         <div class="space-y-2">
           <label class="block text-sm font-bold text-gray-700 ml-1">Número de Preguntas</label>
           <div class="relative">
             <i class="pi pi-list absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="number" [(ngModel)]="configuracion.cantidad_preguntas" class="input-sena">
+          <input type="number" [(ngModel)]="configuracion.cantidad_preguntas" min="1" max="15" class="input-sena...">
           </div>
         </div>
 
@@ -53,7 +54,7 @@
           <label class="block text-sm font-bold text-gray-700 ml-1">Nivel de la Prueba</label>
           <div class="relative">
             <i class="pi pi-chart-bar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <select [(ngModel)]="configuracion.dificultad" class="input-sena appearance-none">
+            <select [(ngModel)]="configuracion.dificultad" class="input-sena appearance-none pl-10 w-full p-3 rounded-xl border border-gray-200 outline-none">
               <option value="basico">Básico (Fundamentos)</option>
               <option value="intermedio">Intermedio (Técnico)</option>
               <option value="avanzado">Avanzado (Experto)</option>
@@ -62,30 +63,91 @@
         </div>
 
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-bold text-gray-700 ml-1 flex items-center gap-2">
-            Instrucciones para la IA
-          </label>
-          <textarea 
-            [(ngModel)]="configuracion.instrucciones_adicionales"
-            rows="3"
-            placeholder="Ej: Enfócate en identificar si conocen los conceptos de Docker Swarm y balanceo de carga..."
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sena outline-none transition-all text-sm resize-none bg-gray-50/50"
-          ></textarea>
+          <label class="block text-sm font-bold text-gray-700 ml-1 flex items-center gap-2">Instrucciones para la IA</label>
+          <textarea [(ngModel)]="configuracion.instrucciones_adicionales" rows="3" placeholder="Ej: Enfócate en identificar si conocen los conceptos de Docker Swarm y balanceo de carga..." class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sena outline-none transition-all text-sm resize-none bg-gray-50/50"></textarea>
+        </div>
+      </div>
+
+    <div *ngIf="testGenerado" class="space-y-4 animate-in fade-in duration-500">
+      
+      <div class="bg-sena/10 p-6 rounded-xl border border-sena/20 mb-6 group">
+        <div class="flex flex-col gap-2">
+          <p class="text-[10px] font-black text-sena uppercase tracking-widest">Título del Test</p>
+          <input type="text" 
+                [(ngModel)]="testGenerado.nombre_test" 
+                class="bg-transparent font-bold text-sena text-xl border-b border-transparent focus:border-sena focus:outline-none w-full transition-all"
+                placeholder="Escribe el nombre del test...">
+          
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Descripción General</p>
+          <textarea [(ngModel)]="testGenerado.descripcion" 
+                    rows="2"
+                    class="bg-transparent text-xs text-gray-600 border-b border-transparent focus:border-gray-300 focus:outline-none w-full resize-none transition-all"
+                    placeholder="Escribe una breve descripción..."></textarea>
+        </div>
+      </div>
+
+      <div *ngFor="let pregunta of (testGenerado.preguntas || testGenerado); let i = index" 
+          class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        
+        <div class="flex justify-between items-center mb-4">
+          <span class="px-3 py-1 bg-gray-100 text-[10px] font-black text-gray-500 rounded-full">PREGUNTA {{i+1}}</span>
+          <span class="text-[10px] font-bold text-sena/50 italic">Modo Edición Activo</span>
+        </div>
+
+        <textarea [(ngModel)]="pregunta.enunciado" 
+                  rows="2"
+                  class="font-bold text-gray-800 mb-4 text-sm w-full p-2 bg-gray-50 rounded-lg border-2 border-transparent focus:border-sena/20 focus:bg-white focus:outline-none transition-all"
+                  placeholder="Escribe el enunciado de la pregunta..."></textarea>
+        
+        <div class="space-y-3">
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Opciones de respuesta</p>
+          
+          <div *ngFor="let opt of pregunta.opciones" 
+              class="group flex items-center gap-3 p-1">
+            
+            <div class="flex-none">
+              <button (click)="marcarComoCorrecta(pregunta, opt)"
+                      [ngClass]="opt.es_correcta ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-300'"
+                      class="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110">
+                <i class="pi pi-check text-xs"></i>
+              </button>
+            </div>
+
+            <input type="text" 
+                  [(ngModel)]="opt.texto" 
+                  [ngClass]="opt.es_correcta ? 'border-green-200 bg-green-50/30 text-green-700 font-medium' : 'border-gray-100 text-gray-600'"
+                  class="flex-1 p-3 text-xs rounded-xl border-2 focus:outline-none focus:border-sena/30 transition-all"
+                  placeholder="Escribe la opción...">
+          </div>
         </div>
       </div>
     </div>
 
+    </div>
+
     <div class="bg-gray-50 p-6 flex justify-end gap-3 border-t border-gray-100">
-      <button (click)="cerrar()" 
-              class="px-6 py-2.5 text-gray-500 font-bold hover:text-sena-black transition-colors text-sm">
-        Cancelar
-      </button>
-      <button (click)="generar()" 
-              [disabled]="cargando || !configuracion.nombre_test"
-              class="btn-sena shadow-lg shadow-sena-alpha flex items-center gap-2 px-8">
-        <i [class]="cargando ? 'pi pi-spin pi-spinner' : 'pi pi-bolt'"></i>
-        {{ cargando ? 'Generando...' : 'Crear Diagnóstico' }}
-      </button>
+      
+      <ng-container *ngIf="testGenerado; else btnConfig">
+        <button (click)="testGenerado = null" class="px-6 py-2.5 text-gray-500 font-bold hover:text-sena-black transition-colors text-sm">
+          Atrás (Editar Config)
+        </button>
+        <button (click)="confirmarGuardado()" class="btn-sena shadow-lg shadow-sena-alpha px-8">
+          Guardar Test
+        </button>
+      </ng-container>
+
+      <ng-template #btnConfig>
+        <button (click)="cerrar()" class="px-6 py-2.5 text-gray-500 font-bold hover:text-sena-black transition-colors text-sm">
+          Cancelar
+        </button>
+        <button (click)="generar()" 
+                [disabled]="cargando || !configuracion.nombre_test"
+                class="btn-sena shadow-lg shadow-sena-alpha flex items-center gap-2 px-8 disabled:opacity-50">
+          <i [class]="cargando ? 'pi pi-spin pi-spinner' : 'pi pi-bolt'"></i>
+          {{ cargando ? 'Generando...' : 'Crear Diagnóstico' }}
+        </button>
+      </ng-template>
+
     </div>
 
   </div>
