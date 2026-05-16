@@ -11,6 +11,18 @@ export interface TestDiagnostico {
   preguntas: any; // Aquí va el objeto JSON generado por la IA
 }
 
+export interface TestDetalleCompleto {
+  test_id: number;
+  competencia_id: number;
+  nombre_test: string;
+  descripcion?: string;
+  preguntas_json: any[]; // Array parseado listo para recorrer con *ngFor
+  activo: boolean;
+  competencia_nombre: string;
+  ciclo_nombre: string;
+  ponderacion: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -30,6 +42,13 @@ export class TestService {
   getTestsPorCompetencia(competenciaId: number): Observable<any[]> {
     return this.http.get<any[]>(
       `${this.apiUrl}/tests/${competenciaId}`, 
+      { withCredentials: true }
+    );
+  }
+
+  obtenerTestPorId(testId: number): Observable<TestDetalleCompleto> {
+    return this.http.get<TestDetalleCompleto>(
+      `${this.apiUrl}/ver-test/${testId}`,
       { withCredentials: true }
     );
   }

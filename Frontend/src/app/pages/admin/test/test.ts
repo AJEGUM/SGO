@@ -6,11 +6,12 @@ import { SeleccionarCrearTest } from "../../../components/admin/seleccionar-crea
 import { GenerartestModal } from "../../../components/admin/generartest-modal/generartest-modal";
 import { TestService } from '../../../services/expertoTematico/test-inicial';
 import Swal from 'sweetalert2';
+import { VisualizarTest } from '../../../components/expertoTematico/visualizar-test/visualizar-test';
 
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal],
+  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal, VisualizarTest],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })
@@ -32,6 +33,9 @@ export class Test {
   nombreCompetenciaElegida: string = '';
 
   dataIA_ParaModal: any = null;
+
+  verCuestionario: boolean = false;
+  
 
   constructor(private iaService: TestInicialService, private testinicialService: TestService) {}
 
@@ -173,6 +177,39 @@ confirmarYGuardar(evento: any) {
         icon: 'error',
         confirmButtonColor: '#d33'
       });
+    }
+  });
+}
+
+togglePrevisualizar(testId: number): void {
+  // Si el modal ya está abierto, solo cambiamos la bandera para ocultarlo
+  if (this.verCuestionario) {
+    this.verCuestionario = false;
+    return;
+  }
+
+  this.buscandoTest = true;
+  
+  this.testinicialService.obtenerTestPorId(testId).subscribe({
+    next: (data: any) => {
+      const contenidoClave = data.preguntas_json ? data.preguntas_json : data;
+      
+      this.testActual = {
+        test_id: data.test_id || testId,
+        nombre_test: data.nombre_test || contenidoClave.nombre_test || 'Test sin título',
+        descripcion: data.descripcion || contenidoClave.descripcion || 'Sin descripción',
+        ciclo_nombre: data.ciclo_nombre || 'Estructura Principal',
+        ponderacion: data.ponderacion || 100,
+        preguntas: contenidoClave['preguntas'] || data['preguntas'] || []
+      };
+      
+      // Activamos el modal sin romper la existencia de testActual
+      this.verCuestionario = true; 
+      this.buscandoTest = false;
+    },
+    error: (err) => {
+      this.buscandoTest = false;
+      console.error('🚨 Error al recuperar el test:', err);
     }
   });
 }

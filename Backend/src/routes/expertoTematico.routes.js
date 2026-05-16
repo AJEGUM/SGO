@@ -9,4 +9,6 @@ router.get('/mis-semillas', expertoController.listarMisSemillas);
 
 router.post('/guardar-test', testController.crearTest);
 
+router.get('/ver-test/:id', testController.obtenerTest);
+
 export default router;

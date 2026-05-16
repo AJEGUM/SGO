@@ -46,7 +46,7 @@
   </div>
 
   <div *ngIf="!buscandoTest && testActual" 
-       class="bg-white rounded-[var(--radius-sena)] shadow-xl border border-gray-100 overflow-hidden animate-in zoom-in-95 duration-300 group">
+       class="bg-white rounded-[var(--radius-sena)] shadow-xl border border-gray-100 overflow-hidden animate-in zoom-in-95 duration-300 group relative">
     
     <div class="absolute left-0 top-0 h-full w-2 bg-sena"></div>
 
@@ -64,13 +64,15 @@
           </div>
           <h3 class="text-2xl font-black text-sena-black">{{ testActual.nombre_test }}</h3>
           <div class="flex gap-5 mt-3">
-             <span class="text-sm text-gray-500"><i class="pi pi-chart-bar mr-1 text-sena"></i> Ponderación: <b class="text-sena-black">{{ testActual.ponderacion }}%</b></span>
-    </div>
+            <span class="text-sm text-gray-500"><i class="pi pi-chart-bar mr-1 text-sena"></i> Ponderación: <b class="text-sena-black">{{ testActual.ponderacion }}%</b></span>
+          </div>
         </div>
       </div>
 
       <div class="flex gap-3 w-full lg:w-auto">
-        <button class="flex-1 lg:flex-none px-6 py-3 text-gray-400 font-bold hover:text-sena transition-colors flex items-center justify-center gap-2">
+        <button 
+          (click)="togglePrevisualizar(testActual.test_id || testActual.id)"
+          class="flex-1 lg:flex-none px-6 py-3 text-gray-400 font-bold hover:text-sena transition-colors flex items-center justify-center gap-2">
           <i class="pi pi-eye"></i> Previsualizar
         </button>
         <button class="flex-1 lg:flex-none btn-sena shadow-lg shadow-sena/20 px-10 py-3 flex items-center justify-center gap-2 active:scale-95 transition-transform">
@@ -78,9 +80,15 @@
         </button>
       </div>
     </div>
+
+    <app-visualizar-test 
+      *ngIf="verCuestionario && testActual" 
+      [test]="testActual"
+      (alCerrar)="verCuestionario = false">
+    </app-visualizar-test>
     
     <div class="bg-gray-50/80 px-8 py-3 border-t border-gray-100 flex justify-between items-center">
-      <span class="text-[10px] font-bold text-gray-400 tracking-widest">REF: #SGO-{{ testActual.test_id }}</span>
+      <span class="text-[10px] font-bold text-gray-400 tracking-widest">REF: #SGO-{{ testActual.test_id || testActual.id }}</span>
     </div>
   </div>
 

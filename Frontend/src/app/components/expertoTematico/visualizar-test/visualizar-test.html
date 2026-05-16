@@ -1,0 +1,93 @@
+<div *ngIf="test" 
+     class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200"
+     (click)="$event.target === backdrop ? cerrarModal() : null" #backdrop>
+  
+  <div class="bg-gray-50 w-full max-w-5xl max-h-[85vh] rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+    
+    <div class="bg-white px-8 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-sena-alpha rounded-2xl flex items-center justify-center text-sena shadow-inner">
+          <i class="pi pi-file-check text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-sena bg-sena-alpha px-2 py-0.5 rounded-md">
+            Vista Previa de Instrumento
+          </span>
+          <h3 class="text-xl font-black text-sena-black mt-0.5">{{ test.nombre_test }}</h3>
+        </div>
+      </div>
+      
+      <button (click)="cerrarModal()" 
+              class="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:text-sena hover:bg-sena-alpha flex items-center justify-center transition-all group">
+        <i class="pi pi-times text-lg group-hover:rotate-90 transition-transform duration-200"></i>
+      </button>
+    </div>
+
+    <div class="p-8 overflow-y-auto space-y-6 flex-1">
+      
+      <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Descripción del Test</p>
+          <p class="text-sm font-semibold text-gray-600 mt-1">{{ test.descripcion || 'Sin descripción configurada.' }}</p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <span class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl text-xs font-bold">
+            <i class="pi pi-tag mr-1"></i> {{ test.ciclo_nombre }}
+          </span>
+          <span class="px-3 py-1.5 bg-gray-900 text-white rounded-xl text-xs font-bold shadow-sm">
+            {{ test.preguntas?.length || 0 }} Reactivos
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div *ngFor="let pregunta of test.preguntas; let i = index" 
+             class="bg-white p-6 md:p-8 rounded-[1.5rem] border border-gray-100 shadow-sm">
+          
+          <div class="flex items-start gap-4 mb-5">
+            <span class="flex items-center justify-center w-8 h-8 bg-sena text-white font-black rounded-xl text-xs shrink-0 shadow-md shadow-sena/10">
+              {{ i + 1 }}
+            </span>
+            <p class="text-base md:text-lg font-bold text-gray-800 leading-snug pt-0.5">
+              {{ pregunta.enunciado }}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-0 md:pl-12">
+            <div *ngFor="let opcion of pregunta.opciones; let idxOpcion = index" 
+                 [ngClass]="{
+                   'bg-green-50/40 border-green-200 text-green-900': opcion.es_correcta,
+                   'bg-gray-50 border-gray-100 text-gray-600': !opcion.es_correcta
+                 }"
+                 class="p-4 rounded-xl border text-sm font-bold flex items-center gap-3 transition-colors">
+              
+              <span [ngClass]="{
+                      'bg-green-600 text-white border-green-600': opcion.es_correcta,
+                      'bg-white text-gray-400 border-gray-200': !opcion.es_correcta
+                    }"
+                    class="w-6 h-6 flex items-center justify-center border rounded-lg text-xs font-black shrink-0">
+                {{ obtenerLetra(idxOpcion) }}
+              </span> 
+              
+              <span class="leading-tight">{{ opcion.texto }}</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pl-0 md:pl-12" *ngFor="let opcion of pregunta.opciones; let idxOpcion = index">
+            <div *ngIf="opcion.es_correcta" class="inline-flex items-center gap-2 text-xs font-black uppercase text-green-600 tracking-wider bg-green-50 px-3 py-1 rounded-lg border border-green-100">
+              <i class="pi pi-check-circle text-sm"></i> Clave Correcta: Opción {{ obtenerLetra(idxOpcion) }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-white px-8 py-4 border-t border-gray-100 flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">
+      <span>REF: #SGO-{{ test.test_id }}</span>
+      <span>SGO IA • CBI Palmira</span>
+    </div>
+
+  </div>
+</div>
