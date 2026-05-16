@@ -11,4 +11,6 @@ router.post('/guardar-test', testController.crearTest);
 
 router.get('/ver-test/:id', testController.obtenerTest);
 
+router.put('/editar-test/:id', testController.editarTest);
+
 export default router;

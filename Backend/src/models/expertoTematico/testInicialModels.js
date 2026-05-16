@@ -54,5 +54,26 @@ export const testModel = {
         }
 
         return test;
+    },
+
+    async actualizarTest(testId, { nombre_test, descripcion, preguntas_json }) {
+        const query = `
+            UPDATE tests_diagnosticos 
+            SET 
+                nombre_test = ?, 
+                descripcion = ?, 
+                preguntas_json = ?
+            WHERE id = ?;
+        `;
+
+        // Ejecución segura y parametrizada contra SQL para evitar inyecciones
+        const [result] = await db.execute(query, [
+            nombre_test, 
+            descripcion, 
+            preguntas_json, 
+            testId
+        ]);
+        
+        return result;
     }
 };

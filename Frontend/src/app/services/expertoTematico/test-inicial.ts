@@ -52,4 +52,12 @@ export class TestService {
       { withCredentials: true }
     );
   }
+
+  actualizarTest(testId: number, datosEditados: any): Observable<any> {
+    return this.http.put<any>(
+      `${this.apiUrl}/editar-test/${testId}`, 
+      datosEditados, 
+      { withCredentials: true }
+    );
+  }
 }

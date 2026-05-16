@@ -18,5 +18,26 @@ export const testService = {
         test.ponderacion = test.ponderacion || 100; 
 
         return test;
+    },
+
+    async actualizarExistente(testId, datosTest) {
+        const { nombre_test, descripcion, preguntas } = datosTest;
+
+        // Reconstruimos la estructura idéntica a como la guarda tu prompt de IA
+        const payloadEstructurado = {
+            preguntas: preguntas,
+            descripcion: descripcion || 'Test inicial para el programa',
+            nombre_test: nombre_test
+        };
+
+        // Convertimos el objeto estructurado a String para la columna JSON de la DB
+        const preguntasJsonString = JSON.stringify(payloadEstructurado);
+
+        // Orquestamos la llamada al modelo de datos
+        return await testModel.actualizarTest(testId, {
+            nombre_test,
+            descripcion,
+            preguntas_json: preguntasJsonString
+        });
     }
 };

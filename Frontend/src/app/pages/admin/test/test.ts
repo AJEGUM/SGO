@@ -7,11 +7,12 @@ import { GenerartestModal } from "../../../components/admin/generartest-modal/ge
 import { TestService } from '../../../services/expertoTematico/test-inicial';
 import Swal from 'sweetalert2';
 import { VisualizarTest } from '../../../components/expertoTematico/visualizar-test/visualizar-test';
+import { EditarTestComponent } from '../../../components/expertoTematico/editar-test-inicial/editar-test-inicial';
 
 @Component({
   selector: 'app-test',
   standalone: true,
-  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal, VisualizarTest],
+  imports: [CommonModule, FormsModule, SeleccionarCrearTest, GenerartestModal, VisualizarTest, EditarTestComponent],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })
@@ -35,7 +36,8 @@ export class Test {
   dataIA_ParaModal: any = null;
 
   verCuestionario: boolean = false;
-  
+
+  verEditor: boolean = false;
 
   constructor(private iaService: TestInicialService, private testinicialService: TestService) {}
 
@@ -182,7 +184,6 @@ confirmarYGuardar(evento: any) {
 }
 
 togglePrevisualizar(testId: number): void {
-  // Si el modal ya está abierto, solo cambiamos la bandera para ocultarlo
   if (this.verCuestionario) {
     this.verCuestionario = false;
     return;
@@ -192,24 +193,100 @@ togglePrevisualizar(testId: number): void {
   
   this.testinicialService.obtenerTestPorId(testId).subscribe({
     next: (data: any) => {
-      const contenidoClave = data.preguntas_json ? data.preguntas_json : data;
+      let contenidoClave = data;
+
+      // 🚨 AQUÍ ESTÁ EL TRUCO: Si preguntas_json es un string de texto, lo convertimos a objeto real
+      if (data.preguntas_json) {
+        if (typeof data.preguntas_json === 'string') {
+          try {
+            contenidoClave = JSON.parse(data.preguntas_json);
+          } catch (e) {
+            console.error("🚨 Error parseando preguntas_json string:", e);
+            contenidoClave = data;
+          }
+        } else {
+          contenidoClave = data.preguntas_json;
+        }
+      }
       
+      // Armamos el objeto con la certeza de que las propiedades existen dentro del objeto ya parseado
       this.testActual = {
         test_id: data.test_id || testId,
         nombre_test: data.nombre_test || contenidoClave.nombre_test || 'Test sin título',
         descripcion: data.descripcion || contenidoClave.descripcion || 'Sin descripción',
         ciclo_nombre: data.ciclo_nombre || 'Estructura Principal',
         ponderacion: data.ponderacion || 100,
-        preguntas: contenidoClave['preguntas'] || data['preguntas'] || []
+        preguntas: contenidoClave.preguntas || data.preguntas || []
       };
       
-      // Activamos el modal sin romper la existencia de testActual
+      console.log('🎉 Data real mapeada con éxito:', this.testActual);
+      
       this.verCuestionario = true; 
       this.buscandoTest = false;
     },
     error: (err) => {
       this.buscandoTest = false;
       console.error('🚨 Error al recuperar el test:', err);
+    }
+  });
+}
+
+guardarCambiosTest(datosEditados: any) {
+  const id = this.testActual.test_id || this.testActual.id;
+  
+  this.testinicialService.actualizarTest(id, datosEditados).subscribe({
+    next: (res) => {
+      // Sincronizamos la vista local con los nuevos datos editados sin recargar la página
+      this.testActual = { 
+        ...this.testActual, 
+        ...datosEditados 
+      };
+      this.verEditor = false; // Cerramos el modal del editor
+      console.log('✅ Cambios guardados en la DB y refrescados en el SGO');
+    },
+    error: (err) => {
+      console.error("🚨 Error al enviar la actualización del test:", err);
+    }
+  });
+}
+
+// Crea este método en el padre para preparar la data antes de levantar el modal de edición
+abrirEditorFormulario(testId: number): void {
+  // Si ya tenemos las preguntas cargadas en memoria, abrimos el editor de una
+  if (this.testActual && this.testActual.preguntas && this.testActual.preguntas.length > 0) {
+    this.verEditor = true;
+    return;
+  }
+
+  // Si no se han cargado (el usuario no previsualizó antes), las traemos usando la misma lógica segura
+  this.buscandoTest = true;
+  this.testinicialService.obtenerTestPorId(testId).subscribe({
+    next: (data: any) => {
+      let contenidoClave = data;
+
+      if (data.preguntas_json) {
+        if (typeof data.preguntas_json === 'string') {
+          try { contenidoClave = JSON.parse(data.preguntas_json); } catch(e) {}
+        } else {
+          contenidoClave = data.preguntas_json;
+        }
+      }
+
+      this.testActual = {
+        test_id: data.test_id || testId,
+        nombre_test: data.nombre_test || contenidoClave.nombre_test || 'Test sin título',
+        descripcion: data.descripcion || contenidoClave.descripcion || 'Sin descripción',
+        ciclo_nombre: data.ciclo_nombre || 'Estructura Principal',
+        ponderacion: data.ponderacion || 100,
+        preguntas: contenidoClave.preguntas || data.preguntas || []
+      };
+
+      this.verEditor = true;
+      this.buscandoTest = false;
+    },
+    error: (err) => {
+      this.buscandoTest = false;
+      console.error('🚨 Error al cargar datos para el editor:', err);
     }
   });
 }

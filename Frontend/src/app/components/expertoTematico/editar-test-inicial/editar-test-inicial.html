@@ -1,0 +1,108 @@
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
+  
+  <div class="bg-gray-50 w-full max-w-5xl max-h-[85vh] rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300" 
+       [formGroup]="testForm">
+    
+    <div class="bg-white px-8 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-inner">
+          <i class="pi pi-pencil text-xl"></i>
+        </div>
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
+            Modo Edición Avanzada
+          </span>
+          <h3 class="text-xl font-black text-sena-black mt-0.5">Modificar Cuestionario</h3>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button type="button" (click)="alCerrar.emit()" 
+                class="px-5 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-50 transition-all">
+          Cancelar
+        </button>
+        <button type="button" (click)="enviarCambios()" 
+                class="btn-sena bg-sena hover:bg-[#2d8400] text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-sena/20 text-sm active:scale-95 transition-transform">
+          <i class="pi pi-save mr-1"></i> Guardar Cambios
+        </button>
+      </div>
+    </div>
+
+    <div class="p-8 overflow-y-auto space-y-6 flex-1">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div class="flex flex-col gap-2">
+          <label class="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Nombre del Instrumento</label>
+          <input type="text" formControlName="nombre_test" 
+                 class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-sena focus:bg-white outline-none font-bold text-gray-700 transition-all text-sm">
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Descripción del Test</label>
+          <input type="text" formControlName="descripcion" 
+                 class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-sena focus:bg-white outline-none font-bold text-gray-700 transition-all text-sm">
+        </div>
+      </div>
+
+      <div formArrayName="preguntas" class="space-y-6">
+        <div *ngFor="let pregunta of preguntasFormArray.controls; let pIdx = index" 
+             [formGroupName]="pIdx" 
+             class="bg-white p-6 md:p-8 rounded-[1.5rem] border border-gray-100 shadow-sm transition-all hover:border-amber-200">
+          
+          <div class="flex items-start gap-4 mb-5">
+            <span class="flex items-center justify-center w-8 h-8 bg-gray-900 text-white font-black rounded-xl text-xs shrink-0 shadow-md">
+              {{ pIdx + 1 }}
+            </span>
+            <div class="w-full">
+              <label class="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1">Enunciado de la Pregunta</label>
+              <textarea formControlName="enunciado" rows="2"
+                        class="w-full bg-transparent border-b border-gray-200 focus:border-sena outline-none text-base md:text-lg font-bold text-gray-800 py-1 resize-none transition-colors"
+                        placeholder="Escribe la pregunta analizada..."></textarea>
+            </div>
+          </div>
+
+<div formArrayName="opciones" class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-0 md:pl-12">
+  <div *ngFor="let controlOpcion of getOpcionesFormArray(pIdx).controls; let oIdx = index" 
+       [formGroupName]="oIdx"
+       [ngClass]="{
+         'bg-green-50/50 border-green-300 text-green-900': controlOpcion.value.es_correcta,
+         'bg-gray-50 border-gray-200 text-gray-600': !controlOpcion.value.es_correcta
+       }"
+       class="p-4 rounded-xl border flex items-center gap-3 transition-all">
+    
+    <button type="button" 
+            (click)="seleccionarOpcionCorrecta(pIdx, oIdx)"
+            [ngClass]="{
+              'bg-green-600 border-green-600 text-white shadow-md shadow-green-200': controlOpcion.value.es_correcta,
+              'bg-white border-gray-300 hover:border-sena text-transparent': !controlOpcion.value.es_correcta
+            }"
+            class="w-6 h-6 flex items-center justify-center border rounded-lg text-xs font-black shrink-0 transition-all">
+      <i class="pi pi-check text-[10px]"></i>
+    </button>
+
+    <div class="w-full">
+      <input type="text" formControlName="texto" 
+             class="bg-transparent border-none outline-none font-bold text-sm w-full focus:text-gray-900"
+             [ngClass]="controlOpcion.value.es_correcta ? 'text-green-900' : 'text-gray-600'">
+    </div>
+  </div>
+</div>
+
+<div class="mt-4 pl-0 md:pl-12 flex items-center gap-2">
+  <div *ngFor="let controlOpcion of getOpcionesFormArray(pIdx).controls; let oIdx = index">
+    <div *ngIf="controlOpcion.value.es_correcta" 
+         class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-green-600 tracking-wider bg-green-50 px-2.5 py-1 rounded-md border border-green-100">
+      <i class="pi pi-check-circle"></i> La opción anterior será evaluada como la respuesta correcta.
+    </div>
+  </div>
+</div>
+      </div>
+
+    </div>
+
+    <div class="bg-white px-8 py-4 border-t border-gray-100 flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">
+      <span>ID REF: #SGO-{{ test.test_id }}</span>
+      <span>Gestión Curricular • CBI Palmira</span>
+    </div>
+
+  </div>
+</div>

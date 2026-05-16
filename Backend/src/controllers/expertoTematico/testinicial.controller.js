@@ -48,5 +48,36 @@ export const testController = {
                 error: error.message
             });
         }
+    },
+
+    async editarTest(req, res) {
+        try {
+            const { id } = req.params; // Parámetro semántico de la URL
+            const { nombre_test, descripcion, preguntas } = req.body; // Extracción del Body
+
+            // Validación básica de campos obligatorios
+            if (!nombre_test || !preguntas || !Array.isArray(preguntas)) {
+                return res.status(400).json({ 
+                    status: 'error', 
+                    message: 'El nombre del test y el listado de preguntas son obligatorios.' 
+                });
+            }
+
+            // Delegamos la orquestación al servicio
+            const resultado = await testService.actualizarExistente(id, { nombre_test, descripcion, preguntas });
+
+            return res.status(200).json({ 
+                status: 'success', 
+                message: 'Test actualizado correctamente en el repositorio.',
+                data: resultado 
+            });
+        } catch (error) {
+            console.error('🚨 Error en testController.editarTest:', error);
+            return res.status(500).json({ 
+                status: 'error', 
+                message: 'Error interno del servidor al intentar actualizar el test.',
+                error: error.message 
+            });
+        }
     }
 };

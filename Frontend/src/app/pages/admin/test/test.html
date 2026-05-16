@@ -75,7 +75,9 @@
           class="flex-1 lg:flex-none px-6 py-3 text-gray-400 font-bold hover:text-sena transition-colors flex items-center justify-center gap-2">
           <i class="pi pi-eye"></i> Previsualizar
         </button>
-        <button class="flex-1 lg:flex-none btn-sena shadow-lg shadow-sena/20 px-10 py-3 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+        <button 
+          (click)="abrirEditorFormulario(testActual.test_id || testActual.id)"
+          class="flex-1 lg:flex-none btn-sena shadow-lg shadow-sena/20 px-10 py-3 flex items-center justify-center gap-2 active:scale-95 transition-transform">
           <i class="pi pi-pencil"></i> Editar Test
         </button>
       </div>
@@ -86,6 +88,13 @@
       [test]="testActual"
       (alCerrar)="verCuestionario = false">
     </app-visualizar-test>
+
+    <app-editar-test 
+      *ngIf="verEditor && testActual" 
+      [test]="testActual"
+      (alCerrar)="verEditor = false"
+      (alGuardar)="guardarCambiosTest($event)">
+    </app-editar-test>
     
     <div class="bg-gray-50/80 px-8 py-3 border-t border-gray-100 flex justify-between items-center">
       <span class="text-[10px] font-bold text-gray-400 tracking-widest">REF: #SGO-{{ testActual.test_id || testActual.id }}</span>
