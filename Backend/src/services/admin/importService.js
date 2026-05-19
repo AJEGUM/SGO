@@ -1,5 +1,5 @@
 import { programModel } from '../../models/admin/importModels.js';
-import { ExcelParser } from '../../utils/ExcelParser.js';
+import { ExcelParser } from '../../utils/excelParser.js';
 import XLSX from 'xlsx';
 
 export const importService = {
