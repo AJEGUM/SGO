@@ -1,3 +1,10 @@
+## [0.27.8](https://github.com/SGO-IA/SGO/compare/v0.27.7...v0.27.8) (2026-05-19)
+
+
+### Bug Fixes
+
+* Merge pull request [#50](https://github.com/SGO-IA/SGO/issues/50) from SGO-IA/rutas ([ea01e36](https://github.com/SGO-IA/SGO/commit/ea01e36365a5303340a0351b435787448de82452))
+
 ## [0.27.7](https://github.com/SGO-IA/SGO/compare/v0.27.6...v0.27.7) (2026-05-19)
 
 
