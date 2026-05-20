@@ -1,3 +1,10 @@
+## [0.29.1](https://github.com/SGO-IA/SGO/compare/v0.29.0...v0.29.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* Merge pull request [#54](https://github.com/SGO-IA/SGO/issues/54) from SGO-IA/diseno ([31dab17](https://github.com/SGO-IA/SGO/commit/31dab174d786fb873649420bd3ba48a39e155181))
+
 # [0.29.0](https://github.com/SGO-IA/SGO/compare/v0.28.0...v0.29.0) (2026-05-20)
 
 
